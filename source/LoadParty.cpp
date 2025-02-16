@@ -17,12 +17,6 @@ void LoadParty::LoadFile(std::ifstream& inFile)
 	{
 		inFile.open("PlayerTwoSave.txt");
 	}
-
-	if (!inFile.is_open())
-	{
-		std::cerr << "Error opening file!";
-		return;
-	}
 }
 
 void LoadParty::LoadPlayerName(std::ifstream& inFile)
@@ -396,6 +390,12 @@ void LoadParty::LoadPokemonMoves(std::ifstream& inFile)
 void LoadParty::Load()
 {
 	LoadFile(inFile);
+
+	if (!inFile.is_open())
+	{
+		std::cerr << "File does not exist! Try saving a party beforehand.\n\n";
+		return;
+	}
 
 	LoadPlayerName(inFile);
 
