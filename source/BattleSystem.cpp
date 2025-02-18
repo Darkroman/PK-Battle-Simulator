@@ -1996,8 +1996,6 @@ double BattleSystem::GetDamageTaken()
 
 void BattleSystem::AISelection(Player* player, BattlePokemon* currentPokemon)
 {
-	bool struggle{ false };
-
 	std::deque<BattlePokemon::pokemonMove*> viableMoves{};
 
 	for (size_t i = 1; i <= 4; ++i)
@@ -2029,8 +2027,6 @@ void BattleSystem::AISelection(Player* player, BattlePokemon* currentPokemon)
 
 void BattleSystem::AISwitch(Player* player, BattlePokemon* currentPokemon)
 {
-	bool struggle{ false };
-
 	std::deque<BattlePokemon*> viablePokemon{};
 
 	for (size_t i = 1; i <= 6; ++i)
