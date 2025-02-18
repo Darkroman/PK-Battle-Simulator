@@ -3,6 +3,7 @@
 # UPDATES
 2/18/2025:
 - Added easy A.I (just picks random move and switches to next Pokemon in line when it faints).
+- Note the default player settings is human. Make sure to set one of em to A.I if you wanna play against the computer, or both to A.I for funsies.
 - Some bug fixes with Bound damage, Reflect actually checking if it's already up rather than Light Screen, and some text dialog fixes.
 
 # BUILD NOTES
