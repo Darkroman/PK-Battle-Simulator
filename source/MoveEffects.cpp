@@ -1,5 +1,4 @@
 #include "../include/MoveEffects.h"
-#include <deque>
 
 IMoveEffects* MoveEffectsFactory::Call(int ID)
 {
@@ -2271,7 +2270,7 @@ void PoisonPowder::DoMove(Player* sourcePlayer, Player* targetPlayer, BattlePoke
 
 	else
 	{
-		DisplayAttackAvoidedTextDialog(sourcePlayer, sourcePokemon);
+		DisplayAttackAvoidedTextDialog(targetPlayer, targetPokemon);
 	}
 
 	currentMove->m_currentPP -= 1;
@@ -2317,7 +2316,7 @@ void StunSpore::DoMove(Player* sourcePlayer, Player* targetPlayer, BattlePokemon
 
 	else
 	{
-		DisplayAttackAvoidedTextDialog(sourcePlayer, sourcePokemon);
+		DisplayAttackAvoidedTextDialog(targetPlayer, targetPokemon);
 	}
 
 	currentMove->m_currentPP -= 1;
@@ -2368,7 +2367,7 @@ void SleepPowder::DoMove(Player* sourcePlayer, Player* targetPlayer, BattlePokem
 
 	else
 	{
-		DisplayAttackAvoidedTextDialog(sourcePlayer, sourcePokemon);
+		DisplayAttackAvoidedTextDialog(targetPlayer, targetPokemon);
 	}
 
 	currentMove->m_currentPP -= 1;
@@ -2537,7 +2536,7 @@ void Paralyze::DoMove(Player* sourcePlayer, Player* targetPlayer, BattlePokemon:
 
 	else
 	{
-		DisplayAttackAvoidedTextDialog(sourcePlayer, sourcePokemon);
+		DisplayAttackAvoidedTextDialog(targetPlayer, targetPokemon);
 	}
 
 	currentMove->m_currentPP -= 1;
@@ -2688,7 +2687,7 @@ void Toxic::DoMove(Player* sourcePlayer, Player* targetPlayer, BattlePokemon::po
 
 	else
 	{
-		DisplayAttackAvoidedTextDialog(sourcePlayer, sourcePokemon);
+		DisplayAttackAvoidedTextDialog(targetPlayer, targetPokemon);
 	}
 
 	currentMove->m_currentPP -= 1;
@@ -3026,7 +3025,7 @@ void Heal50::DoMove(Player* sourcePlayer, Player* targetPlayer, BattlePokemon::p
 
 		sourcePokemon->HealCurrentHP(static_cast<int>(healAmount));
 
-		std::cout << sourcePlayer->GetPlayerNameView() << "'s " << sourcePokemon->GetNameView() << "had its HP restored!\n";
+		std::cout << sourcePlayer->GetPlayerNameView() << "'s " << sourcePokemon->GetNameView() << " had its HP restored!\n";
 		std::cout << "Amount healed: " << healAmount << '\n';
 	}
 
@@ -3177,7 +3176,7 @@ void Reflect::DoMove(Player* sourcePlayer, Player* targetPlayer, BattlePokemon::
 {
 	UsedTextDialog(sourcePlayer, currentMove, sourcePokemon);
 
-	if (sourcePlayer->HasLightScreen())
+	if (sourcePlayer->HasReflect())
 	{
 		DisplayFailedTextDialog();
 	}
@@ -3746,7 +3745,7 @@ void PoisonGas::DoMove(Player* sourcePlayer, Player* targetPlayer, BattlePokemon
 
 	else
 	{
-		DisplayAttackAvoidedTextDialog(sourcePlayer, sourcePokemon);
+		DisplayAttackAvoidedTextDialog(targetPlayer, targetPokemon);
 	}
 
 	currentMove->m_currentPP -= 1;
@@ -3827,7 +3826,7 @@ void Transform::DoMove(Player* sourcePlayer, Player* targetPlayer, BattlePokemon
 
 	else
 	{
-		DisplayAttackAvoidedTextDialog(sourcePlayer, sourcePokemon);
+		DisplayAttackAvoidedTextDialog(targetPlayer, targetPokemon);
 	}
 
 	currentMove->m_currentPP -= 1;
