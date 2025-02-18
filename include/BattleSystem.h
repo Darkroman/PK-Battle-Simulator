@@ -1,6 +1,7 @@
 #pragma once
 #include <random>
 #include <chrono>
+#include <deque>
 
 #include "Player.h"
 
@@ -188,4 +189,7 @@ public:
 	void ResetHPandPPForTesting();
 
 	double GetDamageTaken();
+
+	void AISelection(Player*, BattlePokemon*);
+	void AISwitch(Player*, BattlePokemon*);
 };
