@@ -116,11 +116,6 @@ void BattleSystem::ThrowOutFirstPokemon()
 
 	playerOneCurrentPokemon = playerOne->GetBelt(1);
 	playerTwoCurrentPokemon = playerTwo->GetBelt(1);
-
-	//playerOneCurrentPokemon->ChangeStatus(Status::Burned);
-	//playerTwoCurrentPokemon->ChangeStatus(Status::Burned);
-	//playerOne->GetBelt(2)->ChangeStatus(Status::Burned);
-	//playerTwo->GetBelt(2)->ChangeStatus(Status::Burned);
 }
 
 void BattleSystem::DisplayFightingPokemon()
@@ -134,8 +129,6 @@ void BattleSystem::DisplayFightingPokemon()
 
 bool BattleSystem::StartBattle()
 {
-	std::cout << "A work in progress.\n\n";
-
 	bool exit = false;
 
 	exit = CheckPlayerPokemonAvailability();
@@ -299,7 +292,7 @@ bool BattleSystem::BattleLoop()
 
 bool BattleSystem::CheckPPCountForStruggle(BattlePokemon* pokemon)
 {
-	int zeroPPCount{ 0 };
+	int zeroPPCount{ 0 }, disabledCount{ 0 };
 
 	for (size_t i = 0; i < 4; ++i)
 	{
@@ -309,10 +302,14 @@ bool BattleSystem::CheckPPCountForStruggle(BattlePokemon* pokemon)
 			{
 				++zeroPPCount;
 			}
+			if (pokemon->GetMove(i + 1)->b_isDisabled)
+			{
+				++disabledCount;
+			}
 		}
 	}
 
-	if (zeroPPCount == pokemon->GetMoveCount())
+	if (zeroPPCount + disabledCount >= pokemon->GetMoveCount())
 	{
 		return true;
 	}
@@ -326,15 +323,21 @@ void BattleSystem::PlayerOneMakeSelection()
 		return;
 	}
 
-	std::cout << playerOne->GetPlayerNameView() << " choose your action\n";
-	
-	MakeASelectionLoop(playerOne, playerOneCurrentPokemon);
-
-	if (playerOne->HasForfeited())
+	if (playerOne->IsAI())
 	{
-		return;
+		AISelection(playerOne, playerOneCurrentPokemon);
 	}
+	else
+	{
+		std::cout << playerOne->GetPlayerNameView() << " choose your action\n";
+	
+		MakeASelectionLoop(playerOne, playerOneCurrentPokemon);
 
+		if (playerOne->HasForfeited())
+		{
+			return;
+		}
+	}
 	playerOneCurrentMove = selectedMove;
 	selectedMove = nullptr;
 }
@@ -346,15 +349,21 @@ void BattleSystem::PlayerTwoMakeSelection()
 		return;
 	}
 
-	std::cout << playerTwo->GetPlayerNameView() << " choose your action\n";
-
-	MakeASelectionLoop(playerTwo, playerTwoCurrentPokemon);
-
-	if (playerTwo->HasForfeited())
+	if (playerTwo->IsAI())
 	{
-		return;
+		AISelection(playerTwo, playerTwoCurrentPokemon);
 	}
+	else
+	{
+		std::cout << playerTwo->GetPlayerNameView() << " choose your action\n";
 
+		MakeASelectionLoop(playerTwo, playerTwoCurrentPokemon);
+
+		if (playerTwo->HasForfeited())
+		{
+			return;
+		}
+	}
 	playerTwoCurrentMove = selectedMove;
 	selectedMove = nullptr;
 }
@@ -416,10 +425,6 @@ bool BattleSystem::Fight(Player* player, BattlePokemon* currentPokemon)
 	{
 		std::cout << currentPokemon->GetName() << "'s current moves\n";
 		currentPokemon->DisplayMovesInBattle();
-
-		/*
-			
-		*/
 		
 		struggle = CheckPPCountForStruggle(currentPokemon);
 
@@ -1241,7 +1246,14 @@ bool BattleSystem::CheckWinOrSwitch(Player* sourcePlayer, Player* targetPlayer, 
 
 		if (!winCondition)
 		{
-			SwitchPokemonOption(targetPlayer, targetPokemon);
+			if (targetPlayer->IsAI())
+			{
+				AISwitch(targetPlayer, targetPokemon);
+			}
+			else
+			{
+				SwitchPokemonOption(targetPlayer, targetPokemon);
+			}
 
 			if (targetPokemon == firstTurnPokemon)
 			{
@@ -1703,10 +1715,7 @@ void BattleSystem::CheckBoundStatuses(Player* sourcePlayer, Player* targetPlayer
 		else if (sourcePokemon->GetBoundCounter() < sourcePokemon->GetBoundTurnCount() && !sourcePokemon->IsFainted())
 		{
 			sourcePokemon->IncrementBoundCounter();
-			if (sourcePokemon->GetBoundCounter() == sourcePokemon->GetBoundTurnCount())
-			{
-				boundDamage = floor(sourcePokemon->GetMaxHP() / 8);
-			}
+			boundDamage = floor(sourcePokemon->GetMaxHP() / 8);
 
 			sourcePokemon->DamageCurrentHP(static_cast<int>(boundDamage));
 
@@ -1983,4 +1992,57 @@ void BattleSystem::ResetHPandPPForTesting()
 double BattleSystem::GetDamageTaken()
 {
 	return damageTaken;
+}
+
+void BattleSystem::AISelection(Player* player, BattlePokemon* currentPokemon)
+{
+	bool struggle{ false };
+
+	std::deque<BattlePokemon::pokemonMove*> viableMoves{};
+
+	for (size_t i = 1; i <= 4; ++i)
+	{
+		if (currentPokemon->GetMove(i)->mp_move != nullptr)
+		{
+			if (!currentPokemon->GetMove(i)->b_isDisabled && currentPokemon->GetMove(i)->m_currentPP != 0)
+			{
+				viableMoves.push_back(currentPokemon->GetMove(i));
+			}
+		}
+	}
+
+	if (viableMoves.size() == 0)
+	{
+		selectedMove = currentPokemon->Struggle();
+		return;
+	}
+
+	size_t numberOfMoves = viableMoves.size();
+
+	std::uniform_int_distribution<int> rngDist(1, static_cast<int>(numberOfMoves));
+	int choice{ rngDist(generator) };
+
+	choice--;
+
+	selectedMove = viableMoves.at(choice);
+}
+
+void BattleSystem::AISwitch(Player* player, BattlePokemon* currentPokemon)
+{
+	bool struggle{ false };
+
+	std::deque<BattlePokemon*> viablePokemon{};
+
+	for (size_t i = 1; i <= 6; ++i)
+	{
+		if (player->GetBelt(i) != nullptr)
+		{
+			if (!player->GetBelt(i)->IsFainted() && player->GetBelt(i) != currentPokemon)
+			viablePokemon.push_back(player->GetBelt(i));
+		}
+	}
+
+	player->SetIsSwitching(true);
+
+	player->SetPokemonToSwitchTo(viablePokemon.at(0));
 }
