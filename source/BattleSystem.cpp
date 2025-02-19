@@ -1082,10 +1082,10 @@ void BattleSystem::CalculateDamage(Player* targetPlayer, BattlePokemon::pokemonM
 		target->AddBideDamage(static_cast<int>(damage));
 	}
 
-	//if (damage > target->GetCurrentHP())
-	//{
-		//damage = target->GetCurrentHP();
-	//}
+	if (damage > target->GetCurrentHP())
+	{
+		damage = target->GetCurrentHP();
+	}
 
 	std::cout << damage << " damage inflicted.\n";
 }
