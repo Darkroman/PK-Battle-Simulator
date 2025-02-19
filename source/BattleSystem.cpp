@@ -430,7 +430,9 @@ bool BattleSystem::Fight(Player* player, BattlePokemon* currentPokemon)
 
 		if (struggle)
 		{
-			std::cout << "You are out of PP for all moves. All you can do is Struggle.\n";
+			std::cout << "You are out of PP for all moves. All you can do is Struggle.\n\n";
+			selectedMove = currentPokemon->Struggle();
+			return true;
 		}
 
 		std::string input{};
@@ -793,7 +795,7 @@ double BattleSystem::CalculateCriticalHit(BattlePokemon* source)
 {
 	int critModNumber = CalculateCriticalHitStageModifier(source->GetCriticalHitStage());
 
-	std::uniform_int_distribution<int> critmoddistributor(1, 10001);
+	std::uniform_int_distribution<int> critmoddistributor(0, 10000);
 
 	double randomNumber{ static_cast<double>(critmoddistributor(generator)) };
 
@@ -1019,6 +1021,7 @@ void BattleSystem::CalculateDamage(Player* targetPlayer, BattlePokemon::pokemonM
 
 	std::uniform_int_distribution<int> damagemoddistributor(85, 100);
 	double damagemod{ static_cast<double>(damagemoddistributor(generator)) };
+
 	double random{ (damagemod / 100.0) };
 
 	double powerModifier{ 1 };
@@ -1052,11 +1055,6 @@ void BattleSystem::CalculateDamage(Player* targetPlayer, BattlePokemon::pokemonM
 		damage = 1;
 	}
 
-	if (damage > target->GetCurrentHP())
-	{
-		damage = target->GetCurrentHP();
-	}
-
 	if (targetPlayer->HasReflect() && !isCriticalHit && currentMove->mp_move->GetCategoryEnum() == Category::Physical)
 	{
 		damage = floor(damage / 2);
@@ -1069,22 +1067,12 @@ void BattleSystem::CalculateDamage(Player* targetPlayer, BattlePokemon::pokemonM
 
 	if (target->HasSubstitute() && !currentMove->mp_move->CanBypassSubstitute())
 	{
-		if (damage >= target->GetSubstituteHP())
-		{
-			damage = target->GetSubstituteHP();
-		}
-
 		target->DamageSubstitute(static_cast<int>(damage));
 		damageTaken = damage;
 	}
 
 	else
 	{
-		if (damage > target->GetCurrentHP())
-		{
-			damage = target->GetCurrentHP();
-		}
-
 		target->DamageCurrentHP(static_cast<int>(damage));
 		damageTaken = damage;
 	}
@@ -1093,6 +1081,11 @@ void BattleSystem::CalculateDamage(Player* targetPlayer, BattlePokemon::pokemonM
 	{
 		target->AddBideDamage(static_cast<int>(damage));
 	}
+
+	//if (damage > target->GetCurrentHP())
+	//{
+		//damage = target->GetCurrentHP();
+	//}
 
 	std::cout << damage << " damage inflicted.\n";
 }
