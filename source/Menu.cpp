@@ -1186,7 +1186,7 @@ bool Menu::EditChosenPokemonStats(Player* player, size_t beltslot)
 		player->GetBelt(beltslot)->DisplayStats();
 		std::cout << "----------\n\n";
 
-		std::cout << "IVs can only be set from 0 to 31. EVs from 0 to 255, and max allowed EVs per Pokemon is 510.\n\n";
+		std::cout << "IVs can only be set from 0 to 31. EVs from 0 to 252, and max allowed EVs per Pokemon is 510.\n\n";
 
 		std::cout << "1. Set Nickname\n";
 		std::cout << "2. Set Level\n";
@@ -1574,12 +1574,12 @@ void Menu::SetDefaultPokemon()
 	players[0]->IncrementPokemonCount();
 	players[1]->IncrementPokemonCount();
 
-	players[0]->GetBelt(1)->SetMove(1, "Substitute");
-	players[0]->GetBelt(1)->SetMove(2, "Earthquake");
+	players[0]->GetBelt(1)->SetMove(1, "Seismic Toss");
+	players[0]->GetBelt(1)->SetMove(2, "Sky Attack");
 	players[0]->GetBelt(1)->SetMove(3, "Disable");
 	players[0]->GetBelt(1)->SetMove(4, "Tri Attack");
-	players[1]->GetBelt(1)->SetMove(1, "Leech Seed");
-	players[1]->GetBelt(1)->SetMove(2, "Cut");
+	players[1]->GetBelt(1)->SetMove(1, "Counter");
+	players[1]->GetBelt(1)->SetMove(2, "Leer");
 	players[1]->GetBelt(1)->SetMove(3, "Confuse Ray");
 	players[1]->GetBelt(1)->SetMove(4, "Supersonic");
 
@@ -1596,11 +1596,13 @@ void Menu::SetDefaultPokemon()
 	players[1]->GetBelt(1)->SetLevel(100);
 
 	players[0]->GetBelt(1)->SetHPEV(252);
+	//players[0]->GetBelt(1)->SetAttackEV(252);
 	players[0]->GetBelt(1)->SetDefenseEV(252);
 	players[0]->GetBelt(1)->SetHPIV(31);
 	players[0]->GetBelt(1)->SetDefenseIV(31);
 	players[0]->GetBelt(1)->SetSpeedIV(31);
 	players[1]->GetBelt(1)->SetHPEV(252);
+	//players[1]->GetBelt(1)->SetAttackEV(252);
 	players[1]->GetBelt(1)->SetDefenseEV(252);
 	players[1]->GetBelt(1)->SetHPIV(31);
 	players[1]->GetBelt(1)->SetDefenseIV(31);
