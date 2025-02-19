@@ -1,6 +1,14 @@
 # PK-Battle-Simulator
 
 # UPDATES
+2/19/2025:
+- Fixed damage calculation bug when light screen or reflect are up.
+- "Set EV" menu now displays correctly max EV per stat as 252 instead of 255
+- When showing stats in edit stats menu, speed stat now outputs.
+- Counter correctly does 2x damage taken (originally had it like that but I changed stuff around and just forgot to readd in multiplying the variable by 2)
+- Disable should now correctly fail when used on Struggle
+- When choosing to fight with no moves left, will now automatically choose Struggle
+
 2/18/2025:
 - Added easy A.I (just picks random move and switches to next Pokemon in line when it faints).
 - Note the default player settings is human. Make sure to set one of em to A.I if you wanna play against the computer, or both to A.I for funsies.
