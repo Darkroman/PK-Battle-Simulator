@@ -581,7 +581,7 @@ void BattlePokemon::DisplayStats() const
     std::cout << "Defense: " << GetDefense() << " -- [IV: " << m_defense_iv << "]" << " -- [EV: " << m_defense_ev << "]" << '\n';
     std::cout << "Special Attack: " << GetSpecialAttack() << " -- [IV: " << m_specialattack_iv << "]" << " -- [EV: " << m_specialattack_ev << "]" << '\n';
     std::cout << "Special Defense: " << GetSpecialDefense() << " -- [IV: " << m_specialdefense_iv << "]" << " -- [EV: " << m_specialdefense_ev << "]" << '\n';
-    //std::cout << "Speed: " << GetSpeed() << " -- [IV: " << m_speed_iv << "]" << " -- [EV: " << m_speed_ev << "]" << '\n';
+    std::cout << "Speed: " << GetSpeed() << " -- [IV: " << m_speed_iv << "]" << " -- [EV: " << m_speed_ev << "]" << '\n';
 }
 
 void BattlePokemon::DisplayLearnableMoves() const
@@ -1490,6 +1490,11 @@ const int BattlePokemon::GetSubstituteHP() const
 void BattlePokemon::DamageSubstitute(int damage)
 {
     m_substituteHealth -= damage;
+
+    if (m_substituteHealth < 0)
+    {
+        m_substituteHealth = 0;
+    }
 }
 
 BattlePokemon::pokemonMove* BattlePokemon::Struggle()
