@@ -1671,7 +1671,7 @@ void Disable::DoMove(Player* sourcePlayer, Player* targetPlayer, BattlePokemon::
 		{
 			DisplayFailedTextDialog();
 		}
-		else if (targetPokemon->MoveIsDisabled() || targetPokemon->GetLastUsedMove()->m_currentPP == 0)
+		else if (targetPokemon->MoveIsDisabled() || targetPokemon->GetLastUsedMove()->m_currentPP == 0 || targetPokemon->GetLastUsedMove()->mp_move->GetSecondaryFlag() == 92)
 		{
 			DisplayFailedTextDialog();
 		}
@@ -1950,7 +1950,7 @@ void LowKick::DoMove(Player* sourcePlayer, Player* targetPlayer, BattlePokemon::
 
 void Counter::DoMove(Player* sourcePlayer, Player* targetPlayer, BattlePokemon::pokemonMove* currentMove, BattlePokemon* sourcePokemon, BattlePokemon* targetPokemon, BattleSystem& bs)
 {
-	double counterDamage = damageTaken;
+	double counterDamage = damageTaken * 2;
 
 	CalculateTypeEffectiveness(currentMove, targetPokemon);
 
