@@ -2,6 +2,7 @@
 #include <random>
 #include <chrono>
 #include <deque>
+#include <memory>
 
 #include "Player.h"
 
