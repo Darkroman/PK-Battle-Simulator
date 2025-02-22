@@ -175,7 +175,6 @@ bool BattleSystem::BattleLoop()
 		DetermineWhoGoesFirst();
 
 		MoveEffectsFactory factory;
-		IMoveEffects* moveEffect{ nullptr };
 
 		if (firstTurnPlayer->IsSwitching())
 		{
@@ -195,11 +194,8 @@ bool BattleSystem::BattleLoop()
 		{
 			if (CheckPerformativeStatus(firstTurnPlayer, firstTurnPokemon, firstTurnMove))
 			{
-				moveEffect = factory.Call(firstTurnMove->mp_move->GetSecondaryFlag());
+				std::unique_ptr<IMoveEffects> moveEffect = factory.Call(firstTurnMove->mp_move->GetSecondaryFlag());
 				moveEffect->DoMove(firstTurnPlayer, secondTurnPlayer, firstTurnMove, firstTurnPokemon, secondTurnPokemon, *this);
-
-				delete moveEffect;
-				moveEffect = nullptr;
 			}
 			lastUsedMoveFirst = firstTurnMove;
 		}
@@ -229,11 +225,8 @@ bool BattleSystem::BattleLoop()
 		{
 			if (CheckPerformativeStatus(secondTurnPlayer, secondTurnPokemon, secondTurnMove))
 			{
-				moveEffect = factory.Call(secondTurnMove->mp_move->GetSecondaryFlag());
+				std::unique_ptr<IMoveEffects> moveEffect = factory.Call(secondTurnMove->mp_move->GetSecondaryFlag());
 				moveEffect->DoMove(secondTurnPlayer, firstTurnPlayer, secondTurnMove, secondTurnPokemon, firstTurnPokemon, *this);
-
-				delete moveEffect;
-				moveEffect = nullptr;
 			}
 			lastUsedMoveSecond = secondTurnMove;
 		}
