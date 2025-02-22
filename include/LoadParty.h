@@ -26,3 +26,5 @@ public:
 	void LoadPokemonMoves(std::ifstream&);
 	void Load();
 };
+
+std::string& LoadPosition(const std::string&, std::string&, size_t, std::string_view);
