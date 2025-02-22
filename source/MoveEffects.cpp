@@ -1,386 +1,295 @@
 #include "../include/MoveEffects.h"
 
-IMoveEffects* MoveEffectsFactory::Call(int ID)
+std::unique_ptr<IMoveEffects> MoveEffectsFactory::Call(int ID)
 {
 	switch (ID)
 	{
 	case 0:
-		return new NormalHit;
-		break;
+		return std::make_unique<NormalHit>();
 
 	case 1:
-		return new IncreasedCritical;
-		break;
+		return std::make_unique<IncreasedCritical>();
 
 	case 2:
-		return new MultiAttack;
-		break;
+		return std::make_unique<MultiAttack>();
 
 	case 3:
-		return new BurnHit;
-		break;
+		return std::make_unique<BurnHit>();
 
 	case 4:
-		return new FreezeHit;
-		break;
+		return std::make_unique<FreezeHit>();
 
 	case 5:
-		return new ParalyzeHit10;
-		break;
+		return std::make_unique<ParalyzeHit10>();
 
 	case 6:
-		return new OneHitKOHit;
-		break;
+		return std::make_unique<OneHitKOHit>();
 
 	case 7:
-		return new RazorWind;
-		break;
+		return std::make_unique<RazorWind>();
 
 	case 8:
-		return new AttackUp2;
-		break;
+		return std::make_unique<AttackUp2>();
 
 	case 9:
-		return new Gust;
-		break;
+		return std::make_unique<Gust>();
 
 	case 10:
-		return new MakeEnemySwitch;
-		break;
+		return std::make_unique<MakeEnemySwitch>();
 
 	case 11:
-		return new Fly;
-		break;
+		return std::make_unique<Fly>();
 
 	case 12:
-		return new Bound;
-		break;
+		return std::make_unique<Bound>();
 
 	case 13:
-		return new Stomp;
-		break;
+		return std::make_unique<Stomp>();
 
 	case 14:
-		return new DoubleHit;
-		break;
+		return std::make_unique<DoubleHit>();
 
 	case 15:
-		return new JumpKick;
-		break;
+		return std::make_unique<JumpKick>();
 
 	case 16:
-		return new FlinchHit;
-		break;
+		return std::make_unique<FlinchHit>();
 
 	case 17:
-		return new AccuracyDown;
-		break;
+		return std::make_unique<AccuracyDown>();
 
 	case 18:
-		return new BodySlam;
-		break;
+		return std::make_unique<BodySlam>();
 
 	case 19:
-		return new RecoilQuarter;
-		break;
+		return std::make_unique<RecoilQuarter>();
 
 	case 20:
-		return new Thrash;
-		break;
+		return std::make_unique<Thrash>();
 
 	case 21:
-		return new RecoilThird;
-		break;
+		return std::make_unique<RecoilThird>();
 
 	case 22:
-		return new DefenseDown;
-		break;
+		return std::make_unique<DefenseDown>();
 
 	case 23:
-		return new PoisonHit;
-		break;
+		return std::make_unique<PoisonHit>();
 
 	case 24:
-		return new Twineedle;
-		break;
+		return std::make_unique<Twineedle>();
 
 	case 25:
-		return new AttackDown;
-		break;
+		return std::make_unique<AttackDown>();
 
 	case 26:
-		return new BypassSubSleep;
-		break;
+		return std::make_unique<BypassSubSleep>();
 
 	case 27:
-		return new Confuse;
-		break;
+		return std::make_unique<Confuse>();
 
 	case 28:
-		return new SonicBoom;
-		break;
+		return std::make_unique<SonicBoom>();
 
 	case 29:
-		return new Disable;
-		break;
+		return std::make_unique<Disable>();
 
 	case 30:
-		return new SpecialDefenseDownHit;
-		break;
+		return std::make_unique<SpecialDefenseDownHit>();
 
 	case 31:
-		return new Mist;
-		break;
+		return std::make_unique<Mist>();
 
 	case 32:
-		return new ConfuseHit;
-		break;
+		return std::make_unique<ConfuseHit>();
 
 	case 33:
-		return new SpeedDownHit;
-		break;
+		return std::make_unique<SpeedDownHit>();
 
 	case 34:
-		return new AttackDownHit;
-		break;
+		return std::make_unique<AttackDownHit>();
 
 	case 35:
-		return new RechargeAttack;
-		break;
+		return std::make_unique<RechargeAttack>();
 
 	case 36:
-		return new LowKick;
-		break;
+		return std::make_unique<LowKick>();
 
 	case 37:
-		return new Counter;
-		break;
+		return std::make_unique<Counter>();
 
 	case 38:
-		return new SeismicToss;
-		break;
+		return std::make_unique<SeismicToss>();
 
 	case 39:
-		return new Leech;
-		break;
+		return std::make_unique<Leech>();
 
 	case 40:
-		return new LeechSeed;
-		break;
+		return std::make_unique<LeechSeed>();
 
 	case 41:
-		return new Growth;
-		break;
+		return std::make_unique<Growth>();
 
 	case 42:
-		return new SolarBeam;
+		return std::make_unique<SolarBeam>();
 		break;
 
 	case 43:
-		return new PoisonPowder;
-		break;
+		return std::make_unique<PoisonPowder>();
 
 	case 44:
-		return new StunSpore;
-		break;
+		return std::make_unique<StunSpore>();
 
 	case 45:
-		return new SleepPowder;
-		break;
+		return std::make_unique<SleepPowder>();
 
 	case 46:
-		return new SpeedDown2;
-		break;
+		return std::make_unique<SpeedDown2>();
 
 	case 47:
-		return new DragonRage;
-		break;
+		return std::make_unique<DragonRage>();
 
 	case 48:
-		return new Paralyze;
-		break;
+		return std::make_unique<Paralyze>();
 
 	case 49:
-		return new ParalyzeHit30;
-		break;
+		return std::make_unique<ParalyzeHit30>();
 
 	case 50:
-		return new Earthquake;
-		break;
+		return std::make_unique<Earthquake>();
 
 	case 51:
-		return new Dig;
-		break;
+		return std::make_unique<Dig>();
 
 	case 52:
-		return new Toxic;
-		break;
+		return std::make_unique<Toxic>();
 
 	case 53:
-		return new SleepMove;
-		break;
+		return std::make_unique<SleepMove>();
 
 	case 54:
-		return new AttackUp;
-		break;
+		return std::make_unique<AttackUp>();
 
 	case 55:
-		return new SpeedUp2;
-		break;
+		return std::make_unique<SpeedUp2>();
 
 	case 56:
-		return new Rage;
-		break;
+		return std::make_unique<Rage>();
 
 	case 57:
-		return new Teleport;
-		break;
+		return std::make_unique<Teleport>();
 
 	case 58:
-		return new NightShade;
-		break;
+		return std::make_unique<NightShade>();
 
 	case 59:
-		return new Mimic;
-		break;
+		return std::make_unique<Mimic>();
 
 	case 60:
-		return new DefenseDown2;
-		break;
+		return std::make_unique<DefenseDown2>();
 
 	case 61:
-		return new EvasionUp;
-		break;
+		return std::make_unique<EvasionUp>();
 
 	case 62:
-		return new Heal50;
-		break;
+		return std::make_unique<Heal50>();
 
 	case 63:
-		return new DefenseUp;
-		break;
+		return std::make_unique<DefenseUp>();
 
 	case 64:
-		return new Minimize;
-		break;
+		return std::make_unique<Minimize>();
 
 	case 65:
-		return new DefenseUp2;
+		return std::make_unique<DefenseUp2>();
 		break;
 
 	case 66:
-		return new LightScreen;
-		break;
+		return std::make_unique<LightScreen>();
 
 	case 67:
-		return new Haze;
-		break;
+		return std::make_unique<Haze>();
 
 	case 68:
-		return new Reflect;
-		break;
+		return std::make_unique<Reflect>();
 
 	case 69:
-		return new FocusEnergy;
-		break;
+		return std::make_unique<FocusEnergy>();
 
 	case 70:
-		return new Bide;
-		break;
+		return std::make_unique<Bide>();
 
 	case 71:
-		return new Metronome;
-		break;
+		return std::make_unique<Metronome>();
 
 	case 72:
-		return new MirrorMove;
-		break;
+		return std::make_unique<MirrorMove>();
 
 	case 73:
-		return new Explosion;
-		break;
+		return std::make_unique<Explosion>();
 
 	case 74:
-		return new PoisonHit40;
-		break;
+		return std::make_unique<PoisonHit40>();
 
 	case 75:
-		return new FlinchHit10;
-		break;
+		return std::make_unique<FlinchHit10>();
 
 	case 76:
-		return new FlinchHit20;
-		break;
+		return std::make_unique<FlinchHit20>();
 
 	case 77:
-		return new Swift;
-		break;
+		return std::make_unique<Swift>();
 
 	case 78:
-		return new SkullBash;
-		break;
+		return std::make_unique<SkullBash>();
 
 	case 79:
-		return new SpecialDefenseUp2;
-		break;
+		return std::make_unique<SpecialDefenseUp2>();
 
 	case 80:
-		return new DreamEater;
-		break;
+		return std::make_unique<DreamEater>();
 
 	case 81:
-		return new PoisonGas;
-		break;
+		return std::make_unique<PoisonGas>();
 
 	case 82:
-		return new SkyAttack;
-		break;
+		return std::make_unique<SkyAttack>();
 
 	case 83:
-		return new Transform;
-		break;
+		return std::make_unique<Transform>();
 
 	case 84:
-		return new ConfuseHit20;
-		break;
+		return std::make_unique<ConfuseHit20>();
 
 	case 85:
-		return new Psywave;
-		break;
+		return std::make_unique<Psywave>();
 
 	case 86:
-		return new Splash;
-		break;
+		return std::make_unique<Splash>();
 
 	case 87:
-		return new Rest;
-		break;
+		return std::make_unique<Rest>();
 
 	case 88:
-		return new Conversion;
-		break;
+		return std::make_unique<Conversion>();
 
 	case 89:
-		return new TriAttack;
-		break;
+		return std::make_unique<TriAttack>();
 
 	case 90:
-		return new SuperFang;
-		break;
+		return std::make_unique<SuperFang>();
 
 	case 91:
-		return new Substitute;
-		break;
+		return std::make_unique<Substitute>();
 
 	case 92:
-		return new Struggle;
-		break;
+		return std::make_unique<Struggle>();
 
 	default:
-		return new Noop;
-		break;
+		return std::make_unique<Noop>();
+
 	}
-	return new Noop;
+	return std::make_unique<Noop>();
 }
 
 void Noop::DoMove(Player* sourcePlayer, Player* targetPlayer, BattlePokemon::pokemonMove* currentMove, BattlePokemon* sourcePokemon, BattlePokemon* targetPokemon, BattleSystem& bs)
@@ -3336,13 +3245,11 @@ void Metronome::DoMove(Player* sourcePlayer, Player* targetPlayer, BattlePokemon
 	currentMove->m_currentPP -= 1;
 
 	MoveEffectsFactory factory;
-	IMoveEffects* moveEffect{ nullptr };
 
-	moveEffect = factory.Call(selectedMove->GetSecondaryFlag());
-	moveEffect->DoMove(sourcePlayer, targetPlayer, &sourcePokemon->metronomeMove, sourcePokemon, targetPokemon, bs);
-
-	delete moveEffect;
-	moveEffect = nullptr;
+	{
+		std::unique_ptr<IMoveEffects> moveEffect = factory.Call(selectedMove->GetSecondaryFlag());
+		moveEffect->DoMove(sourcePlayer, targetPlayer, &sourcePokemon->metronomeMove, sourcePokemon, targetPokemon, bs);
+	}
 
 	CheckFaintCondition(sourcePlayer, targetPlayer, sourcePokemon, targetPokemon);
 
@@ -3380,13 +3287,9 @@ void MirrorMove::DoMove(Player* sourcePlayer, Player* targetPlayer, BattlePokemo
 		}
 
 		MoveEffectsFactory factory;
-		IMoveEffects* moveEffect{ nullptr };
 
-		moveEffect = factory.Call(selectedMove->GetSecondaryFlag());
+		std::unique_ptr<IMoveEffects> moveEffect = factory.Call(selectedMove->GetSecondaryFlag());
 		moveEffect->DoMove(sourcePlayer, targetPlayer, &sourcePokemon->mirrorMove, sourcePokemon, targetPokemon, bs);
-
-		delete moveEffect;
-		moveEffect = nullptr;
 	}
 	else
 	{
