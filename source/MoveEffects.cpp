@@ -132,7 +132,6 @@ std::unique_ptr<IMoveEffects> MoveEffectsFactory::Call(int ID)
 
 	case 42:
 		return std::make_unique<SolarBeam>();
-		break;
 
 	case 43:
 		return std::make_unique<PoisonPowder>();
@@ -202,7 +201,6 @@ std::unique_ptr<IMoveEffects> MoveEffectsFactory::Call(int ID)
 
 	case 65:
 		return std::make_unique<DefenseUp2>();
-		break;
 
 	case 66:
 		return std::make_unique<LightScreen>();
