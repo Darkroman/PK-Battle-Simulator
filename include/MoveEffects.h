@@ -10,7 +10,7 @@ public:
 class MoveEffectsFactory
 {
 public:
-	IMoveEffects* Call(int);
+	std::unique_ptr<IMoveEffects> Call(int);
 };
 
 class Noop : public IMoveEffects
