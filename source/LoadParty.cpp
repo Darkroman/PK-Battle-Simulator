@@ -2,8 +2,7 @@
 
 LoadParty::LoadParty(std::array<Player*, 2> players, int numPlayer) : num(numPlayer)
 {
-	LoadParty::players[0] = *(&(players[0]));
-	LoadParty::players[1] = *(&(players[1]));
+	LoadParty::players = players;
 }
 
 void LoadParty::LoadFile(std::ifstream& inFile)
@@ -121,8 +120,6 @@ void LoadParty::LoadPokemonEVs(std::ifstream& inFile)
 		size_t posSpA = line.find("SpA");
 		size_t posSpD = line.find("SpD");
 		size_t posSpe = line.find("Spe");
-		size_t begpos{};
-		size_t endpos{};
 
 		int i = -1;
 		do
@@ -140,14 +137,11 @@ void LoadParty::LoadPokemonEVs(std::ifstream& inFile)
 				iss >> std::ws;
 			}
 
+			std::string substr{};
+
 			if (posHP != std::string::npos)
 			{
-				endpos = section.length();
-				begpos = 0;
-
-				posHP = section.find_first_of("HP");
-
-				std::string substr = section.substr(begpos, posHP - 1);
+				substr = LoadPosition(section, substr, posHP, "HP");
 				players[num]->GetBelt(beltpos)->SetHPEV(std::stoi(substr));
 
 				posHP = std::string::npos;
@@ -155,12 +149,7 @@ void LoadParty::LoadPokemonEVs(std::ifstream& inFile)
 
 			else if (posAtk != std::string::npos)
 			{
-				endpos = section.length();
-				begpos = 0;
-
-				posAtk = section.find_first_of("Atk");
-
-				std::string substr = section.substr(begpos, posAtk - 1);
+				substr = LoadPosition(section, substr, posAtk, "Atk");
 				players[num]->GetBelt(beltpos)->SetAttackEV(std::stoi(substr));
 
 				posAtk = std::string::npos;
@@ -168,12 +157,7 @@ void LoadParty::LoadPokemonEVs(std::ifstream& inFile)
 
 			else if (posDef != std::string::npos)
 			{
-				endpos = section.length();
-				begpos = 0;
-
-				posDef = section.find_first_of("Def");
-
-				std::string substr = section.substr(begpos, posDef - 1);
+				substr = LoadPosition(section, substr, posDef, "Def");
 				players[num]->GetBelt(beltpos)->SetDefenseEV(std::stoi(substr));
 
 				posDef = std::string::npos;
@@ -181,12 +165,7 @@ void LoadParty::LoadPokemonEVs(std::ifstream& inFile)
 
 			else if (posSpA != std::string::npos)
 			{
-				endpos = section.length();
-				begpos = 0;
-
-				posSpA = section.find_first_of("SpA");
-
-				std::string substr = section.substr(begpos, posSpA - 1);
+				substr = LoadPosition(section, substr, posSpA, "SpA");
 				players[num]->GetBelt(beltpos)->SetSpecialAttackEV(std::stoi(substr));
 
 				posSpA = std::string::npos;
@@ -194,12 +173,7 @@ void LoadParty::LoadPokemonEVs(std::ifstream& inFile)
 
 			else if (posSpD != std::string::npos)
 			{
-				endpos = section.length();
-				begpos = 0;
-
-				posSpD = section.find_first_of("SpD");
-
-				std::string substr = section.substr(begpos, posSpD - 1);
+				substr = LoadPosition(section, substr, posSpD, "SpD");
 				players[num]->GetBelt(beltpos)->SetSpecialDefenseEV(std::stoi(substr));
 
 				posSpD = std::string::npos;
@@ -207,12 +181,7 @@ void LoadParty::LoadPokemonEVs(std::ifstream& inFile)
 
 			else if (posSpe != std::string::npos)
 			{
-				endpos = section.length();
-				begpos = 0;
-
-				posSpe = section.find_first_of("Spe");
-
-				std::string substr = section.substr(begpos, posSpe - 1);
+				substr = LoadPosition(section, substr, posSpe, "Spe");
 				players[num]->GetBelt(beltpos)->SetSpeedEV(std::stoi(substr));
 
 				posSpe = std::string::npos;
@@ -251,8 +220,6 @@ void LoadParty::LoadPokemonIVs(std::ifstream& inFile)
 		size_t posSpA = line.find("SpA");
 		size_t posSpD = line.find("SpD");
 		size_t posSpe = line.find("Spe");
-		size_t begpos{};
-		size_t endpos{};
 
 		int i = -1;
 		do
@@ -270,14 +237,11 @@ void LoadParty::LoadPokemonIVs(std::ifstream& inFile)
 				iss >> std::ws;
 			}
 
+			std::string substr{};
+
 			if (posHP != std::string::npos)
 			{
-				endpos = section.length();
-				begpos = 0;
-
-				posHP = section.find_first_of("HP");
-
-				std::string substr = section.substr(begpos, posHP - 1);
+				substr = LoadPosition(section, substr, posHP, "HP");
 				players[num]->GetBelt(beltpos)->SetHPIV(std::stoi(substr));
 
 				posHP = std::string::npos;
@@ -285,12 +249,7 @@ void LoadParty::LoadPokemonIVs(std::ifstream& inFile)
 
 			else if (posAtk != std::string::npos)
 			{
-				endpos = section.length();
-				begpos = 0;
-
-				posAtk = section.find_first_of("Atk");
-
-				std::string substr = section.substr(begpos, posAtk - 1);
+				substr = LoadPosition(section, substr, posAtk, "Atk");
 				players[num]->GetBelt(beltpos)->SetAttackIV(std::stoi(substr));
 
 				posAtk = std::string::npos;
@@ -298,12 +257,7 @@ void LoadParty::LoadPokemonIVs(std::ifstream& inFile)
 
 			else if (posDef != std::string::npos)
 			{
-				endpos = section.length();
-				begpos = 0;
-
-				posDef = section.find_first_of("Def");
-
-				std::string substr = section.substr(begpos, posDef - 1);
+				substr = LoadPosition(section, substr, posDef, "Def");
 				players[num]->GetBelt(beltpos)->SetDefenseIV(std::stoi(substr));
 
 				posDef = std::string::npos;
@@ -311,12 +265,7 @@ void LoadParty::LoadPokemonIVs(std::ifstream& inFile)
 
 			else if (posSpA != std::string::npos)
 			{
-				endpos = section.length();
-				begpos = 0;
-
-				posSpA = section.find_first_of("SpA");
-
-				std::string substr = section.substr(begpos, posSpA - 1);
+				substr = LoadPosition(section, substr, posSpA, "SpA");
 				players[num]->GetBelt(beltpos)->SetSpecialAttackIV(std::stoi(substr));
 
 				posSpA = std::string::npos;
@@ -324,12 +273,7 @@ void LoadParty::LoadPokemonIVs(std::ifstream& inFile)
 
 			else if (posSpD != std::string::npos)
 			{
-				endpos = section.length();
-				begpos = 0;
-
-				posSpD = section.find_first_of("SpD");
-
-				std::string substr = section.substr(begpos, posSpD - 1);
+				substr = LoadPosition(section, substr, posSpD, "SpD");
 				players[num]->GetBelt(beltpos)->SetSpecialDefenseIV(std::stoi(substr));
 
 				posSpD = std::string::npos;
@@ -337,12 +281,7 @@ void LoadParty::LoadPokemonIVs(std::ifstream& inFile)
 
 			else if (posSpe != std::string::npos)
 			{
-				endpos = section.length();
-				begpos = 0;
-
-				posSpe = section.find_first_of("Spe");
-
-				std::string substr = section.substr(begpos, posSpe - 1);
+				substr = LoadPosition(section, substr, posSpe, "Spe");
 				players[num]->GetBelt(beltpos)->SetSpeedIV(std::stoi(substr));
 
 				posSpe = std::string::npos;
@@ -428,4 +367,12 @@ void LoadParty::Load()
 	std::cout << "File Loaded Successfully!\n\n";
 	
 	inFile.close();
+}
+
+std::string& LoadPosition(const std::string& section, std::string& substr, size_t posStat, std::string_view stat)
+{
+	posStat = section.find_first_of(stat);
+
+	substr = section.substr(0, posStat - 1);
+	return substr;
 }
