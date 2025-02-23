@@ -1551,6 +1551,8 @@ void BattlePokemon::ResetStatsAndMoves()
         m_array_moves[i].b_isDisabled = false;
         m_array_moves[i].b_isMimicked = false;
     }
+
+    ResetValues();
 }
 
 void BattlePokemon::ResetValues()
