@@ -87,6 +87,8 @@ void BattlePokemon::SetPokemon(size_t pknum)
     m_type1e = mp_pokemon->GetFirstTypeEnum();
     m_type2 = mp_pokemon->GetSecondType();
     m_type2e = mp_pokemon->GetSecondTypeEnum();
+
+    ResetValues();
     
     UpdateStats();
 }
@@ -115,6 +117,8 @@ void BattlePokemon::SetPokemon(std::string_view pkname)
     m_type2 = mp_pokemon->GetSecondType();
     m_type2e = mp_pokemon->GetSecondTypeEnum();
     b_hasNickname = false;
+
+    ResetValues();
 
     UpdateStats();
 }
@@ -1551,8 +1555,6 @@ void BattlePokemon::ResetStatsAndMoves()
         m_array_moves[i].b_isDisabled = false;
         m_array_moves[i].b_isMimicked = false;
     }
-
-    ResetValues();
 }
 
 void BattlePokemon::ResetValues()
