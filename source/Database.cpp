@@ -208,7 +208,7 @@ void Database::SetPokemonMoveListASync(std::vector<std::vector<size_t>>& tmp_mov
 
 void Database::TestingPokemonAndMoves()
 {
-    pokedex.emplace_back(152, "PokeTest", 100, 100, 100, 100, 100, 100, "Normal", ConvertStringToPokemonType("Normal"), "None", ConvertStringToPokemonType("None"), 200);
+    pokedex.emplace_back(152, "PokeTest", 100, 100, 100, 100, 100, 100, "Normal", ConvertStringToPokemonType("Normal"), "None", ConvertStringToPokemonType("None"), 1);
 
     std::vector<size_t> tmp_movelist2{};
     tmp_movelist2.reserve(165);
