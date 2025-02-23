@@ -1,23 +1,5 @@
 # PK-Battle-Simulator
 
-## UPDATES
-### 2/23/2025
-- Fixed damage calculation bug
-- Metronome and Mirror Move should now work correctly.
-
-### 2/19/2025:
-- Fixed damage calculation bug when light screen or reflect are up.
-- "Set EV" menu now displays correctly max EV per stat as 252 instead of 255
-- When showing stats in edit stats menu, speed stat now outputs.
-- Counter correctly does 2x damage taken (originally had it like that but I changed stuff around and just forgot to readd in multiplying the variable by 2)
-- Disable should now correctly fail when used on Struggle
-- When choosing to fight with no moves left, will now automatically choose Struggle
-
-### 2/18/2025:
-- Added easy A.I (just picks random move and switches to next Pokemon in line when it faints).
-- Note the default player settings is human. Make sure to set one of em to A.I if you wanna play against the computer, or both to A.I for funsies.
-- Some bug fixes with Bound damage, Reflect actually checking if it's already up rather than Light Screen, and some text dialog fixes.
-
 ## BUILD NOTES
 My IDE of choice is Visual Studio, utilizing C++20 standard. Uploaded is a simple CMake build, as well as a binary release if you just want to download and play. Only tested on Windows.
 
@@ -36,3 +18,21 @@ This is just a small console based Pokemon battle simulator program. I started t
 - More sophisticated A.I
 - Code architectural/organizational choices
 - Not sure if I'll ever add in later generation stuff
+
+## UPDATES
+### 2/23/2025
+- Fixed damage calculation bug
+- Metronome and Mirror Move should now work correctly.
+
+### 2/19/2025:
+- Fixed damage calculation bug when light screen or reflect are up.
+- "Set EV" menu now displays correctly max EV per stat as 252 instead of 255
+- When showing stats in edit stats menu, speed stat now outputs.
+- Counter correctly does 2x damage taken (originally had it like that but I changed stuff around and just forgot to readd in multiplying the variable by 2)
+- Disable should now correctly fail when used on Struggle
+- When choosing to fight with no moves left, will now automatically choose Struggle
+
+### 2/18/2025:
+- Added easy A.I (just picks random move and switches to next Pokemon in line when it faints).
+- Note the default player settings is human. Make sure to set one of em to A.I if you wanna play against the computer, or both to A.I for funsies.
+- Some bug fixes with Bound damage, Reflect actually checking if it's already up rather than Light Screen, and some text dialog fixes.
