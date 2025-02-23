@@ -803,7 +803,6 @@ void Bound::DoMove(Player* sourcePlayer, Player* targetPlayer, BattlePokemon::po
 	sourcePokemon->SetLastUsedMove(currentMove);
 }
 
-// Does substitute take double damage if user minimized??
 void Stomp::DoMove(Player* sourcePlayer, Player* targetPlayer, BattlePokemon::pokemonMove* currentMove, BattlePokemon* sourcePokemon, BattlePokemon* targetPokemon, BattleSystem& bs)
 {
 	UsedTextDialog(sourcePlayer, currentMove, sourcePokemon);
@@ -3226,16 +3225,6 @@ void Metronome::DoMove(Player* sourcePlayer, Player* targetPlayer, BattlePokemon
 	sourcePokemon->metronomeMove.m_currentPP = 1;
 	sourcePokemon->metronomeMove.m_maxPP = 1;
 
-	if (sourcePlayer == bs.GetPlayerOne())
-	{
-		bs.SetPlayerOneCurrentMove(&sourcePokemon->metronomeMove);
-	}
-
-	else if (sourcePlayer == bs.GetPlayerTwo())
-	{
-		bs.SetPlayerTwoCurrentMove(&sourcePokemon->metronomeMove);
-	}
-
 	UsedTextDialog(sourcePlayer, currentMove, sourcePokemon);
 
 	std::cout << "Waggling its finger let " << sourcePlayer->GetPlayerNameView() << "'s " << sourcePokemon->GetNameView() << " use " << selectedMove->GetName() << "!\n";
@@ -3274,19 +3263,9 @@ void MirrorMove::DoMove(Player* sourcePlayer, Player* targetPlayer, BattlePokemo
 		sourcePokemon->mirrorMove.m_currentPP = 1;
 		sourcePokemon->mirrorMove.m_maxPP = 1;
 
-		if (sourcePlayer == bs.GetPlayerOne())
-		{
-			bs.SetPlayerOneCurrentMove(&sourcePokemon->mirrorMove);
-		}
-
-		else if (sourcePlayer == bs.GetPlayerTwo())
-		{
-			bs.SetPlayerTwoCurrentMove(&sourcePokemon->mirrorMove);
-		}
-
 		MoveEffectsFactory factory;
 
-		std::unique_ptr<IMoveEffects> moveEffect = factory.Call(selectedMove->GetSecondaryFlag());
+ 		std::unique_ptr<IMoveEffects> moveEffect = factory.Call(selectedMove->GetSecondaryFlag());
 		moveEffect->DoMove(sourcePlayer, targetPlayer, &sourcePokemon->mirrorMove, sourcePokemon, targetPokemon, bs);
 	}
 	else
