@@ -1050,11 +1050,6 @@ void BattleSystem::CalculateDamage(Player* targetPlayer, BattlePokemon::pokemonM
 		damage *= 2;
 	}
 
-	if (damage == 0 && effectiveness != 0)
-	{
-		damage = 1;
-	}
-
 	if (targetPlayer->HasReflect() && !isCriticalHit && currentMove->mp_move->GetCategoryEnum() == Category::Physical)
 	{
 		damage = floor(damage / 2);
@@ -1063,6 +1058,11 @@ void BattleSystem::CalculateDamage(Player* targetPlayer, BattlePokemon::pokemonM
 	if (targetPlayer->HasLightScreen() && !isCriticalHit && currentMove->mp_move->GetCategoryEnum() == Category::Special)
 	{
 		damage = floor(damage / 2);
+	}
+
+	if (damage == 0 && effectiveness != 0)
+	{
+		damage = 1;
 	}
 
 	if (damage > target->GetCurrentHP())
