@@ -275,7 +275,8 @@ bool BattleSystem::BattleLoop()
 		std::cout << '\n';
 
 #if !defined NDEBUG
-			//ResetHPandPPForTesting();
+		ResetHPandPPForTesting();
+
 #endif
 	}
 
