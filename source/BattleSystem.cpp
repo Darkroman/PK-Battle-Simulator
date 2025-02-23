@@ -275,7 +275,7 @@ bool BattleSystem::BattleLoop()
 		std::cout << '\n';
 
 #if !defined NDEBUG
-			ResetHPandPPForTesting();
+			//ResetHPandPPForTesting();
 #endif
 	}
 
@@ -918,11 +918,13 @@ void BattleSystem::CalculateDamage(Player* targetPlayer, BattlePokemon::pokemonM
 
 	double effectiveness = CalculateTypeEffectiveness(currentMove, target);
 
+	// if move is struggle, effectiveness is always a normal hit
 	if (currentMove->mp_move->GetSecondaryFlag() == 92)
 	{
 		effectiveness = 1;
 	}
 
+	// If move is a one hit KO move type
 	if ((currentMove->mp_move->GetSecondaryFlag() == 6) && effectiveness != 0)
 	{
 		damage = target->GetCurrentHP();
@@ -995,6 +997,7 @@ void BattleSystem::CalculateDamage(Player* targetPlayer, BattlePokemon::pokemonM
 
 	double stab{};
 
+	// If move type matches one of Pokemon's types and is not the move 'Struggle'
 	if ((currentMove->mp_move->GetMoveTypeEnum() == source->GetTypeOneEnum()) || (currentMove->mp_move->GetMoveTypeEnum() == source->GetTypeTwoEnum())
 		&& currentMove->mp_move->GetSecondaryFlag() != 92)
 	{
@@ -1019,7 +1022,8 @@ void BattleSystem::CalculateDamage(Player* targetPlayer, BattlePokemon::pokemonM
 
 	double powerModifier{ 1 };
 
-	if (target->IsSemiInvulnerableFromFly() && (currentMove->mp_move->GetSecondaryFlag() == 9)) // For Gust if target is in first turn of fly
+	// For Gust if target is in first turn of fly
+	if (target->IsSemiInvulnerableFromFly() && (currentMove->mp_move->GetSecondaryFlag() == 9))
 	{
 		powerModifier = 2;
 	}
@@ -1032,12 +1036,14 @@ void BattleSystem::CalculateDamage(Player* targetPlayer, BattlePokemon::pokemonM
 	}
 
 	damage = floor(floor(floor(floor(floor(floor(floor(floor(floor(2 * source->GetLevel() / 5 + 2) * (currentMovePower * powerModifier) * (static_cast<double>(sourceAttack) / static_cast<double>(targetDefense)) / 50) + 2) * critical) * random) * stab) * effectiveness) * burn));
-
+	
+	// If move is stomp or body slam, do double damage on target if it has used minimized
 	if ((currentMove->mp_move->GetSecondaryFlag() == 13 || currentMove->mp_move->GetSecondaryFlag() == 18) && target->HasUsedMinimize())
 	{
 		damage *= 2;
 	}
 
+	// If move is earthquake and target is in 1st turn of dig, double the damage
 	if (currentMove->mp_move->GetSecondaryFlag() == 50 && target->IsSemiInvulnerableFromDig())
 	{
 		damage *= 2;
@@ -1058,16 +1064,19 @@ void BattleSystem::CalculateDamage(Player* targetPlayer, BattlePokemon::pokemonM
 		damage = floor(damage / 2);
 	}
 
+	if (damage > target->GetCurrentHP())
+	{
+		damage = target->GetCurrentHP();
+	}
+
 	if (target->HasSubstitute() && !currentMove->mp_move->CanBypassSubstitute())
 	{
 		target->DamageSubstitute(static_cast<int>(damage));
-		damageTaken = damage;
 	}
 
 	else
 	{
 		target->DamageCurrentHP(static_cast<int>(damage));
-		damageTaken = damage;
 	}
 
 	if (target->IsBiding())
@@ -1075,10 +1084,7 @@ void BattleSystem::CalculateDamage(Player* targetPlayer, BattlePokemon::pokemonM
 		target->AddBideDamage(static_cast<int>(damage));
 	}
 
-	if (damage > target->GetCurrentHP())
-	{
-		damage = target->GetCurrentHP();
-	}
+	damageTaken = damage;
 
 	std::cout << damage << " damage inflicted.\n";
 }
@@ -1973,11 +1979,6 @@ void BattleSystem::ResetHPandPPForTesting()
 	{
 		playerTwoCurrentMove->m_currentPP = playerTwoCurrentMove->m_maxPP;
 	}
-}
-
-double BattleSystem::GetDamageTaken()
-{
-	return damageTaken;
 }
 
 void BattleSystem::AISelection(Player* player, BattlePokemon* currentPokemon)
