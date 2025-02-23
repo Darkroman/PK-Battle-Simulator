@@ -189,8 +189,6 @@ public:
 
 	void ResetHPandPPForTesting();
 
-	double GetDamageTaken();
-
 	void AISelection(Player*, BattlePokemon*);
 	void AISwitch(Player*, BattlePokemon*);
 };
