@@ -2,8 +2,7 @@
 
 SaveParty::SaveParty(std::array<Player*, 2> players, int numPlayer) : num(numPlayer)
 {
-	SaveParty::players[0] = *(&(players[0]));
-	SaveParty::players[1] = *(&(players[1]));
+	SaveParty::players = players;
 }
 
 void SaveParty::SaveFile(std::ofstream& outFile)
