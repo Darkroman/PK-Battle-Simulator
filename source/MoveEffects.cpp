@@ -674,7 +674,7 @@ void MakeEnemySwitch::DoMove(Player* sourcePlayer, Player* targetPlayer, BattleP
 	{
 		for (size_t i = 1; i <= 6; ++i)
 		{
-			if (targetPlayer->GetBelt(i)->HasPokemon() && targetPlayer->GetBelt(i) != targetPokemon)
+			if (targetPlayer->GetBelt(i)->HasPokemon() && targetPlayer->GetBelt(i) != targetPokemon && targetPlayer->GetBelt(i)->GetCurrentHP() != 0)
 			{
 				enemyPokemonList.push_back(targetPlayer->GetBelt(i));
 				++numberOfPokemon;
