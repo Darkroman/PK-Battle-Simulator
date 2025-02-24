@@ -435,7 +435,7 @@ void BurnHit::DoMove(Player* sourcePlayer, Player* targetPlayer, BattlePokemon::
 		DisplaySubstituteDamageTextDialog(targetPlayer, targetPokemon);
 
 		if (targetPokemon->GetStatus() == Status::Normal && (targetPokemon->GetTypeOneEnum() != PokemonType::Fire && targetPokemon->GetTypeTwoEnum() != PokemonType::Fire)
-			&& !targetPokemon->HasSubstitute())
+			&& !targetPokemon->HasSubstitute() && targetPokemon->GetCurrentHP() != 0)
 		{
 			std::uniform_int_distribution<int> rngDist(1, 101);
 			int randomNumber{ rngDist(generator) };
@@ -474,7 +474,7 @@ void FreezeHit::DoMove(Player* sourcePlayer, Player* targetPlayer, BattlePokemon
 		DisplaySubstituteDamageTextDialog(targetPlayer, targetPokemon);
 
 		if (targetPokemon->GetStatus() == Status::Normal && (targetPokemon->GetTypeOneEnum() != PokemonType::Ice && targetPokemon->GetTypeTwoEnum() != PokemonType::Ice)
-			&& !targetPokemon->HasSubstitute())
+			&& !targetPokemon->HasSubstitute() && targetPokemon->GetCurrentHP() != 0)
 		{
 			std::uniform_int_distribution<int> rngDist(1, 101);
 			int randomNumber{ rngDist(generator) };
@@ -513,7 +513,7 @@ void ParalyzeHit10::DoMove(Player* sourcePlayer, Player* targetPlayer, BattlePok
 		DisplaySubstituteDamageTextDialog(targetPlayer, targetPokemon);
 
 		if (targetPokemon->GetStatus() == Status::Normal && (targetPokemon->GetTypeOneEnum() != PokemonType::Electric && targetPokemon->GetTypeTwoEnum() != PokemonType::Electric)
-			&& !targetPokemon->HasSubstitute())
+			&& !targetPokemon->HasSubstitute() && targetPokemon->GetCurrentHP() != 0)
 		{
 			std::uniform_int_distribution<int> rngDist(1, 101);
 			int randomNumber{ rngDist(generator) };
@@ -621,7 +621,7 @@ void AttackUp2::DoMove(Player* sourcePlayer, Player* targetPlayer, BattlePokemon
 		sourcePokemon->SetAttackStage(attackStage);
 		std::cout << sourcePlayer->GetPlayerNameView() << "'s " << sourcePokemon->GetNameView() << "'s attack rose sharply!\n";
 	}
-	
+
 	currentMove->m_currentPP -= 1;
 
 	sourcePokemon->SetLastUsedMove(currentMove);
@@ -653,7 +653,7 @@ void Gust::DoMove(Player* sourcePlayer, Player* targetPlayer, BattlePokemon::pok
 	sourcePokemon->SetLastUsedMove(currentMove);
 }
 
-void MakeEnemySwitch::DoMove(Player* sourcePlayer, Player* targetPlayer, BattlePokemon::pokemonMove* currentMove, BattlePokemon* sourcePokemon, BattlePokemon* targetPokemon, BattleSystem &bs)
+void MakeEnemySwitch::DoMove(Player* sourcePlayer, Player* targetPlayer, BattlePokemon::pokemonMove* currentMove, BattlePokemon* sourcePokemon, BattlePokemon* targetPokemon, BattleSystem& bs)
 {
 	currentMove->m_currentPP -= 1;
 
@@ -674,7 +674,7 @@ void MakeEnemySwitch::DoMove(Player* sourcePlayer, Player* targetPlayer, BattleP
 	{
 		for (size_t i = 1; i <= 6; ++i)
 		{
-			if (targetPlayer->GetBelt(i) != nullptr && (targetPlayer->GetBelt(i) != targetPokemon))
+			if (targetPlayer->GetBelt(i)->HasPokemon() && targetPlayer->GetBelt(i) != targetPokemon)
 			{
 				enemyPokemonList.push_back(targetPlayer->GetBelt(i));
 				++numberOfPokemon;
@@ -832,7 +832,7 @@ void Stomp::DoMove(Player* sourcePlayer, Player* targetPlayer, BattlePokemon::po
 	std::uniform_int_distribution<int> randomModDistributor(1, 101);
 	int randomMod{ randomModDistributor(generator) };
 
-	if (randomMod < 30 && targetPlayer == bs.GetSecondTurnPlayer() && currentEffectiveness != Effectiveness::No)
+	if (randomMod < 30 && targetPlayer == bs.GetSecondTurnPlayer() && currentEffectiveness != Effectiveness::No && targetPokemon->GetCurrentHP() != 0)
 	{
 		targetPokemon->SetIsFlinched(true);
 	}
@@ -934,7 +934,7 @@ void FlinchHit::DoMove(Player* sourcePlayer, Player* targetPlayer, BattlePokemon
 		std::uniform_int_distribution<int> randomModDistributor(1, 101);
 		int randomMod{ randomModDistributor(generator) };
 
-		if (randomMod < 30 && targetPlayer == bs.GetSecondTurnPlayer() && currentEffectiveness != Effectiveness::No && !targetPokemon->HasSubstitute())
+		if (randomMod < 30 && targetPlayer == bs.GetSecondTurnPlayer() && currentEffectiveness != Effectiveness::No && !targetPokemon->HasSubstitute() && targetPokemon->GetCurrentHP() != 0)
 		{
 			targetPokemon->SetIsFlinched(true);
 		}
@@ -1024,7 +1024,7 @@ void BodySlam::DoMove(Player* sourcePlayer, Player* targetPlayer, BattlePokemon:
 		DisplaySubstituteDamageTextDialog(targetPlayer, targetPokemon);
 
 		if (targetPokemon->GetStatus() == Status::Normal && (targetPokemon->GetTypeOneEnum() != PokemonType::Electric && targetPokemon->GetTypeTwoEnum() != PokemonType::Electric)
-			&& !targetPokemon->HasSubstitute())
+			&& !targetPokemon->HasSubstitute() && targetPokemon->GetCurrentHP() != 0)
 		{
 			std::uniform_int_distribution<int> rngDist(1, 101);
 			int randomNumber{ rngDist(generator) };
@@ -1298,7 +1298,7 @@ void PoisonHit::DoMove(Player* sourcePlayer, Player* targetPlayer, BattlePokemon
 		DisplaySubstituteDamageTextDialog(targetPlayer, targetPokemon);
 
 		if (targetPokemon->GetStatus() == Status::Normal && (targetPokemon->GetTypeOneEnum() != PokemonType::Poison && targetPokemon->GetTypeTwoEnum() != PokemonType::Poison)
-			&& (targetPokemon->GetTypeOneEnum() != PokemonType::Steel && targetPokemon->GetTypeTwoEnum() != PokemonType::Steel) && !targetPokemon->HasSubstitute())
+			&& (targetPokemon->GetTypeOneEnum() != PokemonType::Steel && targetPokemon->GetTypeTwoEnum() != PokemonType::Steel) && !targetPokemon->HasSubstitute() && targetPokemon->GetCurrentHP() != 0)
 		{
 			std::uniform_int_distribution<int> rngDist(1, 101);
 			int randomNumber{ rngDist(generator) };
@@ -1348,7 +1348,7 @@ void Twineedle::DoMove(Player* sourcePlayer, Player* targetPlayer, BattlePokemon
 			DisplaySubstituteDamageTextDialog(targetPlayer, targetPokemon);
 
 			if (targetPokemon->GetStatus() == Status::Normal && (targetPokemon->GetTypeOneEnum() != PokemonType::Poison && targetPokemon->GetTypeTwoEnum() != PokemonType::Poison)
-				&& (targetPokemon->GetTypeOneEnum() != PokemonType::Steel && targetPokemon->GetTypeTwoEnum() != PokemonType::Steel) && !targetPokemon->HasSubstitute())
+				&& (targetPokemon->GetTypeOneEnum() != PokemonType::Steel && targetPokemon->GetTypeTwoEnum() != PokemonType::Steel) && !targetPokemon->HasSubstitute() && targetPokemon->GetCurrentHP() != 0)
 			{
 				std::uniform_int_distribution<int> rngDist(1, 101);
 				int randomNumber{ rngDist(generator) };
@@ -1618,7 +1618,7 @@ void SpecialDefenseDownHit::DoMove(Player* sourcePlayer, Player* targetPlayer, B
 		std::uniform_int_distribution<int> rngDist(1, 101);
 		int randomNumber{ rngDist(generator) };
 
-		if (randomNumber <= 10 && !targetPlayer->HasMist() && !targetPokemon->HasSubstitute())
+		if (randomNumber <= 10 && !targetPlayer->HasMist() && !targetPokemon->HasSubstitute() && targetPokemon->GetCurrentHP() != 0)
 		{
 			if (targetPokemon->GetSpecialDefenseStage() > -6)
 			{
@@ -1682,7 +1682,7 @@ void ConfuseHit::DoMove(Player* sourcePlayer, Player* targetPlayer, BattlePokemo
 			std::uniform_int_distribution<int> rngDist(1, 101);
 			int randomNumber{ rngDist(generator) };
 
-			if (randomNumber <= 10 && !targetPokemon->HasSubstitute())
+			if (randomNumber <= 10 && !targetPokemon->HasSubstitute() && targetPokemon->GetCurrentHP() != 0)
 			{
 				std::cout << targetPlayer->GetPlayerNameView() << "'s " << targetPokemon->GetNameView() << " became confused!\n";
 
@@ -1724,7 +1724,7 @@ void SpeedDownHit::DoMove(Player* sourcePlayer, Player* targetPlayer, BattlePoke
 		std::uniform_int_distribution<int> rngDist(1, 101);
 		int randomNumber{ rngDist(generator) };
 
-		if (randomNumber <= 10 && !targetPlayer->HasMist() && !targetPokemon->HasSubstitute())
+		if (randomNumber <= 10 && !targetPlayer->HasMist() && !targetPokemon->HasSubstitute() && targetPokemon->GetCurrentHP() != 0)
 		{
 			if (targetPokemon->GetSpeedStage() > -6)
 			{
@@ -1764,7 +1764,7 @@ void AttackDownHit::DoMove(Player* sourcePlayer, Player* targetPlayer, BattlePok
 		std::uniform_int_distribution<int> rngDist(1, 101);
 		int randomNumber{ rngDist(generator) };
 
-		if (randomNumber <= 10 && !targetPlayer->HasMist() && !targetPokemon->HasSubstitute())
+		if (randomNumber <= 10 && !targetPlayer->HasMist() && !targetPokemon->HasSubstitute() && targetPokemon->GetCurrentHP() != 0)
 		{
 			if (targetPokemon->GetAttackStage() > -6)
 			{
@@ -2466,7 +2466,7 @@ void ParalyzeHit30::DoMove(Player* sourcePlayer, Player* targetPlayer, BattlePok
 		DisplaySubstituteDamageTextDialog(targetPlayer, targetPokemon);
 
 		if (targetPokemon->GetStatus() == Status::Normal && (targetPokemon->GetTypeOneEnum() != PokemonType::Electric && targetPokemon->GetTypeTwoEnum() != PokemonType::Electric)
-			&& !targetPokemon->HasSubstitute())
+			&& !targetPokemon->HasSubstitute() && targetPokemon->GetCurrentHP() != 0)
 		{
 			std::uniform_int_distribution<int> rngDist(1, 101);
 			int randomNumber{ rngDist(generator) };
@@ -3322,7 +3322,7 @@ void PoisonHit40::DoMove(Player* sourcePlayer, Player* targetPlayer, BattlePokem
 		DisplaySubstituteDamageTextDialog(targetPlayer, targetPokemon);
 
 		if (targetPokemon->GetStatus() == Status::Normal && (targetPokemon->GetTypeOneEnum() != PokemonType::Poison && targetPokemon->GetTypeTwoEnum() != PokemonType::Poison)
-			&& (targetPokemon->GetTypeOneEnum() != PokemonType::Steel && targetPokemon->GetTypeTwoEnum() != PokemonType::Steel) && !targetPokemon->HasSubstitute())
+			&& (targetPokemon->GetTypeOneEnum() != PokemonType::Steel && targetPokemon->GetTypeTwoEnum() != PokemonType::Steel) && !targetPokemon->HasSubstitute() && targetPokemon->GetCurrentHP() != 0)
 		{
 			std::uniform_int_distribution<int> rngDist(1, 101);
 			int randomNumber{ rngDist(generator) };
@@ -3363,7 +3363,7 @@ void FlinchHit10::DoMove(Player* sourcePlayer, Player* targetPlayer, BattlePokem
 		std::uniform_int_distribution<int> randomModDistributor(1, 101);
 		int randomMod{ randomModDistributor(generator) };
 
-		if (randomMod < 10 && targetPlayer == bs.GetSecondTurnPlayer() && currentEffectiveness != Effectiveness::No && !targetPokemon->HasSubstitute())
+		if (randomMod < 10 && targetPlayer == bs.GetSecondTurnPlayer() && currentEffectiveness != Effectiveness::No && !targetPokemon->HasSubstitute() && targetPokemon->GetCurrentHP() != 0)
 		{
 			targetPokemon->SetIsFlinched(true);
 		}
@@ -3397,7 +3397,7 @@ void FlinchHit20::DoMove(Player* sourcePlayer, Player* targetPlayer, BattlePokem
 		std::uniform_int_distribution<int> randomModDistributor(1, 101);
 		int randomMod{ randomModDistributor(generator) };
 
-		if (randomMod < 20 && targetPlayer == bs.GetSecondTurnPlayer() && currentEffectiveness != Effectiveness::No && !targetPokemon->HasSubstitute())
+		if (randomMod < 20 && targetPlayer == bs.GetSecondTurnPlayer() && currentEffectiveness != Effectiveness::No && !targetPokemon->HasSubstitute() && targetPokemon->GetCurrentHP() != 0)
 		{
 			targetPokemon->SetIsFlinched(true);
 		}
@@ -3653,7 +3653,7 @@ void SkyAttack::DoMove(Player* sourcePlayer, Player* targetPlayer, BattlePokemon
 			std::uniform_int_distribution<int> randomModDistributor(1, 101);
 			int randomMod{ randomModDistributor(generator) };
 
-			if (randomMod < 30 && targetPlayer == bs.GetSecondTurnPlayer() && currentEffectiveness != Effectiveness::No && !targetPokemon->HasSubstitute())
+			if (randomMod < 30 && targetPlayer == bs.GetSecondTurnPlayer() && currentEffectiveness != Effectiveness::No && !targetPokemon->HasSubstitute() && targetPokemon->GetCurrentHP() != 0)
 			{
 				targetPokemon->SetIsFlinched(true);
 			}
@@ -3734,7 +3734,7 @@ void ConfuseHit20::DoMove(Player* sourcePlayer, Player* targetPlayer, BattlePoke
 			std::uniform_int_distribution<int> rngDist(1, 101);
 			int randomNumber{ rngDist(generator) };
 
-			if (randomNumber <= 20 && !targetPokemon->HasSubstitute())
+			if (randomNumber <= 20 && !targetPokemon->HasSubstitute() && targetPokemon->GetCurrentHP() != 0)
 			{
 				std::cout << targetPlayer->GetPlayerNameView() << "'s " << targetPokemon->GetNameView() << " became confused!\n";
 
@@ -3895,7 +3895,7 @@ void TriAttack::DoMove(Player* sourcePlayer, Player* targetPlayer, BattlePokemon
 		std::uniform_int_distribution<int> rngDist(1, 101);
 		int randomNumber{ rngDist(generator) };
 
-		if (randomNumber <= 20 && currentEffectiveness != Effectiveness::No && !targetPokemon->HasSubstitute())
+		if (randomNumber <= 20 && currentEffectiveness != Effectiveness::No && !targetPokemon->HasSubstitute() && targetPokemon->GetCurrentHP() != 0)
 		{
 			std::uniform_int_distribution<int> rngDist(1, 3);
 			int randomStatus{ rngDist(generator) };
