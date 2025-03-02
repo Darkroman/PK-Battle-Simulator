@@ -6,7 +6,7 @@ class Player
 {
 public:
 
-    Player(std::string_view, Database*);
+    Player(std::string_view);
 
     BattlePokemon* GetBelt(size_t);
     const std::string& GetPlayerName() const;
@@ -89,6 +89,4 @@ private:
     int m_reflectCounter{};
 
     int m_faintedPokemon{ 0 };
-
-    Database* mp_db;
 };
