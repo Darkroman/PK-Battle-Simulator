@@ -338,7 +338,7 @@ void BattleSystem::PlayerOneMakeSelection()
 
 void BattleSystem::PlayerTwoMakeSelection()
 {
-	if (playerTwoCurrentPokemon->IsCharging() || playerTwoCurrentPokemon->IsRecharging() || playerTwoCurrentPokemon->IsThrashing())
+	if (playerTwoCurrentPokemon->IsCharging() || playerTwoCurrentPokemon->IsRecharging() || playerTwoCurrentPokemon->IsThrashing() || playerTwoCurrentPokemon->IsBiding())
 	{
 		return;
 	}
@@ -648,6 +648,7 @@ void BattleSystem::ResetStatsOnSwitch(BattlePokemon* currentPokemon)
 				currentPokemon->GetMove(i)->b_isDisabled = false;
 				currentPokemon->SetDisabledStatus(false);
 				currentPokemon->ResetDisabledCounter();
+				break;
 			}
 		}
 	}
@@ -1348,6 +1349,11 @@ void BattleSystem::ResetValues()
 bool BattleSystem::CheckPerformativeStatus(Player* sourcePlayer, BattlePokemon* sourcePokemon, BattlePokemon::pokemonMove* currentMove)
 {
 	bool canPerform{ true };
+
+	if (sourcePokemon->IsRecharging())
+	{
+		return true;
+	}
 
 	switch (sourcePokemon->currentStatus)
 	{
