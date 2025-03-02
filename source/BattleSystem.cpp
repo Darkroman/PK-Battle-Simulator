@@ -2,14 +2,7 @@
 #include "../include/InputValidation.h"
 #include "../include/MoveEffects.h"
 
-BattleSystem::BattleSystem()
-{
-	//seed = static_cast<int>(std::chrono::system_clock::now().time_since_epoch().count());
-
-	//std::mt19937 gen(seed);
-
-	//BattleSystem::generator = gen;
-}
+BattleSystem::BattleSystem() {}
 
 BattleSystem::BattleSystem(std::vector<Player>& players)
 {
@@ -194,7 +187,7 @@ bool BattleSystem::BattleLoop()
 		{
 			if (CheckPerformativeStatus(firstTurnPlayer, firstTurnPokemon, firstTurnMove))
 			{
-				std::unique_ptr<IMoveEffects> moveEffect = factory.Call(firstTurnMove->mp_move->GetSecondaryFlag());
+				std::unique_ptr<IMoveEffects> moveEffect = factory.Call(firstTurnMove->mp_move->GetMoveEffectEnum());
 				moveEffect->DoMove(firstTurnPlayer, secondTurnPlayer, firstTurnMove, firstTurnPokemon, secondTurnPokemon, *this);
 			}
 			lastUsedMoveFirst = firstTurnMove;
@@ -225,7 +218,7 @@ bool BattleSystem::BattleLoop()
 		{
 			if (CheckPerformativeStatus(secondTurnPlayer, secondTurnPokemon, secondTurnMove))
 			{
-				std::unique_ptr<IMoveEffects> moveEffect = factory.Call(secondTurnMove->mp_move->GetSecondaryFlag());
+				std::unique_ptr<IMoveEffects> moveEffect = factory.Call(secondTurnMove->mp_move->GetMoveEffectEnum());
 				moveEffect->DoMove(secondTurnPlayer, firstTurnPlayer, secondTurnMove, secondTurnPokemon, firstTurnPokemon, *this);
 			}
 			lastUsedMoveSecond = secondTurnMove;
@@ -319,7 +312,7 @@ void BattleSystem::PlayerOneMakeSelection()
 
 	if (playerOne->IsAI())
 	{
-		AISelection(playerOne, playerOneCurrentPokemon);
+		AISelection(playerOne, playerTwo, playerOneCurrentPokemon, playerTwoCurrentPokemon);
 	}
 	else
 	{
@@ -345,7 +338,7 @@ void BattleSystem::PlayerTwoMakeSelection()
 
 	if (playerTwo->IsAI())
 	{
-		AISelection(playerTwo, playerTwoCurrentPokemon);
+		AISelection(playerTwo, playerOne, playerTwoCurrentPokemon, playerOneCurrentPokemon);
 	}
 	else
 	{
@@ -842,7 +835,7 @@ double BattleSystem::CalculateTypeEffectiveness(BattlePokemon::pokemonMove* curr
 		currentEffectiveness = Effectiveness::No;
 	}
 
-	if (currentMove->mp_move->GetSecondaryFlag() == 6 && moveEffectiveness != 0)
+	if (currentMove->mp_move->GetMoveEffectEnum() == MoveEffect::OHKO && moveEffectiveness != 0)
 	{
 		currentEffectiveness = Effectiveness::OHKO;
 	}
@@ -859,8 +852,8 @@ double BattleSystem::CalculateAccuracyModifiers(int element)
 bool BattleSystem::CalculateHitChance(BattlePokemon::pokemonMove* currentMove, BattlePokemon* source, BattlePokemon* target)
 {
 	if (
-		(target->IsSemiInvulnerableFromFly() && (currentMove->mp_move->GetSecondaryFlag() != 9 && currentMove->mp_move->GetName() != "Thunder")) ||
-		(target->IsSemiInvulnerableFromDig() && (currentMove->mp_move->GetSecondaryFlag() != 50 && currentMove->mp_move->GetName() != "Fissure"))
+		(target->IsSemiInvulnerableFromFly() && (currentMove->mp_move->GetMoveEffectEnum() != MoveEffect::Gust && currentMove->mp_move->GetName() != "Thunder")) ||
+		(target->IsSemiInvulnerableFromDig() && (currentMove->mp_move->GetMoveEffectEnum() != MoveEffect::Earthquake && currentMove->mp_move->GetName() != "Fissure"))
 	   )
 	{
 		return false;
@@ -881,13 +874,13 @@ bool BattleSystem::CalculateHitChance(BattlePokemon::pokemonMove* currentMove, B
 
 	double accuracyMod{ 0 };
 
-	if (currentMove->mp_move->GetSecondaryFlag() != 6)
+	if (currentMove->mp_move->GetMoveEffectEnum() != MoveEffect::OHKO)
 	{
 		accuracyMod = moveAccuracy * CalculateAccuracyModifiers(adjustedStages);
 	}
 	else
 	{
-		accuracyMod = (source->GetLevel() - target->GetLevel()) + 30; // for one-hit KO moves
+		accuracyMod = (source->GetLevel() - target->GetLevel()) + 30; // for OHKO moves
 	}
 
 	double randomMod{ 0.0 };
@@ -920,14 +913,12 @@ void BattleSystem::CalculateDamage(Player* targetPlayer, BattlePokemon::pokemonM
 
 	double effectiveness = CalculateTypeEffectiveness(currentMove, target);
 
-	// if move is struggle, effectiveness is always a normal hit
-	if (currentMove->mp_move->GetSecondaryFlag() == 92)
+	if (currentMove->mp_move->GetMoveEffectEnum() == MoveEffect::Struggle)
 	{
 		effectiveness = 1;
 	}
 
-	// If move is a one hit KO move type
-	if ((currentMove->mp_move->GetSecondaryFlag() == 6) && effectiveness != 0)
+	if ((currentMove->mp_move->GetMoveEffectEnum() == MoveEffect::OHKO) && effectiveness != 0)
 	{
 		damage = target->GetCurrentHP();
 		target->DamageCurrentHP(static_cast<int>(damage));
@@ -999,9 +990,8 @@ void BattleSystem::CalculateDamage(Player* targetPlayer, BattlePokemon::pokemonM
 
 	double stab{};
 
-	// If move type matches one of Pokemon's types and is not the move 'Struggle'
 	if ((currentMove->mp_move->GetMoveTypeEnum() == source->GetTypeOneEnum()) || (currentMove->mp_move->GetMoveTypeEnum() == source->GetTypeTwoEnum())
-		&& currentMove->mp_move->GetSecondaryFlag() != 92)
+		&& currentMove->mp_move->GetMoveEffectEnum() != MoveEffect::Struggle)
 	{
 		stab = 1.5;
 	}
@@ -1024,29 +1014,26 @@ void BattleSystem::CalculateDamage(Player* targetPlayer, BattlePokemon::pokemonM
 
 	double powerModifier{ 1 };
 
-	// For Gust if target is in first turn of fly
-	if (target->IsSemiInvulnerableFromFly() && (currentMove->mp_move->GetSecondaryFlag() == 9))
+	if (target->IsSemiInvulnerableFromFly() && (currentMove->mp_move->GetMoveEffectEnum() == MoveEffect::Gust))
 	{
 		powerModifier = 2;
 	}
 
 	int currentMovePower{ currentMove->mp_move->GetPower() };
 
-	if (currentMove->mp_move->GetSecondaryFlag() == 36)
+	if (currentMove->mp_move->GetMoveEffectEnum() == MoveEffect::LowKick)
 	{
 		currentMovePower = CalculateLowKickPower(target);
 	}
 
 	damage = floor(floor(floor(floor(floor(floor(floor(floor(floor(2 * source->GetLevel() / 5 + 2) * (currentMovePower * powerModifier) * (static_cast<double>(sourceAttack) / static_cast<double>(targetDefense)) / 50) + 2) * critical) * random) * stab) * effectiveness) * burn));
 	
-	// If move is stomp or body slam, do double damage on target if it has used minimized
-	if ((currentMove->mp_move->GetSecondaryFlag() == 13 || currentMove->mp_move->GetSecondaryFlag() == 18) && target->HasUsedMinimize())
+	if ((currentMove->mp_move->GetMoveEffectEnum() == MoveEffect::Stomp || currentMove->mp_move->GetMoveEffectEnum() == MoveEffect::BodySlam) && target->HasUsedMinimize())
 	{
 		damage *= 2;
 	}
 
-	// If move is earthquake and target is in 1st turn of dig, double the damage
-	if (currentMove->mp_move->GetSecondaryFlag() == 50 && target->IsSemiInvulnerableFromDig())
+	if (currentMove->mp_move->GetMoveEffectEnum() == MoveEffect::Earthquake && target->IsSemiInvulnerableFromDig())
 	{
 		damage *= 2;
 	}
@@ -1942,7 +1929,7 @@ void BattleSystem::RageCheck(Player* sourcePlayer, Player* targetPlayer, BattleP
 		return;
 	}
 
-	if (targetPokemon->IsRaging() && (damageTaken > 0 || move->mp_move->GetSecondaryFlag() == 29)) // If target took damage or was targeted by disable while rage is up
+	if (targetPokemon->IsRaging() && (damageTaken > 0 || move->mp_move->GetMoveEffectEnum() == MoveEffect::Disable)) // If target took damage or was targeted by disable while rage is up
 	{
 		int attackStage = targetPokemon->GetAttackStage();
 
@@ -1958,15 +1945,15 @@ void BattleSystem::RageCheck(Player* sourcePlayer, Player* targetPlayer, BattleP
 		}
 	}
 
-	if (sourcePokemon->IsRaging() && move->mp_move->GetSecondaryFlag() != 56)
+	if (sourcePokemon->IsRaging() && move->mp_move->GetMoveEffectEnum() != MoveEffect::Rage)
 	{
 		sourcePokemon->SetRaging(false);
 	}
-	else if (sourcePokemon->IsRaging() && move->mp_move->GetSecondaryFlag() == 56 && move->b_isDisabled)
+	else if (sourcePokemon->IsRaging() && move->mp_move->GetMoveEffectEnum() == MoveEffect::Rage && move->b_isDisabled)
 	{
 		sourcePokemon->SetRaging(false);
 	}
-	else if (sourcePokemon->IsRaging() && move->mp_move->GetSecondaryFlag() == 56 && !move->b_isDisabled)
+	else if (sourcePokemon->IsRaging() && move->mp_move->GetMoveEffectEnum() == MoveEffect::Rage && !move->b_isDisabled)
 	{
 		std::cout << "(" << "Rage started on " << sourcePlayer->GetPlayerNameView() << "'s " << sourcePokemon->GetNameView() << ")" <<  '\n';
 	}
