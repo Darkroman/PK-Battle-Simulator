@@ -64,8 +64,6 @@ public:
 
 public:
     //BattlePokemon();
-    void SetDatabasePointer(Database*);
-    Database* GetDatabasePointer();
     Pokemon* GetPokemonDatabasePointer();
 
     void SetPokemon(size_t);
@@ -311,7 +309,7 @@ private:
     bool b_hasNickname{ false };
 
     Pokemon* mp_pokemon{ nullptr };
-    Database* mp_db{ nullptr };
+    //Database* mp_db{ nullptr };
 
     std::array<pokemonMove, 4> m_array_moves{};
 
