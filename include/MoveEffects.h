@@ -10,7 +10,7 @@ public:
 class MoveEffectsFactory
 {
 public:
-	std::unique_ptr<IMoveEffects> Call(int);
+	std::unique_ptr<IMoveEffects> Call(MoveEffect);
 };
 
 class Noop : public IMoveEffects
@@ -55,7 +55,7 @@ public:
 	void DoMove(Player*, Player*, BattlePokemon::pokemonMove*, BattlePokemon*, BattlePokemon*, BattleSystem&) override;
 };
 
-class OneHitKOHit : public IMoveEffects
+class OHKO : public IMoveEffects
 {
 public:
 	void DoMove(Player*, Player*, BattlePokemon::pokemonMove*, BattlePokemon*, BattlePokemon*, BattleSystem&) override;
@@ -391,7 +391,7 @@ public:
 	void DoMove(Player*, Player*, BattlePokemon::pokemonMove*, BattlePokemon*, BattlePokemon*, BattleSystem&) override;
 };
 
-class Heal50 : public IMoveEffects
+class HealHalfHP : public IMoveEffects
 {
 public:
 	void DoMove(Player*, Player*, BattlePokemon::pokemonMove*, BattlePokemon*, BattlePokemon*, BattleSystem&) override;
