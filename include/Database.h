@@ -11,18 +11,12 @@
 class Database
 {
 private:
-    static Database* p_db_instance;
-    static std::mutex mutex_;
-
-protected:
     Database();
-    ~Database() {}
+    ~Database() = default;
 
 public:
     Database(const Database&) = delete; // No copy constructor
     Database& operator=(const Database&) = delete; // no copy assignment
-    Database(const Database&&) = delete; // No move constructor
-    Database& operator=(const Database&&) = delete; // no move assignment
 
     Pokemon* GetPointerToPokedexNumber(size_t);
     Move*    GetPointerToMovedexNumber(size_t);
@@ -40,7 +34,7 @@ public:
     void DisplayPokemon() const;
     void   DisplayMoves() const;
 
-    static Database* GetInstance();
+    static Database& GetInstance();
 
 private:
 
