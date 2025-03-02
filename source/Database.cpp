@@ -30,19 +30,10 @@ Database::Database()
 #endif
 }
 
-Database* Database::p_db_instance{nullptr};
-std::mutex Database::mutex_;
-
-Database* Database::GetInstance()
+Database& Database::GetInstance()
 {
-    std::lock_guard<std::mutex> lock(mutex_);
-
-    if (p_db_instance == nullptr)
-    {
-        p_db_instance = new Database;
-    }
-
-    return p_db_instance;
+    static Database instance;
+    return instance;
 }
 
 void Database::LoadPokemon()
@@ -64,7 +55,7 @@ void Database::LoadPokemon()
     std::string tmp_weight = "";
      
     while (tmp_NationalDexNumber != "151")
-    {   
+    {
         std::getline(iss, tmp_NationalDexNumber, ',');
         std::getline(iss, tmp_name, ',');
         std::getline(iss, tmp_basehp, ',');
