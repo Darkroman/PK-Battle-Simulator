@@ -52,16 +52,6 @@ void BattlePokemon::DetransformData::BackupOriginalPokemonData(BattlePokemon* po
     }
 }
 
-void BattlePokemon::SetDatabasePointer(Database* db)
-{
-    mp_db = db;
-}
-
-Database* BattlePokemon::GetDatabasePointer()
-{
-    return mp_db;
-}
-
 Pokemon* BattlePokemon::GetPokemonDatabasePointer()
 {
     return mp_pokemon;
@@ -81,7 +71,7 @@ void BattlePokemon::SetPokemon(size_t pknum)
         ResetStatsAndMoves();
     }
 
-    mp_pokemon = mp_db->GetPointerToPokedexNumber(pknum);
+    mp_pokemon = Database::GetInstance().GetPointerToPokedexNumber(pknum);
     m_name = mp_pokemon->GetName();
     m_type1 = mp_pokemon->GetFirstType();
     m_type1e = mp_pokemon->GetFirstTypeEnum();
@@ -95,22 +85,19 @@ void BattlePokemon::SetPokemon(size_t pknum)
 
 void BattlePokemon::SetPokemon(std::string_view pkname)
 {
-    auto it = std::find_if(mp_db->cPokedexBegin(), mp_db->cPokedexEnd(), [&pkname](const Pokemon& obj) { return obj.GetName() == pkname; });
+    auto it = std::find_if(Database::GetInstance().cPokedexBegin(), Database::GetInstance().cPokedexEnd(), [&pkname](const Pokemon& obj) { return obj.GetName() == pkname; });
 
-    size_t result = std::distance(mp_db->cPokedexBegin(), it);
+    size_t result = std::distance(Database::GetInstance().cPokedexBegin(), it);
 
-    if (it == mp_db->cPokedexEnd())
+    if (it == Database::GetInstance().cPokedexEnd())
     {
         std::cout << "That Pokemon doesn't exist!\n";
         return;
     }
 
-    if (mp_db != nullptr)
-    {
-        ResetStatsAndMoves();
-    }
+    ResetStatsAndMoves();
 
-    mp_pokemon = mp_db->GetPointerToPokedexNumber(result);
+    mp_pokemon = Database::GetInstance().GetPointerToPokedexNumber(result);
     m_name = mp_pokemon->GetName();
     m_type1 = mp_pokemon->GetFirstType();
     m_type1e = mp_pokemon->GetFirstTypeEnum();
@@ -137,20 +124,20 @@ void BattlePokemon::SetMove(size_t moveslot, size_t movenum)
 
     for (auto& i : m_array_moves)
     {
-        if (mp_db->GetPointerToMovedexNumber(movenum) == i.mp_move)
+        if (Database::GetInstance().GetPointerToMovedexNumber(movenum) == i.mp_move)
         {
-            std::cout << this->m_name << " already knows " << mp_db->GetPointerToMovedexNumber(movenum)->GetName() << "!\n";
+            std::cout << this->m_name << " already knows " << Database::GetInstance().GetPointerToMovedexNumber(movenum)->GetName() << "!\n";
             return;
         }
     }
 
     if (!CanLearnMove)
     {
-        std::cout << this->m_name << " cannot learn " << mp_db->GetPointerToMovedexNumber(movenum)->GetName() << "!\n";
+        std::cout << this->m_name << " cannot learn " << Database::GetInstance().GetPointerToMovedexNumber(movenum)->GetName() << "!\n";
     }
     else
     {
-        m_array_moves[moveslot].mp_move = mp_db->GetPointerToMovedexNumber(movenum);
+        m_array_moves[moveslot].mp_move = Database::GetInstance().GetPointerToMovedexNumber(movenum);
         m_array_moves[moveslot].m_currentPP = m_array_moves[moveslot].mp_move->GetPP();
         m_array_moves[moveslot].m_maxPP = m_array_moves[moveslot].mp_move->GetPP();
         //std::cout << this->m_name <<  " was able to learn move " << m_array_moves[moveslot].mp_move->GetName() << " successfully!" << '\n';
@@ -160,11 +147,11 @@ void BattlePokemon::SetMove(size_t moveslot, size_t movenum)
 void BattlePokemon::SetMove(size_t moveslot, std::string_view movename)
 {
     --moveslot;
-    auto it = std::find_if(mp_db->cMovedexBegin(), mp_db->cMovedexEnd(), [&movename](const Move& obj) { return obj.GetName() == movename; });
+    auto it = std::find_if(Database::GetInstance().cMovedexBegin(), Database::GetInstance().cMovedexEnd(), [&movename](const Move& obj) { return obj.GetName() == movename; });
 
-    size_t result = std::distance(mp_db->cMovedexBegin(), it);
+    size_t result = std::distance(Database::GetInstance().cMovedexBegin(), it);
 
-    if (it == mp_db->cMovedexEnd())
+    if (it == Database::GetInstance().cMovedexEnd())
     {
         std::cout << "That move doesn't exist!\n";
         return;
@@ -175,20 +162,20 @@ void BattlePokemon::SetMove(size_t moveslot, std::string_view movename)
 
     for (auto& i : m_array_moves)
     {
-        if (mp_db->GetPointerToMovedexNumber(result) == i.mp_move)
+        if (Database::GetInstance().GetPointerToMovedexNumber(result) == i.mp_move)
         {
-            std::cout << this->m_name << " already knows " << mp_db->GetPointerToMovedexNumber(result)->GetName() << "!\n";
+            std::cout << this->m_name << " already knows " << Database::GetInstance().GetPointerToMovedexNumber(result)->GetName() << "!\n";
             return;
         }
     }
 
     if (!CanLearnMove)
     {
-        std::cout << this->m_name << " cannot learn " << mp_db->GetPointerToMovedexNumber(result)->GetName() << "!\n";
+        std::cout << this->m_name << " cannot learn " << Database::GetInstance().GetPointerToMovedexNumber(result)->GetName() << "!\n";
     }
     else
     {
-        m_array_moves[moveslot].mp_move = mp_db->GetPointerToMovedexNumber(result);
+        m_array_moves[moveslot].mp_move = Database::GetInstance().GetPointerToMovedexNumber(result);
         m_array_moves[moveslot].m_currentPP = m_array_moves[moveslot].mp_move->GetPP();
         m_array_moves[moveslot].m_maxPP = m_array_moves[moveslot].mp_move->GetPP();
         //std::cout << this->m_name << " was able to learn move " << m_array_moves[moveslot].mp_move->GetName() << " successfully!" << '\n';
@@ -599,7 +586,7 @@ void BattlePokemon::DisplayLearnableMoves() const
         ++colCount;
         auto moveNum = mp_pokemon->FetchMoveNumber(index);
         
-        move = mp_db->GetPointerToMovedexNumber(moveNum);
+        move = Database::GetInstance().GetPointerToMovedexNumber(moveNum);
 
         //std::cout << move->GetMoveIndex() << ": " << move->GetName() << " --- ";
 
@@ -1503,11 +1490,11 @@ void BattlePokemon::DamageSubstitute(int damage)
 
 BattlePokemon::pokemonMove* BattlePokemon::Struggle()
 {
-    m_struggle.mp_move = mp_db->GetPointerToMovedexNumber(164);
+    m_struggle.mp_move = Database::GetInstance().GetPointerToMovedexNumber(164);
     m_struggle.m_currentPP = 1;
     m_struggle.m_maxPP = 1;
 
-    return &(m_struggle);
+    return &m_struggle;
 }
 
 void BattlePokemon::ResetStatsAndMoves()
@@ -1620,7 +1607,7 @@ void BattlePokemon::ResetValues()
         {
             if (this->GetMove(i)->b_isMimicked)
             {
-                this->GetMove(i)->mp_move = this->GetDatabasePointer()->GetPointerToMovedexNumber(101);
+                this->GetMove(i)->mp_move = Database::GetInstance().GetPointerToMovedexNumber(101);
                 this->GetMove(i)->m_currentPP = this->GetMimicPP();
                 this->GetMove(i)->m_maxPP = this->GetMove(i)->mp_move->GetPP();
 
