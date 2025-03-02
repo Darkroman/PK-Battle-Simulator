@@ -1,286 +1,286 @@
 #include "../include/MoveEffects.h"
 
-std::unique_ptr<IMoveEffects> MoveEffectsFactory::Call(int ID)
+std::unique_ptr<IMoveEffects> MoveEffectsFactory::Call(MoveEffect ID)
 {
 	switch (ID)
 	{
-	case 0:
+	case MoveEffect::NormalHit:
 		return std::make_unique<NormalHit>();
 
-	case 1:
+	case MoveEffect::IncreasedCritical:
 		return std::make_unique<IncreasedCritical>();
 
-	case 2:
+	case MoveEffect::MultiAttack:
 		return std::make_unique<MultiAttack>();
 
-	case 3:
+	case MoveEffect::BurnHit:
 		return std::make_unique<BurnHit>();
 
-	case 4:
+	case MoveEffect::FreezeHit:
 		return std::make_unique<FreezeHit>();
 
-	case 5:
+	case MoveEffect::ParalyzeHit10:
 		return std::make_unique<ParalyzeHit10>();
 
-	case 6:
-		return std::make_unique<OneHitKOHit>();
+	case MoveEffect::OHKO:
+		return std::make_unique<OHKO>();
 
-	case 7:
+	case MoveEffect::RazorWind:
 		return std::make_unique<RazorWind>();
 
-	case 8:
+	case MoveEffect::AttackUp2:
 		return std::make_unique<AttackUp2>();
 
-	case 9:
+	case MoveEffect::Gust:
 		return std::make_unique<Gust>();
 
-	case 10:
+	case MoveEffect::MakeEnemySwitch:
 		return std::make_unique<MakeEnemySwitch>();
 
-	case 11:
+	case MoveEffect::Fly:
 		return std::make_unique<Fly>();
 
-	case 12:
+	case MoveEffect::Bound:
 		return std::make_unique<Bound>();
 
-	case 13:
+	case MoveEffect::Stomp:
 		return std::make_unique<Stomp>();
 
-	case 14:
+	case MoveEffect::DoubleHit:
 		return std::make_unique<DoubleHit>();
 
-	case 15:
+	case MoveEffect::JumpKick:
 		return std::make_unique<JumpKick>();
 
-	case 16:
+	case MoveEffect::FlinchHit:
 		return std::make_unique<FlinchHit>();
 
-	case 17:
+	case MoveEffect::AccuracyDown:
 		return std::make_unique<AccuracyDown>();
 
-	case 18:
+	case MoveEffect::BodySlam:
 		return std::make_unique<BodySlam>();
 
-	case 19:
+	case MoveEffect::RecoilQuarter:
 		return std::make_unique<RecoilQuarter>();
 
-	case 20:
+	case MoveEffect::Thrash:
 		return std::make_unique<Thrash>();
 
-	case 21:
+	case MoveEffect::RecoilThird:
 		return std::make_unique<RecoilThird>();
 
-	case 22:
+	case MoveEffect::DefenseDown:
 		return std::make_unique<DefenseDown>();
 
-	case 23:
+	case MoveEffect::PoisonHit:
 		return std::make_unique<PoisonHit>();
 
-	case 24:
+	case MoveEffect::Twineedle:
 		return std::make_unique<Twineedle>();
 
-	case 25:
+	case MoveEffect::AttackDown:
 		return std::make_unique<AttackDown>();
 
-	case 26:
+	case MoveEffect::BypassSubSleep:
 		return std::make_unique<BypassSubSleep>();
 
-	case 27:
+	case MoveEffect::Confuse:
 		return std::make_unique<Confuse>();
 
-	case 28:
+	case MoveEffect::SonicBoom:
 		return std::make_unique<SonicBoom>();
 
-	case 29:
+	case MoveEffect::Disable:
 		return std::make_unique<Disable>();
 
-	case 30:
+	case MoveEffect::SpecialDefenseDownHit:
 		return std::make_unique<SpecialDefenseDownHit>();
 
-	case 31:
+	case MoveEffect::Mist:
 		return std::make_unique<Mist>();
 
-	case 32:
+	case MoveEffect::ConfuseHit:
 		return std::make_unique<ConfuseHit>();
 
-	case 33:
+	case MoveEffect::SpeedDownHit:
 		return std::make_unique<SpeedDownHit>();
 
-	case 34:
+	case MoveEffect::AttackDownHit:
 		return std::make_unique<AttackDownHit>();
 
-	case 35:
+	case MoveEffect::RechargeAttack:
 		return std::make_unique<RechargeAttack>();
 
-	case 36:
+	case MoveEffect::LowKick:
 		return std::make_unique<LowKick>();
 
-	case 37:
+	case MoveEffect::Counter:
 		return std::make_unique<Counter>();
 
-	case 38:
+	case MoveEffect::SeismicToss:
 		return std::make_unique<SeismicToss>();
 
-	case 39:
+	case MoveEffect::Leech:
 		return std::make_unique<Leech>();
 
-	case 40:
+	case MoveEffect::LeechSeed:
 		return std::make_unique<LeechSeed>();
 
-	case 41:
+	case MoveEffect::Growth:
 		return std::make_unique<Growth>();
 
-	case 42:
+	case MoveEffect::SolarBeam:
 		return std::make_unique<SolarBeam>();
 
-	case 43:
+	case MoveEffect::PoisonPowder:
 		return std::make_unique<PoisonPowder>();
 
-	case 44:
+	case MoveEffect::StunSpore:
 		return std::make_unique<StunSpore>();
 
-	case 45:
+	case MoveEffect::SleepPowder:
 		return std::make_unique<SleepPowder>();
 
-	case 46:
+	case MoveEffect::SpeedDown2:
 		return std::make_unique<SpeedDown2>();
 
-	case 47:
+	case MoveEffect::DragonRage:
 		return std::make_unique<DragonRage>();
 
-	case 48:
+	case MoveEffect::Paralyze:
 		return std::make_unique<Paralyze>();
 
-	case 49:
+	case MoveEffect::ParalyzeHit30:
 		return std::make_unique<ParalyzeHit30>();
 
-	case 50:
+	case MoveEffect::Earthquake:
 		return std::make_unique<Earthquake>();
 
-	case 51:
+	case MoveEffect::Dig:
 		return std::make_unique<Dig>();
 
-	case 52:
+	case MoveEffect::Toxic:
 		return std::make_unique<Toxic>();
 
-	case 53:
+	case MoveEffect::SleepMove:
 		return std::make_unique<SleepMove>();
 
-	case 54:
+	case MoveEffect::AttackUp:
 		return std::make_unique<AttackUp>();
 
-	case 55:
+	case MoveEffect::SpeedUp2:
 		return std::make_unique<SpeedUp2>();
 
-	case 56:
+	case MoveEffect::Rage:
 		return std::make_unique<Rage>();
 
-	case 57:
+	case MoveEffect::Teleport:
 		return std::make_unique<Teleport>();
 
-	case 58:
+	case MoveEffect::NightShade:
 		return std::make_unique<NightShade>();
 
-	case 59:
+	case MoveEffect::Mimic:
 		return std::make_unique<Mimic>();
 
-	case 60:
+	case MoveEffect::DefenseDown2:
 		return std::make_unique<DefenseDown2>();
 
-	case 61:
+	case MoveEffect::EvasionUp:
 		return std::make_unique<EvasionUp>();
 
-	case 62:
-		return std::make_unique<Heal50>();
+	case MoveEffect::HealHalfHP:
+		return std::make_unique<HealHalfHP>();
 
-	case 63:
+	case MoveEffect::DefenseUp:
 		return std::make_unique<DefenseUp>();
 
-	case 64:
+	case MoveEffect::Minimize:
 		return std::make_unique<Minimize>();
 
-	case 65:
+	case MoveEffect::DefenseUp2:
 		return std::make_unique<DefenseUp2>();
 
-	case 66:
+	case MoveEffect::LightScreen:
 		return std::make_unique<LightScreen>();
 
-	case 67:
+	case MoveEffect::Haze:
 		return std::make_unique<Haze>();
 
-	case 68:
+	case MoveEffect::Reflect:
 		return std::make_unique<Reflect>();
 
-	case 69:
+	case MoveEffect::FocusEnergy:
 		return std::make_unique<FocusEnergy>();
 
-	case 70:
+	case MoveEffect::Bide:
 		return std::make_unique<Bide>();
 
-	case 71:
+	case MoveEffect::Metronome:
 		return std::make_unique<Metronome>();
 
-	case 72:
+	case MoveEffect::MirrorMove:
 		return std::make_unique<MirrorMove>();
 
-	case 73:
+	case MoveEffect::Explosion:
 		return std::make_unique<Explosion>();
 
-	case 74:
+	case MoveEffect::PoisonHit40:
 		return std::make_unique<PoisonHit40>();
 
-	case 75:
+	case MoveEffect::FlinchHit10:
 		return std::make_unique<FlinchHit10>();
 
-	case 76:
+	case MoveEffect::FlinchHit20:
 		return std::make_unique<FlinchHit20>();
 
-	case 77:
+	case MoveEffect::Swift:
 		return std::make_unique<Swift>();
 
-	case 78:
+	case MoveEffect::SkullBash:
 		return std::make_unique<SkullBash>();
 
-	case 79:
+	case MoveEffect::SpecialDefenseUp2:
 		return std::make_unique<SpecialDefenseUp2>();
 
-	case 80:
+	case MoveEffect::DreamEater:
 		return std::make_unique<DreamEater>();
 
-	case 81:
+	case MoveEffect::PoisonGas:
 		return std::make_unique<PoisonGas>();
 
-	case 82:
+	case MoveEffect::SkyAttack:
 		return std::make_unique<SkyAttack>();
 
-	case 83:
+	case MoveEffect::Transform:
 		return std::make_unique<Transform>();
 
-	case 84:
+	case MoveEffect::ConfuseHit20:
 		return std::make_unique<ConfuseHit20>();
 
-	case 85:
+	case MoveEffect::Psywave:
 		return std::make_unique<Psywave>();
 
-	case 86:
+	case MoveEffect::Splash:
 		return std::make_unique<Splash>();
 
-	case 87:
+	case MoveEffect::Rest:
 		return std::make_unique<Rest>();
 
-	case 88:
+	case MoveEffect::Conversion:
 		return std::make_unique<Conversion>();
 
-	case 89:
+	case MoveEffect::TriAttack:
 		return std::make_unique<TriAttack>();
 
-	case 90:
+	case MoveEffect::SuperFang:
 		return std::make_unique<SuperFang>();
 
-	case 91:
+	case MoveEffect::Substitute:
 		return std::make_unique<Substitute>();
 
-	case 92:
+	case MoveEffect::Struggle:
 		return std::make_unique<Struggle>();
 
 	default:
@@ -538,7 +538,7 @@ void ParalyzeHit10::DoMove(Player* sourcePlayer, Player* targetPlayer, BattlePok
 	sourcePokemon->SetLastUsedMove(currentMove);
 }
 
-void OneHitKOHit::DoMove(Player* sourcePlayer, Player* targetPlayer, BattlePokemon::pokemonMove* currentMove, BattlePokemon* sourcePokemon, BattlePokemon* targetPokemon, BattleSystem& bs)
+void OHKO::DoMove(Player* sourcePlayer, Player* targetPlayer, BattlePokemon::pokemonMove* currentMove, BattlePokemon* sourcePokemon, BattlePokemon* targetPokemon, BattleSystem& bs)
 {
 	hit = CalculateHitChance(currentMove, sourcePokemon, targetPokemon);
 
@@ -1577,7 +1577,7 @@ void Disable::DoMove(Player* sourcePlayer, Player* targetPlayer, BattlePokemon::
 		{
 			DisplayFailedTextDialog();
 		}
-		else if (targetPokemon->MoveIsDisabled() || targetPokemon->GetLastUsedMove()->m_currentPP == 0 || targetPokemon->GetLastUsedMove()->mp_move->GetSecondaryFlag() == 92)
+		else if (targetPokemon->MoveIsDisabled() || targetPokemon->GetLastUsedMove()->m_currentPP == 0 || targetPokemon->GetLastUsedMove()->mp_move->GetMoveEffectEnum() == MoveEffect::Struggle)
 		{
 			DisplayFailedTextDialog();
 		}
@@ -2919,7 +2919,7 @@ void EvasionUp::DoMove(Player* sourcePlayer, Player* targetPlayer, BattlePokemon
 	sourcePokemon->SetLastUsedMove(currentMove);
 }
 
-void Heal50::DoMove(Player* sourcePlayer, Player* targetPlayer, BattlePokemon::pokemonMove* currentMove, BattlePokemon* sourcePokemon, BattlePokemon* targetPokemon, BattleSystem& bs)
+void HealHalfHP::DoMove(Player* sourcePlayer, Player* targetPlayer, BattlePokemon::pokemonMove* currentMove, BattlePokemon* sourcePokemon, BattlePokemon* targetPokemon, BattleSystem& bs)
 {
 	UsedTextDialog(sourcePlayer, currentMove, sourcePokemon);
 
@@ -3234,7 +3234,7 @@ void Metronome::DoMove(Player* sourcePlayer, Player* targetPlayer, BattlePokemon
 	MoveEffectsFactory factory;
 
 	{
-		std::unique_ptr<IMoveEffects> moveEffect = factory.Call(selectedMove->GetSecondaryFlag());
+		std::unique_ptr<IMoveEffects> moveEffect = factory.Call(selectedMove->GetMoveEffectEnum());
 		moveEffect->DoMove(sourcePlayer, targetPlayer, &sourcePokemon->metronomeMove, sourcePokemon, targetPokemon, bs);
 	}
 
@@ -3265,7 +3265,7 @@ void MirrorMove::DoMove(Player* sourcePlayer, Player* targetPlayer, BattlePokemo
 
 		MoveEffectsFactory factory;
 
- 		std::unique_ptr<IMoveEffects> moveEffect = factory.Call(selectedMove->GetSecondaryFlag());
+ 		std::unique_ptr<IMoveEffects> moveEffect = factory.Call(selectedMove->GetMoveEffectEnum());
 		moveEffect->DoMove(sourcePlayer, targetPlayer, &sourcePokemon->mirrorMove, sourcePokemon, targetPokemon, bs);
 	}
 	else
