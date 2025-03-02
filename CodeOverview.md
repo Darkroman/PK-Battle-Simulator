@@ -6,7 +6,7 @@
 
 **_Move.h/cpp_** is the base **Move** class that will be instantiated based on data read from a text file through the **Database** class. It will hold data such as the move's name, its max PP, base power, physical/special/status category and typing, secondary move effect flag, as well as special boolean flags.
 
-**_Database.h/cpp_** is the **Database** Meyer's Singleton class that reads from 3 text files to instantiate the **Pokemon** class instances in the pokedex std::vector, **Move** class instances to the movedex std::vector, and loads the respective Pokemon movesets to their own internal moveset vectors held in the **Pokemon** instances. The **LoadPokemon()** and **LoadMoves()** methods are launched via std::async in the class constructor. **SetPokemonMoveListAsync()** is the method that loads the movesets for each Pokemon.
+**_Database.h/cpp_** is the **Database** Meyer's Singleton class that reads from 3 text files to instantiate the **Pokemon** class instances in the pokedex std::vector, **Move** class instances to the movedex std::vector, and loads the respective Pokemon movesets to their own internal moveset vectors held in the **Pokemon** instances. The **LoadPokemon()** and **LoadMoves()** methods are launched via std::async in the class constructor. **SetPokemonMoveList** is the method that loads the movesets for each Pokemon.
 
 **_Player.h/cpp_** is the **Player** class that holds an array of 6 default initialized **BattlePokemon** class instances, as well as player's name, and field effects. It also keeps track of Pokemon count and fainted count.
 
