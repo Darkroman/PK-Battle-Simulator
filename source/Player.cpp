@@ -1,13 +1,8 @@
 #include "../include/Player.h"
 
-Player::Player(std::string_view name, Database* db)
-    : m_name{ name }, mp_db{ db }
-{
-    for (size_t i = 0; i < belt.size(); ++i)
-    {
-        belt[i].SetDatabasePointer(db);
-    }
-}
+Player::Player(std::string_view name)
+    : m_name{ name }
+{}
 
 BattlePokemon* Player::GetBelt(size_t beltslot)
 {
@@ -54,7 +49,7 @@ void Player::DisplayPlayerPokemon()
 
 void Player::DisplayAllPokemon()
 {
-    mp_db->DisplayPokemon();
+    Database::GetInstance().DisplayPokemon();
 }
 
 void Player::IncrementPokemonCount()
