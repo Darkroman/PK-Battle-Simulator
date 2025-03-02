@@ -2837,7 +2837,7 @@ void Mimic::DoMove(Player* sourcePlayer, Player* targetPlayer, BattlePokemon::po
 
 	std::cout << sourcePlayer->GetPlayerNameView() << "'s " << sourcePokemon->GetNameView() << " learned " << targetLastUsedMove->mp_move->GetName() << "!\n";
 
-	currentMove->mp_move = targetPokemon->GetDatabasePointer()->GetPointerToMovedexNumber(targetLastUsedMove->mp_move->GetMoveIndex() - 1);
+	currentMove->mp_move = Database::GetInstance().GetPointerToMovedexNumber(targetLastUsedMove->mp_move->GetMoveIndex() - 1);
 	currentMove->m_currentPP = targetLastUsedMove->mp_move->GetPP();
 	currentMove->m_maxPP = targetLastUsedMove->mp_move->GetPP();
 	currentMove->b_isMimicked = true;
@@ -3220,7 +3220,7 @@ void Metronome::DoMove(Player* sourcePlayer, Player* targetPlayer, BattlePokemon
 		randomMod = randomModResult;
 	}
 
-	Move* selectedMove = Database::GetInstance()->GetPointerToMovedexNumber(randomMod);
+	Move* selectedMove = Database::GetInstance().GetPointerToMovedexNumber(randomMod);
 	sourcePokemon->metronomeMove.mp_move = selectedMove;
 	sourcePokemon->metronomeMove.m_currentPP = 1;
 	sourcePokemon->metronomeMove.m_maxPP = 1;
@@ -3258,7 +3258,7 @@ void MirrorMove::DoMove(Player* sourcePlayer, Player* targetPlayer, BattlePokemo
 
 	if (targetLastUsedMove->mp_move->IsAffectedByMirrorMove())
 	{
-		Move* selectedMove = Database::GetInstance()->GetPointerToMovedexNumber(targetLastUsedMove->mp_move->GetMoveIndex() - 1);
+		Move* selectedMove = Database::GetInstance().GetPointerToMovedexNumber(targetLastUsedMove->mp_move->GetMoveIndex() - 1);
 		sourcePokemon->mirrorMove.mp_move = selectedMove;
 		sourcePokemon->mirrorMove.m_currentPP = 1;
 		sourcePokemon->mirrorMove.m_maxPP = 1;
