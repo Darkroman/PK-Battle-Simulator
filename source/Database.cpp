@@ -15,7 +15,7 @@ Database::Database()
 
     std::vector<std::vector<size_t>> tmp_movelist;
     tmp_movelist.reserve(151);
-    SetPokemonMoveListASync(tmp_movelist);
+    SetPokemonMoveList(tmp_movelist);
 
     m_futures.wait();
     for (size_t i = 0; i < tmp_movelist.size(); ++i)
@@ -87,7 +87,7 @@ void Database::LoadMoves()
     std::string tmp_type;
     std::string tmp_category;
     std::string tmp_priority;
-    std::string tmp_secondaryFlag;
+    std::string tmp_moveEffect;
     std::string tmp_pp;
     std::string tmp_maxpp;
     std::string tmp_power;
@@ -108,7 +108,7 @@ void Database::LoadMoves()
         std::getline(iss, tmp_type, ',');
         std::getline(iss, tmp_category, ',');
         std::getline(iss, tmp_priority, ',');
-        std::getline(iss, tmp_secondaryFlag, ',');
+        std::getline(iss, tmp_moveEffect, ',');
         std::getline(iss, tmp_pp, ',');
         std::getline(iss, tmp_maxpp, ',');
         std::getline(iss, tmp_power, ',');
@@ -125,7 +125,7 @@ void Database::LoadMoves()
 
         movedex.emplace_back(std::stoi(tmp_movenum), tmp_name,
             tmp_type, ConvertStringToPokemonType(tmp_type), tmp_category, ConvertStringToCategory(tmp_category),
-            std::stoi(tmp_priority), std::stoi(tmp_secondaryFlag),
+            std::stoi(tmp_priority), StringToMoveEffect(tmp_moveEffect),
             std::stoi(tmp_pp), std::stoi(tmp_maxpp), std::stoi(tmp_power), std::stoi(tmp_accuracy),
             ConvertStringToBool(tmp_contact), ConvertStringToBool(tmp_protect), ConvertStringToBool(tmp_magicCoat),
             ConvertStringToBool(tmp_snatch), ConvertStringToBool(tmp_mirrorMove), ConvertStringToBool(tmp_kingRock), ConvertStringToBool(tmp_soundBased), ConvertStringToBool(tmp_bypassSubstitute));
@@ -133,7 +133,7 @@ void Database::LoadMoves()
 }
 
 // new way of setting movelist, can be done asynchronously as long as a loop copies the vector into the Pokemon's movelist after LoadPokemon() function finishes
-void Database::SetPokemonMoveListASync(std::vector<std::vector<size_t>>& tmp_movelist)
+void Database::SetPokemonMoveList(std::vector<std::vector<size_t>>& tmp_movelist)
 {
     static std::istream::pos_type savedFilePosition{};
 
@@ -328,66 +328,3 @@ void Database::DisplayMoves() const
     }
     std::cout << '\n';
 }
-
-/* Old way of setting moves list which was done after instantiating each pokemon into the pokedex
-void Database::SetPokemonMoveList(size_t sumnum)
-{
-    static std::istream::pos_type savedFilePosition{};
-
-    if (savedFilePosition == -1) { return; }
-
-    std::string filename = "data/learnset.txt";
-
-    std::ifstream iss(filename);
-
-    std::string first{};
-    std::string second{};
-    std::string line{};
-
-    std::string cntstr{};
-
-    int numofmoves{};
-
-    static int count{};
-
-    pokedex[count].ReserveMoveListVector(); // reserves vector size of 57, which is the max amount of moves that can be learned by a Pokemon (Mew in gen 1)
-
-    while (first != "151")
-    {
-        iss.seekg(savedFilePosition);
-        ++count;
-        while (std::getline(iss, line))
-        {
-            std::stringstream ss(line);
-            std::getline(ss, first, ':');
-
-            cntstr = std::to_string(count);
-
-            if (first == cntstr)
-            {
-                while (std::getline(ss, second, ','))
-                {
-                    if (second == "\r")
-                        break;
-                    int secondint = std::stoi(second);
-                    int secondsize_t = secondint;
-                    pokedex[sumnum].EmplaceBackIntoMoveList(secondsize_t);
-                }
-                savedFilePosition = iss.tellg();
-                pokedex[sumnum].ShrinkToFitMoveList();
-                //std::cout << "Loaded Movelist number " << sumnum + 1 << '\n';
-                return;
-            }
-            else if (savedFilePosition == -1)
-            {
-                return;
-            }
-
-            else
-            {
-                continue;
-            }
-        }
-    }
-}
-*/
