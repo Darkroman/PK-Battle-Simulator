@@ -628,7 +628,7 @@ void BattleSystem::ResetStatsOnSwitch(BattlePokemon* currentPokemon)
 		{
 			if (currentPokemon->GetMove(i)->b_isMimicked)
 			{
-				currentPokemon->GetMove(i)->mp_move = currentPokemon->GetDatabasePointer()->GetPointerToMovedexNumber(101);
+				currentPokemon->GetMove(i)->mp_move = Database::GetInstance().GetPointerToMovedexNumber(101);
 				currentPokemon->GetMove(i)->m_currentPP = currentPokemon->GetMimicPP();
 				currentPokemon->GetMove(i)->m_maxPP = currentPokemon->GetMove(i)->mp_move->GetPP();
 
