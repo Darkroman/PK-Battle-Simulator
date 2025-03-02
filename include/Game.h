@@ -8,7 +8,7 @@ void RunGame()
     std::chrono::time_point<std::chrono::high_resolution_clock> start, end;
 
     start = std::chrono::high_resolution_clock::now();
-    Database* db = Database::GetInstance();
+    Database& db = Database::GetInstance();
     end = std::chrono::high_resolution_clock::now();
 
     std::chrono::duration<double> ms = (end - start) * 1000;
@@ -18,8 +18,8 @@ void RunGame()
     std::vector<Player> players;
     players.reserve(2);
 
-    players.emplace_back("Player One", db);
-    players.emplace_back("Player Two", db);
+    players.emplace_back("Player One");
+    players.emplace_back("Player Two");
 
     Menu menu(players);
     BattleSystem battle(players);
