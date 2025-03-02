@@ -19,7 +19,7 @@ There are some static data members so the child class **IMoveEffects** and its d
 It also exposes the user to options for battling, where you can choose a move for your Pokemon, switch to other Pokemon mid-battle, or forfeit battle.
 BattleLoop() is the main loop of the class.
 
-**_MoveEffects.h/cpp_** is how all the secondary move effects are implemented and called. They're implemented via a factory method pattern. **IMoveEffects** is an interface, or pure virtual class derived from **BattleSystem**. Every secondary move effect is derived from the **IMoveEffects** class.
+**_MoveEffects.h/cpp_** is how all the secondary move effects are implemented and called. They're implemented via a factory method pattern. **IMoveEffects** is an interface, or abstract class derived from **BattleSystem**. Every secondary move effect is derived from the **IMoveEffects** class.
 The **MoveEffectsFactory** class has the **Call()** method that takes in the user's selected move's secondary flag as a parameter. The **Call()** method then returns a std::unique_ptr based on the switch case. **MoveEffectsFactory** is instantiated in the **BattleSystem's BattleLoop()** method, as well as **Metronome** and **MirrorMove** methods.
 
 **_LoadParty.h/cpp_** is a class that receives input from the user to read a txt file from disk, either PlayerOneSave.txt or PlayerTwoSave.txt, and instantiates a Player's name, and their saved party of Pokemon, moves, and stats.
