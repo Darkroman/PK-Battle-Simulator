@@ -13,6 +13,7 @@ This is just a small console based Pokemon battle simulator program. I started t
 - Mechanics are based on latest generation (except fairy, steel, and dark typing, besides the move "Bite")
 - No natures, held items, or abilities.
 - Physical/Special move split from gen 4 onward implemented.
+- A Simple A.I akin to Wild Pokemon (picks random move)
 
 ## PLANNED UPDATES
 - More sophisticated A.I
@@ -20,12 +21,17 @@ This is just a small console based Pokemon battle simulator program. I started t
 - Not sure if I'll ever add in later generation stuff
 
 ## UPDATES
+### 3/1/2025
+- Some bug fixes in MakeEnemySwitch effect
+- If Pokemon needs to recharge and is inflicted with a performative status condition, it will correctly now do the recharge turn first
+- A couple other bug fixes
+
 ### 2/23/2025
 - Fixed damage calculation bug
-- Metronome and Mirror Move should now work correctly.
+- Metronome and Mirror Move should now work correctly
 
 ### 2/19/2025:
-- Fixed damage calculation bug when light screen or reflect are up.
+- Fixed damage calculation bug when light screen or reflect are up
 - "Set EV" menu now displays correctly max EV per stat as 252 instead of 255
 - When showing stats in edit stats menu, speed stat now outputs.
 - Counter correctly does 2x damage taken (originally had it like that but I changed stuff around and just forgot to readd in multiplying the variable by 2)
@@ -33,6 +39,6 @@ This is just a small console based Pokemon battle simulator program. I started t
 - When choosing to fight with no moves left, will now automatically choose Struggle
 
 ### 2/18/2025:
-- Added easy A.I (just picks random move and switches to next Pokemon in line when it faints).
-- Note the default player settings is human. Make sure to set one of em to A.I if you wanna play against the computer, or both to A.I for funsies.
-- Some bug fixes with Bound damage, Reflect actually checking if it's already up rather than Light Screen, and some text dialog fixes.
+- Added easy A.I (just picks random move and switches to next Pokemon in line when it faints)
+- Note the default player settings is human. Make sure to set one of em to A.I if you wanna play against the computer, or both to A.I for funsies
+- Some bug fixes with Bound damage, Reflect actually checking if it's already up rather than Light Screen, and some text dialog fixes
