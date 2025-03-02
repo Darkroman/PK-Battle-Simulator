@@ -3,13 +3,13 @@
 Move::Move
 (size_t movenum, std::string_view name,
     std::string_view type, PokemonType typee, std::string_view category, Category categorye,
-    int priority, int secondaryFlag,
+    int priority, MoveEffect moveEffectEnum, 
     int pp, int maxpp, int power, int accuracy,
     bool contact, bool protect, bool magicCoat,
     bool snatch, bool mirrorMove, bool kingRock, bool soundBased, bool bypassSubstitute)
     : m_movenum{ movenum }, m_name{ name },
     m_type{ type }, m_typee{ typee }, m_category{ category }, m_categorye{ categorye },
-    m_priority{ priority }, m_secondaryFlag{ secondaryFlag },
+    m_priority{ priority }, m_moveEffectEnum{ moveEffectEnum },
     m_pp{ pp }, m_maxpp{ maxpp }, m_power{ power }, m_accuracy{ accuracy },
     b_DoesMakeContact{ contact }, b_IsAffectedByProtect{ protect }, b_IsAffectedByMagicCoat{ magicCoat },
     b_IsAffectedBySnatch{ snatch }, b_IsAffectedByMirrorMove{ mirrorMove }, b_IsAffectedByKingRock{ kingRock }, b_isSoundBased{ soundBased }, b_bypassSubstitute{ bypassSubstitute }
@@ -50,9 +50,9 @@ const int Move::GetPriority() const
     return m_priority;
 }
 
-const int Move::GetSecondaryFlag() const
+const MoveEffect Move::GetMoveEffectEnum() const
 {
-    return m_secondaryFlag;
+    return m_moveEffectEnum;
 }
 
 const int Move::GetPP() const
@@ -114,4 +114,3 @@ const bool Move::CanBypassSubstitute() const
 {
     return b_bypassSubstitute;
 }
-
