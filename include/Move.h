@@ -6,6 +6,7 @@
 #pragma once
 
 #include "StringToTypes.h"
+#include "MoveEffectEnums.h"
 
 class Move
 {
@@ -13,13 +14,12 @@ public:
     Move
     (size_t, std::string_view,
      std::string_view, PokemonType, std::string_view, Category,
-     int, int,
+     int, MoveEffect,
      int, int, int, int,
      bool, bool, bool,
      bool, bool, bool, bool, bool);
 
     const size_t   GetMoveIndex() const;
-    //const std::string&  GetName() const;
     std::string_view    GetName() const;
     
     std::string_view      GetCategory() const;
@@ -27,8 +27,8 @@ public:
     std::string_view      GetMoveType() const;
     const PokemonType GetMoveTypeEnum() const;
     
-    const int      GetPriority() const;
-    const int GetSecondaryFlag() const;
+    const int            GetPriority() const;
+    const MoveEffect GetMoveEffectEnum() const;
     
     const int       GetPP() const;
     const int    GetMaxPP() const;
@@ -55,7 +55,7 @@ private:
     Category   m_categorye;
 
     int      m_priority;
-    int m_secondaryFlag;
+    MoveEffect m_moveEffectEnum;
 
     int       m_pp;
     int    m_maxpp;
