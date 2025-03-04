@@ -40,7 +40,7 @@ private:
 
     void LoadPokemon();
     void LoadMoves();
-    void SetPokemonMoveListASync(std::vector<std::vector<size_t>>&);
+    void SetPokemonMoveList(std::vector<std::vector<size_t>>&);
     void TestingPokemonAndMoves();
     //void SetPokemonMoveList(size_t);
 
