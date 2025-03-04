@@ -312,7 +312,7 @@ void BattleSystem::PlayerOneMakeSelection()
 
 	if (playerOne->IsAI())
 	{
-		AISelection(playerOne, playerTwo, playerOneCurrentPokemon, playerTwoCurrentPokemon);
+		AISelection(playerOne, playerOneCurrentPokemon);
 	}
 	else
 	{
@@ -338,7 +338,7 @@ void BattleSystem::PlayerTwoMakeSelection()
 
 	if (playerTwo->IsAI())
 	{
-		AISelection(playerTwo, playerOne, playerTwoCurrentPokemon, playerOneCurrentPokemon);
+		AISelection(playerTwo, playerTwoCurrentPokemon);
 	}
 	else
 	{
