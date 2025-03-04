@@ -1540,7 +1540,10 @@ bool Menu::ChangeMove(Player* player, size_t beltslot)
 				}
 
 				player->GetBelt(beltslot)->SetMove(moveslot, moveInput);
-				std::cout << "Changed " << OldMoveName << " to " << player->GetBelt(beltslot)->GetMoveName(moveslot) << "\n";
+				if (OldMoveName != player->GetBelt(beltslot)->GetMoveName(moveslot))
+				{
+					std::cout << "Changed " << OldMoveName << " to " << player->GetBelt(beltslot)->GetMoveName(moveslot) << "\n";
+				}
 			}
 			else
 			{
@@ -1558,7 +1561,10 @@ bool Menu::ChangeMove(Player* player, size_t beltslot)
 					}
 
 					player->GetBelt(beltslot)->SetMove(moveslot, value);
-					std::cout << "Changed " << OldMoveName << " to " << player->GetBelt(beltslot)->GetMoveName(moveslot) << "\n";
+					if (OldMoveName != player->GetBelt(beltslot)->GetMoveName(moveslot))
+					{
+						std::cout << "Changed " << OldMoveName << " to " << player->GetBelt(beltslot)->GetMoveName(moveslot) << "\n";
+					}
 				}
 			}
 		}
