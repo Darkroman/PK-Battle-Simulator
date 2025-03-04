@@ -21,7 +21,7 @@ static void CheckUserInput(std::string& input)
 	    	else
 	    	{
 	        	c = tolower(c);
-	        	startOfWord = (c == ' ' || c == '-');
 	    	}
+		startOfWord = (c == ' ' || c == '-');
 	}
 }
