@@ -174,15 +174,11 @@ bool BattleManager::RunBattleLoop()
 		m_postTurnProcessor.ProcessAllPostTurnEffects(winCondition);
 		if (winCondition) { continue; }
 
-		m_context.playerOne->SetHasSwitched(false);
-		m_context.playerTwo->SetHasSwitched(false);
-
 		m_context.flags.ResetBattleFlags();
 
 		m_battleAnnouncerUI.NewLine();
 	}
 
-	m_context.battleTurn = 0;
 	return winCondition;
 }
 

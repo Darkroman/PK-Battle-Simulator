@@ -60,9 +60,6 @@ public:
     bool IsSwitching() const;
     void SetIsSwitching(bool);
 
-    bool HasSwitched() const;
-    void SetHasSwitched(bool);
-
     void SetPokemonToSwitchTo(BattlePokemon*);
     BattlePokemon* GetPokemonToSwitchTo() const;
 

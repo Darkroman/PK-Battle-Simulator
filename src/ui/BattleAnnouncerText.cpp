@@ -21,13 +21,16 @@ void BattleAnnouncerText::DisplayFightingPokemon(const BattleContext& context) c
             return;
         }
 
-        const int HP_BAR_WIDTH = context.HP_BAR_WIDTH;
+        const unsigned int HP_BAR_WIDTH = context.HP_BAR_WIDTH * 2;
 
-        int pixelsOfHP = currentHP * HP_BAR_WIDTH / maxHP;
-        int quarterPercent = pixelsOfHP * 25;
+        unsigned int pixelsOfHP = ((currentHP * HP_BAR_WIDTH) / maxHP) / 2;
 
-        int integer = quarterPercent / 100;
-        int decimal = quarterPercent % 100;
+        pixelsOfHP = std::max((unsigned int)1, pixelsOfHP);
+
+        unsigned int quarterPercent = pixelsOfHP * 25;
+
+        unsigned int integer = quarterPercent / 100;
+        unsigned int decimal = quarterPercent % 100;
 
         std::cout << integer << ".";
         if (decimal < 10) std::cout << "0";

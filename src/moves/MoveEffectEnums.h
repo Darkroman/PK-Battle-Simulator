@@ -2,7 +2,8 @@
 
 enum class MoveEffect
 {
-	NormalHit = 0,
+	Noop = 0,
+	NormalHit,
 	IncreasedCritical,
 	MultiHit,
 	BurnHit,
@@ -89,6 +90,5 @@ enum class MoveEffect
 	SuperFang,
 	Substitute,
 	Struggle,
-	Noop,
 	COUNT
 };

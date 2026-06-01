@@ -1556,12 +1556,12 @@ void BattlePokemon::ResetStatsAndMoves()
     //m_specialdefense = 0;
     //m_speed = 0;
 
-    m_hp_iv = 0;
-    m_attack_iv = 0;
-    m_defense_iv = 0;
-    m_specialattack_iv = 0;
-    m_specialdefense_iv = 0;
-    m_speed_iv = 0;
+    m_hp_iv = 31;
+    m_attack_iv = 31;
+    m_defense_iv = 31;
+    m_specialattack_iv = 31;
+    m_specialdefense_iv = 31;
+    m_speed_iv = 31;
 
     m_hp_ev = 0;
     m_attack_ev = 0;

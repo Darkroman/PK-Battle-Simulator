@@ -8,18 +8,19 @@
 
 namespace MediumMoveScoring
 {
-	void EvaluateBestDamageMove(std::vector<ScoringResults>& results, const BattlePokemon& targetMon)
+	void EvaluateBestDamageMove(std::span<ScoringResults>& results, const BattlePokemon& targetMon)
 	{
-		std::vector<ScoringResults*> damagingMoves{};
-		damagingMoves.reserve(results.size());
+		std::array<ScoringResults*, 4> damagingMoves{};
 
 		unsigned int highestDamage = 0;
+		size_t count{};
 		for (auto& result : results)
 		{
 			if (result.damage > 0)
 			{
-				damagingMoves.emplace_back(&result);
-				if (!(result.tag == AIScoreTag::RechargeMove)) // don't consider recharge moves into highest damage calculation
+				damagingMoves[count] = &result;
+
+				if (!(result.tag == AIScoreTag::RechargeMove || result.tag == AIScoreTag::SelfFaintingDamage)) // don't consider recharge or self-fainting moves into highest damage calculation
 				{
 					highestDamage = std::max(highestDamage, result.damage);
 				}
@@ -28,14 +29,15 @@ namespace MediumMoveScoring
 				{
 					result.damage /= 2;
 				}
+				++count;
 			}
 		}
 
-		for (auto* result : damagingMoves)
-		{
-			auto tag = result->tag;
+		std::span<ScoringResults*> damagingMovesView{ damagingMoves.data(), count };
 
-			bool isRechargeMove = tag == AIScoreTag::RechargeMove;
+		for (auto& result : damagingMovesView)
+		{
+			bool isRechargeMove = result->tag == AIScoreTag::RechargeMove;
 
 			bool canKill{ false };
 			if (result->damage >= targetMon.GetCurrentHP())

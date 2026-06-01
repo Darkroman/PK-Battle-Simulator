@@ -497,18 +497,22 @@ namespace MoveRoutines
 			return;
 		}
 
-		std::vector<BattlePokemon*> enemyPokemonList{};
+		std::array<BattlePokemon*, 6> enemyPokemonList{};
 
+		size_t count{};
 		for (auto& candidateMon : ctx.defendingPlayer->GetBeltArray())
 		{
 			if (candidateMon.HasPokemon() && &candidateMon != ctx.defendingPokemon && !candidateMon.IsFainted())
 			{
-				enemyPokemonList.emplace_back(&candidateMon);
+				enemyPokemonList[count] = &candidateMon;
+				++count;
 			}
 		}
 
-		std::uniform_int_distribution<size_t> randomModDistributor(0, enemyPokemonList.size() - 1);
-		BattlePokemon* newMon = enemyPokemonList[randomModDistributor(deps.rng.GetGenerator())];
+		std::span<BattlePokemon*> enemyListView{ enemyPokemonList.data(), count };
+
+		std::uniform_int_distribution<size_t> randomModDistributor(0, count - 1);
+		BattlePokemon* newMon = enemyListView[randomModDistributor(deps.rng.GetGenerator())];
 
 		// Reset stats for the Pokémon being forced out
 		ctx.defendingPokemon->ResetStatsOnSwitch();

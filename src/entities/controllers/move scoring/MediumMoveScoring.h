@@ -1,6 +1,6 @@
 #pragma once
 
-#include <vector>
+#include <span>
 
 class Player;
 class BattlePokemon;
@@ -11,5 +11,5 @@ struct ScoringResults;
 
 namespace MediumMoveScoring
 {
-	void EvaluateBestDamageMove(std::vector<ScoringResults>& results, const BattlePokemon& targetMon);
+	void EvaluateBestDamageMove(std::span<ScoringResults>& results, const BattlePokemon& targetMon);
 }

@@ -206,16 +206,6 @@ void Player::SetIsSwitching(bool Switching)
     b_isSwitching = Switching;
 }
 
-bool Player::HasSwitched() const
-{
-    return b_hasSwitched;
-}
-
-void Player::SetHasSwitched(bool hasSwitched)
-{
-    b_hasSwitched = hasSwitched;
-}
-
 void Player::SetPokemonToSwitchTo(BattlePokemon* pokemon)
 {
     pokemonToSwitchTo = pokemon;
@@ -225,7 +215,6 @@ BattlePokemon* Player::GetPokemonToSwitchTo() const
 {
     return pokemonToSwitchTo;
 }
-
 
 void Player::SetWinCondition(bool won)
 {

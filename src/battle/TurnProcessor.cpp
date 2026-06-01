@@ -27,11 +27,11 @@ void TurnProcessor::DetermineTurnOrder()
 
 	constexpr int SWITCH_PRIORITY{ 6 };
 
-	const auto* moveOne = m_context.playerOneCurrentMove;
-	const auto* moveTwo = m_context.playerTwoCurrentMove;
+	const pokemonMove* moveOne = m_context.playerOneCurrentMove;
+	const pokemonMove* moveTwo = m_context.playerTwoCurrentMove;
 
-	auto moveOnePriority = (m_context.playerOne->IsSwitching()) ? SWITCH_PRIORITY : moveOne->GetPriority();
-	auto moveTwoPriority = (m_context.playerTwo->IsSwitching()) ? SWITCH_PRIORITY : moveTwo->GetPriority();
+	int moveOnePriority = (m_context.playerOne->IsSwitching()) ? SWITCH_PRIORITY : moveOne->GetPriority();
+	int moveTwoPriority = (m_context.playerTwo->IsSwitching()) ? SWITCH_PRIORITY : moveTwo->GetPriority();
 
 	if (moveOnePriority > moveTwoPriority)
 	{
@@ -44,8 +44,8 @@ void TurnProcessor::DetermineTurnOrder()
 		return;
 	}
 
-	int playerOneSpeed = m_calculations.CalculatePokemonSpeed(*m_context.playerOneCurrentPokemon);
-	int playerTwoSpeed = m_calculations.CalculatePokemonSpeed(*m_context.playerTwoCurrentPokemon);
+	unsigned int playerOneSpeed = m_calculations.CalculatePokemonSpeed(*m_context.playerOneCurrentPokemon);
+	unsigned int playerTwoSpeed = m_calculations.CalculatePokemonSpeed(*m_context.playerTwoCurrentPokemon);
 
 	if (playerOneSpeed > playerTwoSpeed)
 	{
@@ -65,31 +65,24 @@ void TurnProcessor::DetermineTurnOrder()
 
 void TurnProcessor::ExecuteTurn(bool& winCondition)
 {
-	auto& ctx = m_context;
-
-	if (ctx.currentMove)
+	if (m_context.currentMove)
 	{
-		if (ctx.currentMove->GetName() != "Counter")
+		if (m_context.currentMove->GetName() != "Counter")
 		{
-			ctx.damageTaken = 0;
+			m_context.damageTaken = 0;
 		}
 	}
 	
-	ctx.pixelsLost = 0;
-	ctx.initialPowerMultiplier = 10;
-	ctx.effectiveness = 4096;
+	m_context.pixelsLost = 0;
+	m_context.initialPowerMultiplier = 10;
+	m_context.effectiveness = 4096;
 
-	ctx.flags.ResetBattleFlags();
+	m_context.flags.ResetBattleFlags();
 
 	if (m_context.attackingPlayer->IsSwitching())
 	{
 		m_switchExecutor.ExecuteSwitch(*m_context.attackingPlayer, m_context.attackingPokemon);
 
-		return;
-	}
-	else if (m_context.attackingPlayer->HasSwitched())
-	{
-		m_context.attackingPlayer->SetHasSwitched(false);
 		return;
 	}
 

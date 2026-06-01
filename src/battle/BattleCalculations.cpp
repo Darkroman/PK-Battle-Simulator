@@ -35,7 +35,7 @@ void BattleCalculations::RandomizeTurnOrder()
 
 void BattleCalculations::RandomizePostTurnOrder()
 {
-	std::vector<BattlePokemon*> activePokemon{ m_context.attackingPokemon, m_context.defendingPokemon };
+	std::array<BattlePokemon*, 2> activePokemon{ m_context.attackingPokemon, m_context.defendingPokemon };
 	std::shuffle(activePokemon.begin(), activePokemon.end(), m_rng.GetGenerator());
 
 	if (activePokemon[0] != m_context.attackingPokemon) {

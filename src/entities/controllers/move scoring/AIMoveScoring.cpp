@@ -17,8 +17,7 @@ namespace AIMoveScoring
 {
 	pokemonMove* GetWinningMove(const Player& self, const Player& targetPlayer, BattlePokemon& selfMon, const BattlePokemon& targetMon, RandomEngine& rng)
 	{
-		std::vector<ScoringResults> results{};
-		results.reserve(4);
+		std::array<ScoringResults, 4> results{};
 
 		auto moveArray = selfMon.GetMoveArray();
 
@@ -30,30 +29,32 @@ namespace AIMoveScoring
 				continue;
 			}
 
-			results.emplace_back();
+			results[index].score = 100;
 			results[index].move = &moveArray[i];
 			results[index].tag = AIMoveClassifier::Classify(*results[index].move);
 
 			++index;
 		}
 
-		for (auto& result : results)
+		std::span<ScoringResults> resultsView{ results.data(), index};
+
+		for (auto& result : resultsView)
 		{
 			result = RunScoringRoutine(result, self, targetPlayer, *result.move, selfMon, targetMon);
 		}
 
 		if (self.GetAIController().GetDifficulty() >= Difficulty::Medium)
 		{
-			MediumMoveScoring::EvaluateBestDamageMove(results, targetMon);
+			MediumMoveScoring::EvaluateBestDamageMove(resultsView, targetMon);
 		}
 
 		//pokemonMove* winningMove = EvaluateScoredMoves(results, rng);
 		//return winningMove;
 
-		return EvaluateScoredMoves(results, rng);
+		return EvaluateScoredMoves(resultsView, rng);
 	}
 
-	pokemonMove* EvaluateScoredMoves(const std::vector<ScoringResults>& results, RandomEngine& rng)
+	pokemonMove* EvaluateScoredMoves(std::span<ScoringResults>& results, RandomEngine& rng)
 	{
 		int highestScore = INT_MIN;
 		for (const auto& result : results)
@@ -61,18 +62,19 @@ namespace AIMoveScoring
 			highestScore = std::max(highestScore, result.score);
 		}
 
-		std::vector<ScoringResults> topScores{};
-		topScores.reserve(results.size());
-		for (const auto& result : results)
+		std::array<ScoringResults*, 4> topScores{};
+		size_t count{};
+		for (auto& result : results)
 		{
 			if (result.score == highestScore)
 			{
-				topScores.emplace_back(result);
+				topScores[count] = &result;
+				++count;
 			}
 		}
 		
-		std::uniform_int_distribution<size_t> dist(0, topScores.size() - 1);
-		return topScores[dist(rng.GetGenerator())].move;
+		std::uniform_int_distribution<size_t> dist(0, count - 1);
+		return topScores[dist(rng.GetGenerator())]->move;
 	}
 
 	ScoringResults RunScoringRoutine(ScoringResults& results, const Player& self, const Player& targetPlayer, const pokemonMove& move, const BattlePokemon& selfMon, const BattlePokemon& targetMon)

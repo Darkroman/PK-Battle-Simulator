@@ -97,7 +97,7 @@ void PostTurnEffectProcessor::CheckSeededStatuses()
     }
 
     if (m_context.attackingPokemon->IsSeeded() && m_context.defendingPokemon->IsSeeded())
-    {
+    {   
         m_calculations.RandomizePostTurnOrder();
     }
 

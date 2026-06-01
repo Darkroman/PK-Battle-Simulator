@@ -7,7 +7,7 @@ struct pokemonMove;
 struct ScoringResults
 {
 	unsigned int damage{};
-	int score{ 100 };
+	int score{ 0 };
 	pokemonMove* move{};
 	AIScoreTag tag{};
 };

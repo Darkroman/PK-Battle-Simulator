@@ -51,7 +51,6 @@ bool WinChecker::CheckWinOrSwitch(Player& sourcePlayer, Player& targetPlayer, co
 		if (&targetPokemon == m_context.playerOneCurrentPokemon)
 		{
 			m_switchExecutor.ExecuteSwitch(*m_context.playerOne, m_context.playerOneCurrentPokemon);
-			targetPlayer.SetHasSwitched(true);
 			return false;
 		}
 
@@ -59,7 +58,6 @@ bool WinChecker::CheckWinOrSwitch(Player& sourcePlayer, Player& targetPlayer, co
 		{
 
 			m_switchExecutor.ExecuteSwitch(*m_context.playerTwo, m_context.playerTwoCurrentPokemon);
-			targetPlayer.SetHasSwitched(true);
 			return false;
 		}
 

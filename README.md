@@ -7,6 +7,15 @@
 
    </summary>
 
+### 6/1/2026
+- **Improved performance in simulation times by 35-40%**
+  - More of the same type of optimizations that were done in AI Switch logic I also applied to the AI move scoring routines.
+  - Added a total turns tracker for the sims as well.
+- **Developer notes**
+  - I converted any remaining temporary std::vectors to std::array and std::span for filtering scoring results.
+  - Made those changes to any remaining functions or methods that did that like in ForceSwitch in MoveRoutines as well.
+  - There should be no more std::vector instantiations in any of the battle functions.
+
 ### 5/30/2026
 - **More AI switching logic improvements**
   - Optimized the mid-turn and Post-KO switching algorithms which resulted in decent performance gains in simulation times with medium and hard difficulty AIs.
