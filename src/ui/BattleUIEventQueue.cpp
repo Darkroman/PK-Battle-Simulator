@@ -50,19 +50,11 @@ void BattleUIEventQueue::ProcessNextEvent(IOutputTarget& target)
 
             // --- SINGLE INT ARGUMENTS ---
             case BattleEvents::DirectDamage:
-            {
-                auto fmtStr = BattleText::GetFormat(currentEvent.event);
-                formattedText = std::vformat(fmtStr,
-                    std::make_format_args(std::get<unsigned int>(currentEvent.args[0])));
-                break;
-            }
-
-            // --- SINGLE SIZE_T ARGUMENTS ---
             case BattleEvents::BoundNotFound:
             {
                 auto fmtStr = BattleText::GetFormat(currentEvent.event);
                 formattedText = std::vformat(fmtStr,
-                    std::make_format_args(std::get<size_t>(currentEvent.args[0])));
+                    std::make_format_args(std::get<unsigned int>(currentEvent.args[0])));
                 break;
             }
 
@@ -119,8 +111,6 @@ void BattleUIEventQueue::ProcessNextEvent(IOutputTarget& target)
             case BattleEvents::ProtectedByMist:
             case BattleEvents::BideUnleashed:
             case BattleEvents::BideStoringEnergy:
-            case BattleEvents::RampageDisabled:
-            case BattleEvents::BideDisabled:
             case BattleEvents::SwitchOutNoFaint:
             case BattleEvents::SwitchOut:
             case BattleEvents::PlayerChooses:
