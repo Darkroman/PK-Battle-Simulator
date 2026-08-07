@@ -800,10 +800,11 @@ void BattleManager::TestBattleText() const
 	m_statusEffectUI.DisplayFlinchMsg("Red", "Charizard");
 	m_statusEffectUI.DisplayRechargeMsg("Red", "Charizard");
 
+	m_statusEffectUI.DisplayBideStoringEnergyMsg("Red", "Charizard");
+
 	m_statusEffectUI.DisplayNoLongerProtectedMist("Red");
 	m_statusEffectUI.DisplayFieldEffectFadedMsg("Red", "Light Screen");
 	m_statusEffectUI.DisplayFieldEffectFadedMsg("Red", "Reflect");
-	m_statusEffectUI.DisplayFieldEffectFadedMsg("Red", "Mist");
 
 	m_statusEffectUI.DisplayLeechSeedSappedMsg("Blue", "Venusaur");
 	m_statusEffectUI.DisplayDamagedByStatusPostTurn("Blue", "Venusaur", "poison");

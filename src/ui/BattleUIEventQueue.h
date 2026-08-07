@@ -14,7 +14,7 @@ class IOutputTarget;
 struct QueuedUIEvent
 {
 	BattleEvents event;
-	using UIArg = std::variant<std::monostate, std::string_view, unsigned int, int, size_t, EffectivenessText, Status>;
+	using UIArg = std::variant<std::monostate, std::string_view, unsigned int, int, EffectivenessText, Status>;
 	std::array<UIArg, 4> args{};
 };
 

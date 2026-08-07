@@ -69,16 +69,7 @@ void StatusEffectText::DisplayNoLongerProtectedMist(std::string_view playerName)
 
 void StatusEffectText::DisplayFieldEffectFadedMsg(std::string_view playerName, std::string_view effect) const
 {
-	if (effect == "Light Screen" || effect == "light screen" || effect == "Reflect" || effect == "reflect")
-	{
-		m_target.Emit(std::format("{}'s team's {} wore off!", playerName, effect));
-	}
-
-	else if (effect == "Mist" || effect == "mist")
-	{
-		m_target.Emit(std::format("{}'s team is no longer protected by {}!", playerName, effect));
-		
-	}
+	m_target.Emit(std::format("{}'s team's {} wore off!", playerName, effect));
 }
 
 // Post-turn effects
