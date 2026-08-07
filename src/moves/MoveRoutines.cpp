@@ -2173,8 +2173,9 @@ namespace MoveRoutines
 		bool isElectricType = (ctx.defendingPokemon->GetTypeOneEnum() == PokemonType::Electric ||
 			ctx.defendingPokemon->GetTypeTwoEnum() == PokemonType::Electric);
 
-		bool electricVsGround = ctx.currentMove->GetMoveTypeEnum() == PokemonType::Electric && ctx.defendingPokemon->GetTypeOneEnum() == PokemonType::Ground ||
-			ctx.defendingPokemon->GetTypeTwoEnum() == PokemonType::Ground;
+		bool electricVsGround =	ctx.currentMove->GetMoveTypeEnum() == PokemonType::Electric &&
+			(ctx.defendingPokemon->GetTypeOneEnum() == PokemonType::Ground ||
+				ctx.defendingPokemon->GetTypeTwoEnum() == PokemonType::Ground);
 
 		bool isImmune = (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No || isElectricType || electricVsGround);
 

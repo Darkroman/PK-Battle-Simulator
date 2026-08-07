@@ -25,5 +25,5 @@ namespace AISwitchLogic
 
 	bool isStatusMoveEffective(const Player&, const pokemonMove&, const BattlePokemon&);
 
-	size_t PokemonTypeEffectiveness(const Player& self, const BattlePokemon& source, const BattlePokemon& target);
+	unsigned int PokemonTypeEffectiveness(const Player& self, const BattlePokemon& source, const BattlePokemon& target);
 }

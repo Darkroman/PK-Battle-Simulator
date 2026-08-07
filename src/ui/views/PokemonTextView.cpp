@@ -81,11 +81,11 @@ namespace PokemonTextView
 
         int colCount = 0;
 
-        for (auto move : movelist)
+        for (auto moveId : movelist)
         {
             ++colCount;
 
-            size_t moveIndex = basePokemon->FetchMoveNumber(move);
+            size_t moveIndex = basePokemon->FetchMoveNumber(moveId);
             const Move* move = Database::GetPointerToBaseMoveByIndex(moveIndex);
 
             size_t displayIndex = moveIndex + 1;

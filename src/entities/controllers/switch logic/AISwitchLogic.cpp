@@ -588,7 +588,7 @@ namespace AISwitchLogic
 		return MoveEffectiveness(move, pokemon) <= 2048 && move.GetPower() > 0 && move.m_currentPP > 0;
 	}
 
-	size_t PokemonTypeEffectiveness(const Player& self, const BattlePokemon& source, const BattlePokemon& target)
+	unsigned int PokemonTypeEffectiveness(const Player& self, const BattlePokemon& source, const BattlePokemon& target)
 	{
 		return self.GetAIController().AICalculatePokemonTypeEffectiveness(source, target);
 	}
