@@ -41,6 +41,9 @@ void BattleContext::ResetBattleState()
     playerOneCurrentMove = nullptr;
     playerTwoCurrentMove = nullptr;
 
+    playerOneCurrentMoveEffect = MoveEffect::Noop;
+    playerTwoCurrentMoveEffect = MoveEffect::Noop;
+
     attackingPlayer = nullptr;
     defendingPlayer = nullptr;
 

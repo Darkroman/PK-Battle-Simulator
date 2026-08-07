@@ -2302,8 +2302,8 @@ void Menu::SetDefaultPokemon()
 
 	if (players[0]->GetBelt(1).GetCurrentHP() != 0)
 	{
-		players[0]->GetBelt(1).SetMove(1, "Tackle");
-		//players[0]->GetBelt(1).SetMove(2, "Recover");
+		players[0]->GetBelt(1).SetMove(1, "Metronome");
+		players[0]->GetBelt(1).SetMove(2, "Tackle");
 		//players[0]->GetBelt(1).SetMove(3, "Quick Attack");
 		//players[0]->GetBelt(1).SetMove(4, "Bite");
 		//players[0]->GetBelt(2).SetMove(1, "Surf");
@@ -2311,7 +2311,7 @@ void Menu::SetDefaultPokemon()
 		//players[0]->GetBelt(2).SetMove(3, "Quick Attack");
 		//players[0]->GetBelt(2).SetMove(4, "Bite");
 		players[1]->GetBelt(1).SetMove(1, "Mirror Move");
-		//players[1]->GetBelt(1).SetMove(2, "Recover");
+		players[1]->GetBelt(1).SetMove(2, "Tackle");
 		//players[1]->GetBelt(1).SetMove(3, "Quick Attack");
 		//players[1]->GetBelt(1).SetMove(4, "Bite");
 		//players[1]->GetBelt(2).SetMove(1, "Surf");
@@ -2320,7 +2320,7 @@ void Menu::SetDefaultPokemon()
 		//players[1]->GetBelt(2).SetMove(4, "Bite");
 
 		players[0]->GetBelt(1).IncrementMoveCount();
-		//players[0]->GetBelt(1).IncrementMoveCount();
+		players[0]->GetBelt(1).IncrementMoveCount();
 		//players[0]->GetBelt(1).IncrementMoveCount();
 		//players[0]->GetBelt(1).IncrementMoveCount();
 		//players[0]->GetBelt(2).IncrementMoveCount();
@@ -2328,7 +2328,7 @@ void Menu::SetDefaultPokemon()
 		//players[0]->GetBelt(2).IncrementMoveCount();
 		//players[0]->GetBelt(2).IncrementMoveCount();
 		players[1]->GetBelt(1).IncrementMoveCount();
-		//players[1]->GetBelt(1).IncrementMoveCount();
+		players[1]->GetBelt(1).IncrementMoveCount();
 		//players[1]->GetBelt(1).IncrementMoveCount();
 		//players[1]->GetBelt(1).IncrementMoveCount();
 		//players[1]->GetBelt(2).IncrementMoveCount();

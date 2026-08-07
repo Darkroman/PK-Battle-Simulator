@@ -145,7 +145,7 @@ void MoveResultsQueuedConsole::DisplayRazorWindChargeMsg(std::string_view attack
 
 void MoveResultsQueuedConsole::DisplayFlyChargeMsg(std::string_view attackingPlayerName, std::string_view attackingPokemonName) const
 {
-	m_queue.PushEvent({BattleEvents::FlyCharge, { attackingPlayerName, attackingPokemonName } });
+	m_queue.PushEvent({BattleEvents::FlyCharge, { attackingPokemonName } });
 }
 
 void MoveResultsQueuedConsole::DisplaySolarBeamChargeMsg(std::string_view attackingPlayerName, std::string_view attackingPokemonName) const
@@ -155,7 +155,7 @@ void MoveResultsQueuedConsole::DisplaySolarBeamChargeMsg(std::string_view attack
 
 void MoveResultsQueuedConsole::DisplayDigChargeMsg(std::string_view attackingPlayerName, std::string_view attackingPokemonName) const
 {
-	m_queue.PushEvent({BattleEvents::DigCharge, { attackingPlayerName, attackingPokemonName } });
+	m_queue.PushEvent({BattleEvents::DigCharge, { attackingPokemonName } });
 }
 
 void MoveResultsQueuedConsole::DisplaySkullBashChargeMsg(std::string_view attackingPlayerName, std::string_view attackingPokemonName) const
