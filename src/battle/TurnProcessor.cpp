@@ -1,12 +1,19 @@
+#include <utility>
+
 #include "TurnProcessor.h"
 
 #include "BattleContext.h"
-#include "../entities/Player.h"
 #include "BattleCalculations.h"
 #include "StatusEffectProcessor.h"
 #include "WinChecker.h"
 #include "SwitchExecutor.h"
 #include "MoveExecutor.h"
+#include "../entities/PlayerDecisionOutcome.h"
+#include "../entities/pokemonMove.h"
+#include "../entities/Player.h"
+#include "../entities/controllers/IPlayerController.h"
+
+constexpr int SwitchPriority{ 6 };
 
 TurnProcessor::TurnProcessor(BattleContext& context, BattleCalculations& calculations, StatusEffectProcessor& statusProcessor, WinChecker& winChecker, SwitchExecutor& switchExecutor, MoveExecutor& moveExecutor)
 	: m_context(context)
@@ -25,13 +32,11 @@ void TurnProcessor::DetermineTurnOrder()
 		return;
 	}
 
-	constexpr int SWITCH_PRIORITY{ 6 };
-
 	const pokemonMove* moveOne = m_context.playerOneCurrentMove;
 	const pokemonMove* moveTwo = m_context.playerTwoCurrentMove;
 
-	int moveOnePriority = (m_context.playerOne->IsSwitching()) ? SWITCH_PRIORITY : moveOne->GetPriority();
-	int moveTwoPriority = (m_context.playerTwo->IsSwitching()) ? SWITCH_PRIORITY : moveTwo->GetPriority();
+	int moveOnePriority = (m_context.playerOne->IsSwitching()) ? SwitchPriority : moveOne->GetPriority();
+	int moveTwoPriority = (m_context.playerTwo->IsSwitching()) ? SwitchPriority : moveTwo->GetPriority();
 
 	if (moveOnePriority > moveTwoPriority)
 	{
@@ -63,42 +68,48 @@ void TurnProcessor::DetermineTurnOrder()
 	}
 }
 
-void TurnProcessor::ExecuteTurn(bool& winCondition)
+TurnSwitchState TurnProcessor::ExecuteTurn()
 {
-	if (m_context.currentMove)
-	{
-		if (m_context.currentMove->GetName() != "Counter")
-		{
-			m_context.damageTaken = 0;
-		}
-	}
-	
-	m_context.pixelsLost = 0;
-	m_context.initialPowerMultiplier = 10;
-	m_context.effectiveness = 4096;
-
-	m_context.flags.ResetBattleFlags();
+	m_context.attackingPokemon->SetRaging(false);
 
 	if (m_context.attackingPlayer->IsSwitching())
 	{
 		m_switchExecutor.ExecuteSwitch(*m_context.attackingPlayer, m_context.attackingPokemon);
 
-		return;
+		return TurnSwitchState::ContinueRound;
 	}
 
-	else if (!m_context.attackingPokemon->IsFainted() && !m_context.defendingPokemon->IsFainted())
+	else
 	{
 		if (!m_statusProcessor.CheckPerformativeStatus())
 		{
-			return;
+
+			return TurnSwitchState::ContinueRound;
 		}
 
 		m_moveExecutor.ExecuteMove();
 	}
 
-	m_statusProcessor.RageCheck();
+	if (m_winChecker.CheckWinCondition(*m_context.attackingPlayer, *m_context.defendingPlayer))
+	{
+		return TurnSwitchState::Victory;
+	}
 
-	winCondition = m_winChecker.CheckWinCondition(*m_context.attackingPlayer, *m_context.defendingPlayer);
+	if (m_winChecker.CheckWinCondition(*m_context.defendingPlayer, *m_context.attackingPlayer))
+	{
+		return TurnSwitchState::Victory;
+	}
+
+	if (!m_context.attackingPlayer->IsPendingSwitch())
+	{
+		curTurnState = TurnSwitchState::ContinueRound;
+		return TurnSwitchState::ContinueRound;
+	}
+	else
+	{
+		curTurnState = TurnSwitchState::PromptUserForSwitch;
+		return TurnSwitchState::PromptUserForSwitch;
+	}
 }
 
 void TurnProcessor::SwapRoles()
@@ -106,4 +117,71 @@ void TurnProcessor::SwapRoles()
 	std::swap(m_context.attackingPlayer, m_context.defendingPlayer);
 	std::swap(m_context.attackingPokemon, m_context.defendingPokemon);
 	m_context.currentMove = (m_context.playerOneCurrentMove == m_context.currentMove) ? m_context.playerTwoCurrentMove : m_context.playerOneCurrentMove;
+	m_context.currentMoveEffect = (m_context.playerOneCurrentMoveEffect == m_context.currentMoveEffect) ? m_context.playerTwoCurrentMoveEffect : m_context.playerOneCurrentMoveEffect;
+}
+
+TurnSwitchState TurnProcessor::CheckPendingSwitch()
+{
+	switch (curTurnState)
+	{
+		case TurnSwitchState::ContinueRound:
+		{
+			curTurnState = TurnSwitchState::ContinueRound;
+			return TurnSwitchState::ContinueRound;
+		}
+		break;
+
+		case TurnSwitchState::PromptUserForSwitch:
+		{
+			curTurnState = PromptUserForSwitch();
+			return curTurnState;
+		}
+		break;
+
+		case TurnSwitchState::WaitForSwitchInput:
+		{
+			curTurnState = ProcessSwitch();
+			return curTurnState;
+		}
+		break;
+	}
+
+	return curTurnState;
+}
+
+TurnSwitchState TurnProcessor::PromptUserForSwitch()
+{
+	m_context.attackingPlayer->GetController().PromptForSwitch(*m_context.attackingPlayer, *m_context.defendingPlayer, *m_context.attackingPokemon, *m_context.defendingPokemon);
+
+	return TurnSwitchState::WaitForSwitchInput;
+}
+
+TurnSwitchState TurnProcessor::ProcessSwitch()
+{
+	const bool playerNeedsSwitch = m_context.attackingPlayer->IsPendingSwitch();
+
+	if (playerNeedsSwitch && !m_context.attackingPlayer->GetController().HasDecision())
+	{
+		return TurnSwitchState::WaitForSwitchInput;
+	}
+
+	if (playerNeedsSwitch)
+	{
+		PlayerDecisionOutcome decision = m_context.attackingPlayer->GetController().TakeDecision();
+
+		m_context.attackingPlayer->SetPokemonToSwitchTo(decision.chosenPokemon);
+	}
+
+	ResolveSwitch(playerNeedsSwitch);
+
+	return TurnSwitchState::ContinueRound;
+}
+
+void TurnProcessor::ResolveSwitch(bool playerNeedsSwitch)
+{
+	if (playerNeedsSwitch)
+	{
+		m_switchExecutor.ExecuteSwitch(*m_context.attackingPlayer, m_context.attackingPokemon);
+		m_context.attackingPlayer->SetPendingSwitch(false);
+	}
 }

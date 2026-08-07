@@ -1,11 +1,22 @@
 #include <iostream>
+#include <istream>
+#include <vector>
+#include <memory>
+#include <string>
+#include <string_view>
+#include <cstdint>
+#include <charconv>
+#include <filesystem>
+#include <algorithm>
 
 #include "Menu.h"
 
+#include "../common/AppState.h"
+#include "../common/PartyEditResults.h"
+#include "../entities/BattlePokemon.h"
 #include "../entities/Player.h"
 #include "../entities/controllers/AIController.h"
 #include "../entities/controllers/HumanControllerConsole.h"
-#include "../data/Database.h"
 #include "../save/SaveParty.h"
 #include "../save/LoadParty.h"
 #include "../ui/views/PokemonTextView.h"
@@ -1172,7 +1183,7 @@ bool Menu::AddPokemon(Player& player)
 
 	while (player.GetPokemonCount() < 6)
 	{
-		DatabaseTextView::DisplayAllPokemon(Database::GetInstance());
+		DatabaseTextView::DisplayAllPokemon();
 		PokemonTextView::DisplayPlayerPokemon(player);
 
 		std::cout << "Enter Pokemon name or number (0 to go back): ";
@@ -1267,7 +1278,7 @@ bool Menu::ChangePokemon(Player& player)
 			OldPokemonName = pokemon.GetPokemonName();
 		}
 
-		DatabaseTextView::DisplayAllPokemon(Database::GetInstance());
+		DatabaseTextView::DisplayAllPokemon();
 
 		std::string pokemonInput{};
 		std::cout << "Enter Pokemon name or number (0 to go back): ";
@@ -2277,53 +2288,70 @@ bool Menu::ReorderMoves(BattlePokemon& pokemon)
 
 void Menu::SetDefaultPokemon()
 {
-
 #if !defined NDEBUG
-	Pokemon* test1;
-	Pokemon* test2;
-		Database::GetInstance().TestingPokemonAndMoves(test1, test2);
-#endif
 
 	if (players[0]->GetPokemonCount() > 0 && players[1]->GetPokemonCount() > 0)
 	{
 		return;
 	}
 
-	//players[0]->GetBelt(1).SetPokemon(test1);
-	//players[1]->GetBelt(1).SetPokemon(test2);
+	players[0]->GetBelt(1).SetPokemon("Test1");
+	//players[0]->GetBelt(2).SetPokemon("Test1");
+	players[1]->GetBelt(1).SetPokemon("Test2");
+	//players[1]->GetBelt(2).SetPokemon("Test2");
 
 	if (players[0]->GetBelt(1).GetCurrentHP() != 0)
 	{
-		players[0]->GetBelt(1).SetMove(1, "Growth");
-		players[0]->GetBelt(1).SetMove(2, "Minimize");
-		players[1]->GetBelt(1).SetMove(1, "Screech");
-		players[1]->GetBelt(1).SetMove(2, "Substitute");
-		players[1]->GetBelt(1).SetMove(3, "Spore");
-		players[1]->GetBelt(1).SetMove(4, "Confuse Ray");
-
+		players[0]->GetBelt(1).SetMove(1, "Tackle");
+		//players[0]->GetBelt(1).SetMove(2, "Recover");
+		//players[0]->GetBelt(1).SetMove(3, "Quick Attack");
+		//players[0]->GetBelt(1).SetMove(4, "Bite");
+		//players[0]->GetBelt(2).SetMove(1, "Surf");
+		//players[0]->GetBelt(2).SetMove(2, "Mega Drain");
+		//players[0]->GetBelt(2).SetMove(3, "Quick Attack");
+		//players[0]->GetBelt(2).SetMove(4, "Bite");
+		players[1]->GetBelt(1).SetMove(1, "Mirror Move");
+		//players[1]->GetBelt(1).SetMove(2, "Recover");
+		//players[1]->GetBelt(1).SetMove(3, "Quick Attack");
+		//players[1]->GetBelt(1).SetMove(4, "Bite");
+		//players[1]->GetBelt(2).SetMove(1, "Surf");
+		//players[1]->GetBelt(2).SetMove(2, "Mega Drain");
+		//players[1]->GetBelt(2).SetMove(3, "Quick Attack");
+		//players[1]->GetBelt(2).SetMove(4, "Bite");
 
 		players[0]->GetBelt(1).IncrementMoveCount();
-		players[0]->GetBelt(1).IncrementMoveCount();
+		//players[0]->GetBelt(1).IncrementMoveCount();
+		//players[0]->GetBelt(1).IncrementMoveCount();
+		//players[0]->GetBelt(1).IncrementMoveCount();
+		//players[0]->GetBelt(2).IncrementMoveCount();
+		//players[0]->GetBelt(2).IncrementMoveCount();
+		//players[0]->GetBelt(2).IncrementMoveCount();
+		//players[0]->GetBelt(2).IncrementMoveCount();
 		players[1]->GetBelt(1).IncrementMoveCount();
-		players[1]->GetBelt(1).IncrementMoveCount();
-		players[1]->GetBelt(1).IncrementMoveCount();
-		players[1]->GetBelt(1).IncrementMoveCount();
+		//players[1]->GetBelt(1).IncrementMoveCount();
+		//players[1]->GetBelt(1).IncrementMoveCount();
+		//players[1]->GetBelt(1).IncrementMoveCount();
+		//players[1]->GetBelt(2).IncrementMoveCount();
+		//players[1]->GetBelt(2).IncrementMoveCount();
+		//players[1]->GetBelt(2).IncrementMoveCount();
+		//players[1]->GetBelt(2).IncrementMoveCount();
+
 
 		players[0]->GetBelt(1).SetLevel(100);
 		players[1]->GetBelt(1).SetLevel(100);
 
-		players[0]->GetBelt(1).SetHPEV(252);
+		//players[0]->GetBelt(1).SetHPEV(252);
 		//players[0]->GetBelt(1).SetAttackEV(64);
-		players[0]->GetBelt(1).SetDefenseEV(252);
+		//players[0]->GetBelt(1).SetDefenseEV(252);
 		//players[0]->GetBelt(1).SetHPIV(31);
 		//players[0]->GetBelt(1).SetAttackIV(31);
 		//players[0]->GetBelt(1).SetDefenseIV(31);
 		//players[0]->GetBelt(1).SetSpecialDefenseIV(31);
 		players[0]->GetBelt(1).SetSpeedIV(30);
 
-		players[1]->GetBelt(1).SetHPEV(252);
+		//players[1]->GetBelt(1).SetHPEV(252);
 		//players[1]->GetBelt(1).SetAttackEV(252);
-		players[1]->GetBelt(1).SetDefenseEV(252);
+		//players[1]->GetBelt(1).SetDefenseEV(252);
 		//players[1]->GetBelt(1).SetSpecialDefenseEV(252);
 		//players[1]->GetBelt(1).SetHPIV(31);
 		//players[1]->GetBelt(1).SetAttackIV(31);
@@ -2335,8 +2363,17 @@ void Menu::SetDefaultPokemon()
 		//players[0]->GetBelt(1).DamageCurrentHP(players[0]->GetBelt(1).GetMaxHP() - 1);
 		//players[0]->GetBelt(1).SetEvasionStage(5);
 
-		//players[1]->GetBelt(1).ChangeStatus(Status::Poisoned);
-		//players[1]->GetBelt(1).DamageCurrentHP(players[1]->GetBelt(1).GetMaxHP() - 1);
+		//players[0]->GetBelt(1).ChangeStatus(Status::Poisoned);
+		//players[0]->GetBelt(1).SetBound(true);
+		//players[0]->GetBelt(1).SetBoundTurnCount(4);
+		//players[0]->GetBelt(1).ResetBoundCounter();
+		//players[0]->GetBelt(1).SetBoundMoveName(20);
+		//players[0]->GetBelt(1).DamageCurrentHP(players[0]->GetBelt(1).GetMaxHP() - 1);
+
+		//players[1]->GetBelt(1).SetBound(true);
+		//players[1]->GetBelt(1).SetBoundTurnCount(4);
+		//players[1]->GetBelt(1).ResetBoundCounter();
+		//players[1]->GetBelt(1).SetBoundMoveName(20);
 
 		//players[0]->GetBelt(1).ChangeStatus(Status::Burned);
 
@@ -2370,6 +2407,8 @@ void Menu::SetDefaultPokemon()
 	}
 
 	players[1]->SetPokemonCount(pokemonCount);
+
+#endif
 }
 
 void Menu::SaveYourParty()

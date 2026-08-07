@@ -6,35 +6,31 @@
 class Player;
 class BattlePokemon;
 struct pokemonMove;
-
-class IPlayerController;
+enum class MoveEffect : unsigned int;
 
 struct BattleStateFlags
 {
-    bool hit{ false };
-    bool hitSubstitute{ false };
-    bool isCriticalHit{ false };
+    void ResetBattleFlags();
 
-    enum class Effectiveness { Normal, Less, Super, No, OHKO };
+    enum class Effectiveness { No, Less, Normal, Super };
 
     Effectiveness currentEffectiveness{ Effectiveness::Normal };
 
-    void ResetBattleFlags()
-    {
-        hit = false;
-        hitSubstitute = false;
-        isCriticalHit = false;
-        currentEffectiveness = Effectiveness::Normal;
-    }
+    bool hit{ false };
+    bool hitSubstitute{ false };
+    bool isCriticalHit{ false };
 };
 
 struct BattleContext
 {
     BattleContext(std::vector<std::unique_ptr<Player>>& vec_players);
 
-    std::vector<Player*> vec_aiPlayers{};
+    void ResetTurnState();
+    void ResetBattleState();
 
-    std::vector<Player*> vec_outOfPokemon{};
+    std::vector<Player*> vec_aiPlayers;
+
+    std::vector<Player*> vec_outOfPokemon;
 
     BattleStateFlags flags;
 
@@ -47,6 +43,9 @@ struct BattleContext
     pokemonMove* playerOneCurrentMove{ nullptr };
     pokemonMove* playerTwoCurrentMove{ nullptr };
 
+    MoveEffect playerOneCurrentMoveEffect{};
+    MoveEffect playerTwoCurrentMoveEffect{};
+
     Player* attackingPlayer{ nullptr };
     Player* defendingPlayer{ nullptr };
 
@@ -54,6 +53,7 @@ struct BattleContext
     BattlePokemon* defendingPokemon{ nullptr };
 
     pokemonMove* currentMove{ nullptr };
+    MoveEffect currentMoveEffect{};
 
     const int HP_BAR_WIDTH{ 400 };
 

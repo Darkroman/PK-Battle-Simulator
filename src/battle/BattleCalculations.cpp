@@ -1,13 +1,35 @@
+#include <array>
+#include <algorithm>
+#include <utility>
+
 #include "BattleCalculations.h"
 
-#include "../data/Pokemon.h"
-#include "../moves/MoveEffectEnums.h"
-#include "../data/StringToTypes.h"
 #include "RandomEngine.h"
 #include "BattleContext.h"
 #include "Typechart.h"
 #include "StageRatios.h"
+
+#include "../common/EnumUtils.h"
+
+#include "../data/Pokemon.h"
+#include "../data/StringToTypes.h"
+#include "../data/MoveID.h"
+#include "../moves/MoveEffectEnums.h"
+#include "../entities/pokemonMove.h"
 #include "../entities/Player.h"
+#include "../entities/BattlePokemon.h"
+
+constexpr unsigned int FixedPointBase = 4096;
+
+constexpr unsigned int HalfMultiplier = FixedPointBase / 2;
+constexpr unsigned int NormalMultiplier = FixedPointBase;
+constexpr unsigned int OneAndHalfMultiplier = FixedPointBase + FixedPointBase / 2;
+constexpr unsigned int DoubleMultiplier = FixedPointBase * 2;
+
+constexpr int MinStage{ 0 };
+constexpr int MaxStage{ 12 };
+constexpr int DefaultStage{ 6 };
+constexpr int MaxCritStage{ 3 };
 
 BattleCalculations::BattleCalculations(BattleContext& context, RandomEngine& rng) : m_context(context), m_rng(rng) {}
 
@@ -53,24 +75,24 @@ void BattleCalculations::SetFirst(Player& first, Player& second)
 	m_context.attackingPokemon = (&first == m_context.playerOne) ? m_context.playerOneCurrentPokemon : m_context.playerTwoCurrentPokemon;
 	m_context.defendingPokemon = (&second == m_context.playerOne) ? m_context.playerOneCurrentPokemon : m_context.playerTwoCurrentPokemon;
 	m_context.currentMove = (&first == m_context.playerOne) ? m_context.playerOneCurrentMove : m_context.playerTwoCurrentMove;
+	m_context.currentMoveEffect = (&first == m_context.playerOne) ? m_context.playerOneCurrentMoveEffect : m_context.playerTwoCurrentMoveEffect;
 }
 
 bool BattleCalculations::CalculateCriticalHit(BattleContext& ctx, const BattlePokemon& source)
 {
-	size_t stage = source.GetCriticalHitStage();
+	int stage = source.GetCriticalHitStage();
 	if (stage > 3) stage = 3;
 
 	int threshold = m_arr_CriticalHitStageThresholds[stage];
-
-	std::uniform_int_distribution<int> critmoddistributor(0, 23);
-	int roll{ critmoddistributor(m_rng.GetGenerator()) };
+	
+	int roll{ m_rng.GetCritRoll() };
 
 	ctx.flags.isCriticalHit = (roll < threshold);
 
 	return ctx.flags.isCriticalHit;
 }
 
-unsigned int BattleCalculations::MultiplyEffectiveness(unsigned int effect1, unsigned effect2)
+unsigned int BattleCalculations::MultiplyEffectiveness(unsigned int effect1, unsigned int effect2)
 {
 	if (effect1 == 0 || effect2 == 0)
 	{
@@ -78,71 +100,71 @@ unsigned int BattleCalculations::MultiplyEffectiveness(unsigned int effect1, uns
 	}
 
 	unsigned int product = effect1 * effect2;
-	return (product / 4096);
+	return (product / FixedPointBase);
 }
 
 void BattleCalculations::CalculateTypeEffectiveness(BattleContext& ctx, const pokemonMove& currentMove, const BattlePokemon& target)
 {
 	using Effectiveness = BattleStateFlags::Effectiveness;
 
-	ctx.effectiveness = 4096;
+	ctx.effectiveness = FixedPointBase;
 	ctx.flags.currentEffectiveness = Effectiveness::Normal;
+
+	if (currentMove.GetMoveEffectEnum() == MoveEffect::OHKO)
+	{
+		return;
+	}
 
 	if (currentMove.GetMoveEffectEnum() == MoveEffect::Struggle)
 	{
 		return;
 	}
 
-	size_t moveType = static_cast<size_t>(currentMove.GetMoveTypeEnum());
-	size_t defensiveTypeOne = static_cast<size_t>(target.GetTypeOneEnum());
-	size_t defensiveTypeTwo = static_cast<size_t>(target.GetTypeTwoEnum());
+	unsigned int moveType = EnumIndex(currentMove.GetMoveTypeEnum());
+	unsigned int defensiveTypeOne = EnumIndex(target.GetTypeOneEnum());
+	unsigned int defensiveTypeTwo = EnumIndex(target.GetTypeTwoEnum());
 
 	unsigned int effect1 = typeChart[moveType][defensiveTypeOne];
-	unsigned int effect2 = (defensiveTypeTwo == 18) ? 4096 : typeChart[moveType][defensiveTypeTwo];
+	unsigned int effect2 = (defensiveTypeTwo == 18) ? NormalMultiplier : typeChart[moveType][defensiveTypeTwo];
 
 	ctx.effectiveness = MultiplyEffectiveness(effect1, effect2);
 
-	unsigned int moveEffectiveness = ctx.effectiveness;
-
+	int moveEffectiveness = ctx.effectiveness;
+	
 	if (moveEffectiveness == 0)
 	{
 		ctx.flags.currentEffectiveness = Effectiveness::No;
 	}
-	else if (moveEffectiveness > 0 && moveEffectiveness < 4096)
+	else if (moveEffectiveness < FixedPointBase)
 	{
 		ctx.flags.currentEffectiveness = Effectiveness::Less;
 	}
-	else if (moveEffectiveness > 4096)
-	{
-		ctx.flags.currentEffectiveness = Effectiveness::Super;
-	}
-	else
+	else if (moveEffectiveness == FixedPointBase)
 	{
 		ctx.flags.currentEffectiveness = Effectiveness::Normal;
 	}
-
-	if (currentMove.GetMoveEffectEnum() == MoveEffect::OHKO && moveEffectiveness != 0)
+	else
 	{
-		ctx.flags.currentEffectiveness = Effectiveness::OHKO;
+		ctx.flags.currentEffectiveness = Effectiveness::Super;
 	}
 }
 
 bool BattleCalculations::CalculateHitChance(const pokemonMove& currentMove, const BattlePokemon& source, const BattlePokemon& target)
 {
 	if (
-		(target.IsSemiInvulnerableFromFly() && (currentMove.GetMoveEffectEnum() != MoveEffect::Gust && currentMove.GetName() != "Thunder")) ||
-		(target.IsSemiInvulnerableFromDig() && (currentMove.GetMoveEffectEnum() != MoveEffect::Earthquake && currentMove.GetName() != "Fissure"))
+		(target.IsSemiInvulnerableFromFly() && (currentMove.GetMoveEffectEnum() != MoveEffect::Gust && currentMove.GetMoveID() != MoveID::Thunder)) ||
+		(target.IsSemiInvulnerableFromDig() && (currentMove.GetMoveEffectEnum() != MoveEffect::Earthquake && currentMove.GetMoveID() != MoveID::Fissure))
 		)
 	{
 		return false;
 	}
 
-	size_t sourceAccuracy = source.GetAccuracyStage();
-	size_t targetEvasion = target.GetEvasionStage();
+	int sourceAccuracy = source.GetAccuracyStage();
+	int targetEvasion = target.GetEvasionStage();
 
-	int netStage{ static_cast<int>(sourceAccuracy) - static_cast<int>(targetEvasion) };
-	int targetIndex = netStage + 6;
-	size_t adjustedStages = static_cast<size_t>(std::clamp(targetIndex, 0, 12));
+	int netStage{ sourceAccuracy - targetEvasion };
+	int targetIndex = netStage + DefaultStage;
+	int adjustedStages = std::clamp(targetIndex, MinStage, MaxStage);
 
 	const auto& [numerator, denominator] = GetAccuracyStageRatio(adjustedStages);
 
@@ -172,8 +194,7 @@ bool BattleCalculations::CalculateHitChance(const pokemonMove& currentMove, cons
 
 	else
 	{
-		std::uniform_int_distribution<int> roll(0, 99);
-		int rollOutcome{ roll(m_rng.GetGenerator()) };
+		int rollOutcome{ m_rng.GetAccuracyRoll() };
 
 		return rollOutcome < accuracyMod;
 	}
@@ -206,16 +227,16 @@ unsigned int BattleCalculations::CalculateDamage(BattleContext& ctx, const Playe
 	unsigned int baseSourceAttack{ isPhysical ? source.GetAttack() : source.GetSpecialAttack() };
 	unsigned int baseTargetDefense{ isPhysical ? target.GetDefense() : target.GetSpecialDefense() };
 
-	size_t sourceStage{ isPhysical ? source.GetAttackStage() : source.GetSpecialAttackStage() };
-	size_t targetStage{ isPhysical ? target.GetDefenseStage() : target.GetSpecialDefenseStage() };
+	int sourceStage{ isPhysical ? source.GetAttackStage() : source.GetSpecialAttackStage() };
+	int targetStage{ isPhysical ? target.GetDefenseStage() : target.GetSpecialDefenseStage() };
 
 	if (isCritical)
 	{
 		// If attacker's attack stage is less than 6, clamp to 6
-		sourceStage = std::max(sourceStage, (size_t)6);
+		sourceStage = std::max(sourceStage, DefaultStage);
 		
 		// If defender's defense stage is greater than 6, clamp to 6
-		targetStage = std::min(targetStage, (size_t)6);
+		targetStage = std::min(targetStage, DefaultStage);
 	}
 
 	auto [atkNumerator, atkDenominator] = GetStageRatio(sourceStage);
@@ -253,13 +274,12 @@ unsigned int BattleCalculations::CalculateDamage(BattleContext& ctx, const Playe
 
 	if (isCritical)
 	{
-		interimDamage = interimDamage * 6144 / 4096;
+		interimDamage = interimDamage * OneAndHalfMultiplier / FixedPointBase;
 	}
 
-	std::uniform_int_distribution<unsigned int> dist(85, 100);
-	unsigned int randPercent = dist(m_rng.GetGenerator());
+	unsigned int randDmgMultiplier{ m_rng.GetDamageRoll() };
 
-	interimDamage = interimDamage * randPercent / 100;
+	interimDamage = interimDamage * randDmgMultiplier / 100;
 
 	bool hasStab = (currentMove.GetMoveTypeEnum() == source.GetTypeOneEnum() ||
 		currentMove.GetMoveTypeEnum() == source.GetTypeTwoEnum())
@@ -267,43 +287,43 @@ unsigned int BattleCalculations::CalculateDamage(BattleContext& ctx, const Playe
 
 	if (hasStab)
 	{
-		interimDamage = interimDamage * 6144 / 4096;
+		interimDamage = interimDamage * OneAndHalfMultiplier / FixedPointBase;
 	}
 
-	interimDamage = interimDamage * effectiveness / 4096;
+	interimDamage = interimDamage * effectiveness / FixedPointBase;
 
 	if (source.GetStatus() == Status::Burned && isPhysical)
 	{
-		interimDamage = interimDamage * 2048 / 4096;
+		interimDamage = interimDamage * HalfMultiplier / FixedPointBase;
 	}
 
-	unsigned int other{ 4096 };
+	unsigned int other{ FixedPointBase };
 
 	if ((currentMove.GetMoveEffectEnum() == MoveEffect::Stomp || currentMove.GetMoveEffectEnum() == MoveEffect::BodySlam) && target.HasUsedMinimize())
 	{
-		other = (other * 8192 + 2048) / 4096;
+		other = (other * DoubleMultiplier + HalfMultiplier) / FixedPointBase;
 	}
 
 	if (currentMove.GetMoveEffectEnum() == MoveEffect::Earthquake && target.IsSemiInvulnerableFromDig())
 	{
-		other = (other * 8192 + 2048) / 4096;
+		other = (other * DoubleMultiplier + HalfMultiplier) / FixedPointBase;
 	}
 
 	if (targetPlayer.HasReflect() && !isCritical && isPhysical)
 	{
-		other = (other * 2048 + 2048) / 4096;
+		other = (other * HalfMultiplier + HalfMultiplier) / FixedPointBase;
 	}
 
 	if (targetPlayer.HasLightScreen() && !isCritical && !isPhysical)
 	{
-		other = (other * 2048 + 2048) / 4096;
+		other = (other * HalfMultiplier + HalfMultiplier) / FixedPointBase;
 	}
 
-	unsigned int finalDamage = interimDamage * other / 4096;
+	unsigned int finalDamage = interimDamage * other / FixedPointBase;
 
 	if (effectiveness != 0)
 	{
-		finalDamage = std::max((unsigned int)1, finalDamage);
+		finalDamage = std::max(1u, finalDamage);
 	}
 
 	/*

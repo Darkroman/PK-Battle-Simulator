@@ -5,6 +5,8 @@ class RandomEngine;
 class IBattleAnnouncerUI;
 class IMoveResultsUI;
 class IStatusEffectUI;
+class IOutputTarget;
+class BattleUIEventQueue;
 
 #include "BattleCalculations.h"
 #include "SwitchExecutor.h"
@@ -14,17 +16,37 @@ class IStatusEffectUI;
 #include "TurnProcessor.h"
 #include "PostTurnEffectProcessor.h"
 #include "BattleAction.h"
+#include "../common/BattleState.h"
 
 class BattleManager
 {
 public:
-	BattleManager(BattleContext& context, RandomEngine& rng, IBattleAnnouncerUI& battleAnnouncerUI, IMoveResultsUI& moveResultsUI, IStatusEffectUI& statusEffectUI);
+	BattleManager(BattleContext& context, RandomEngine& rng, IBattleAnnouncerUI& battleAnnouncerUI, IMoveResultsUI& moveResultsUI, IStatusEffectUI& statusEffectUI, IOutputTarget& outputTarget, BattleUIEventQueue& uiEventQueue);
 
+	BattleState RunBattle();
+	bool RunBattleSimulation();
+	void ResetValues();
+
+private:
 	void AssignFirstPokemon();
+	BattleState StartBattle();
+	BattleState DisplayFightingPokemon();
+	BattleState BeginChooseAction();
+	BattleState ApplyPlayerDecisions();
 	void ApplyPlayerOneAction();
 	void ApplyPlayerTwoAction();
-	bool RunBattleLoop();
-	void ResetValues();
+	BattleState DetermineTurnOrder();
+	BattleState ProcessTurn();
+	BattleState CheckMidTurnPendingSwitch();
+	BattleState SwapRoles();
+	BattleState ProcessPostTurn();
+	BattleState CheckActivePokemonFaints();
+	BattleState PromptUsersForSwitch();
+	BattleState ProcessSwitches();
+	BattleState Cleanup();
+	void ResolveSwitchDecisions(bool playerOneNeedsSwitch, bool playerTwoNeedsSwitch);
+
+	void TestBattleText() const;
 
 private:
 	BattleContext& m_context;
@@ -32,6 +54,9 @@ private:
 	IBattleAnnouncerUI& m_battleAnnouncerUI;
 	IMoveResultsUI& m_moveResultsUI;
 	IStatusEffectUI& m_statusEffectUI;
+	IOutputTarget& m_outputTarget;
+
+	BattleUIEventQueue& m_uiEventQueue;
 
 	BattleCalculations m_calculations;
 	SwitchExecutor m_switchExecutor;
@@ -42,4 +67,6 @@ private:
 	PostTurnEffectProcessor m_postTurnProcessor;
 
 	BattleAction e_battleAction{};
+	BattleState curBattleState = BattleState::StartBattle;
+	CurrentRoundActor curActor{};
 };

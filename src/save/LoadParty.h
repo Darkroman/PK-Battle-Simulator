@@ -1,7 +1,10 @@
 #pragma once
 
+#include <ios>
 #include <fstream>
 #include <filesystem>
+#include <string>
+#include <string_view>
 
 class Player;
 

@@ -13,6 +13,8 @@ EffectivenessText ToEffectivenessText(BattleStateFlags::Effectiveness);
 
 void InflictNVStatus(Status, int effectChance, MoveRoutineDeps&);
 
+bool DefendingPokemonIsFainted(BattleContext&, IMoveResultsUI&);
+
 void DamageRoutine(MoveRoutineDeps&);
 
 void MultiStrikeRoutine(MoveRoutineDeps&, int turnCount);
@@ -23,17 +25,21 @@ void FlinchRoutine(MoveRoutineDeps&);
 
 void RecoilRoutine(MoveRoutineDeps& deps, unsigned int recoilDivisor, unsigned int targetHPBegin, unsigned int targetHPEnd);
 
-using GetStageFn = size_t (*)(BattlePokemon&);
-using SetStageFn = void (*)(BattlePokemon&, size_t);
+void TryDamageReactions(MoveRoutineDeps& deps);
 
-void StageUpRoutine(MoveRoutineDeps& deps, size_t amount, std::string_view stageName, GetStageFn getStage, SetStageFn setStage);
-void StageDownRoutine(MoveRoutineDeps& deps, size_t amount, std::string_view stageName, GetStageFn getStage, SetStageFn setStage);
-void StageDownDamageRoutine(MoveRoutineDeps& deps, size_t amount, std::string_view stageName, GetStageFn getStage, SetStageFn setStage);
-void DisplayStatChange(IMoveResultsUI& ui, size_t amount, bool isUp, std::string_view stageName, std::string_view playerName, std::string_view pokemonName);
+void ProcessRage(MoveRoutineDeps& deps);
+
+using GetStageFn = int (*)(BattlePokemon&);
+using SetStageFn = void (*)(BattlePokemon&, int);
+
+void StageUpRoutine(MoveRoutineDeps& deps, int amount, std::string_view stageName, GetStageFn getStage, SetStageFn setStage);
+void StageDownRoutine(MoveRoutineDeps& deps, int amount, std::string_view stageName, GetStageFn getStage, SetStageFn setStage);
+void StageDownDamageRoutine(MoveRoutineDeps& deps, int amount, std::string_view stageName, GetStageFn getStage, SetStageFn setStage);
+void DisplayStatChange(IMoveResultsUI& ui, int amount, bool isUp, std::string_view stageName, std::string_view playerName, std::string_view pokemonName);
 
 using ChargeMsgMemFn = void (IMoveResultsUI::*)(std::string_view, std::string_view) const;
 using ChargeHookFn = void (*)(MoveRoutineDeps& deps);
-using ChargeStageUpFn = void (*)(MoveRoutineDeps& deps, size_t amount, std::string_view stageName, GetStageFn getStage, SetStageFn setStage);
+using ChargeStageUpFn = void (*)(MoveRoutineDeps& deps, int amount, std::string_view stageName, GetStageFn getStage, SetStageFn setStage);
 
 struct ChargingMoveHooks
 {
@@ -42,7 +48,7 @@ struct ChargingMoveHooks
     ChargeStageUpFn stageUp{ nullptr };
     GetStageFn getStage{ nullptr };
     SetStageFn setStage{ nullptr };
-    size_t stageIncreaseAmount{};
+    int stageIncreaseAmount{};
     std::string_view stageName{};
 };
 

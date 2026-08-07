@@ -5,30 +5,35 @@ class BattleCalculations;
 class IStatusEffectUI;
 class StatusEffectProcessor;
 class WinChecker;
+class SwitchExecutor;
 class Player;
 class BattlePokemon;
 
 class PostTurnEffectProcessor
 {
 public:
-    explicit PostTurnEffectProcessor(BattleContext&, BattleCalculations&, IStatusEffectUI&, StatusEffectProcessor&, WinChecker&);
+    explicit PostTurnEffectProcessor(BattleContext&, BattleCalculations&, IStatusEffectUI&, StatusEffectProcessor&, WinChecker&, SwitchExecutor&);
 
+    bool ProcessAllPostTurnEffects();
     void DeterminePostFaintSwitchOrder();
-    void ProcessAllPostTurnEffects(bool&);
+    void ProcessPostKOSwitches();
 
 private:
-    void CheckSeededStatuses();
-    void CheckDamagingStatuses();
+    bool CheckSeededStatuses();
+    bool CheckDamagingStatuses();
     void BurnedStatus(const Player& player, BattlePokemon& pokemon);
     void PoisonedStatus(const Player& player, BattlePokemon& pokemon);
     void BadlyPoisonedStatus(const Player& player, BattlePokemon& pokemon);
-    void CheckBoundStatuses();
+    bool CheckBoundStatuses();
     void CheckDisabledStatus();
     void CheckFieldEffects();
+
+    void ProcessPostKOSwitch(Player& sourcePlayer, Player& targetPlayer, const BattlePokemon& sourcePokemon, const BattlePokemon& targetPokemon);
 
     BattleContext& m_context;
     BattleCalculations& m_calculations;
     IStatusEffectUI& m_statusEffectUI;
     StatusEffectProcessor& m_statusProcessor;
     WinChecker& m_winChecker;
+    SwitchExecutor& m_switchExecutor;
 };

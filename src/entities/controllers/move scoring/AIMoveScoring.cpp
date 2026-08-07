@@ -1,16 +1,22 @@
 #include <algorithm>
+#include <array>
+#include <span>
+#include <climits>
 
 #include "AIMoveScoring.h"
 
 #include "ScoringResultsStruct.h"
 #include "BasicScoring.h"
 #include "MediumMoveScoring.h"
+//#include "HardAIScoring.h"
 
 #include "AIMoveClassifier.h"
 #include "../../../battle/StageRatios.h"
-#include "../../../data/StringToTypes.h"
-#include "../../Player.h"
 #include "../../../battle/RandomEngine.h"
+#include "../../../data/StringToTypes.h"
+#include "../../pokemonMove.h"
+#include "../../BattlePokemon.h"
+#include "../../Player.h"
 #include "../AIController.h"
 
 namespace AIMoveScoring
@@ -36,7 +42,7 @@ namespace AIMoveScoring
 			++index;
 		}
 
-		std::span<ScoringResults> resultsView{ results.data(), index};
+		std::span<ScoringResults> resultsView{ results.data(), index };
 
 		for (auto& result : resultsView)
 		{
@@ -47,7 +53,15 @@ namespace AIMoveScoring
 		{
 			MediumMoveScoring::EvaluateBestDamageMove(resultsView, targetMon);
 		}
-
+		/*
+		if (self.GetAIController().GetDifficulty() == Difficulty::Hard)
+		{
+			for (auto& result : resultsView)
+			{
+				result = HardAIMoveScoring::RunExpertScoringRoutine(result, resultsView, self, targetPlayer, *result.move, selfMon, targetMon, rng);
+			}
+		}
+		*/
 		//pokemonMove* winningMove = EvaluateScoredMoves(results, rng);
 		//return winningMove;
 
@@ -72,9 +86,8 @@ namespace AIMoveScoring
 				++count;
 			}
 		}
-		
-		std::uniform_int_distribution<size_t> dist(0, count - 1);
-		return topScores[dist(rng.GetGenerator())]->move;
+
+		return topScores[rng.RandomRange(0, count - 1)]->move;
 	}
 
 	ScoringResults RunScoringRoutine(ScoringResults& results, const Player& self, const Player& targetPlayer, const pokemonMove& move, const BattlePokemon& selfMon, const BattlePokemon& targetMon)

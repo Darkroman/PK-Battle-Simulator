@@ -1,5 +1,8 @@
 #include <iostream>
 #include <iomanip>
+#include <span>
+#include <string_view>
+#include <ios>
 
 #include "DatabaseTextView.h"
 #include "../../data/Database.h"
@@ -9,11 +12,11 @@
 
 namespace DatabaseTextView
 {
-	void DisplayAllPokemon(const Database& db)
+	void DisplayAllPokemon()
 	{
         int colCount{};
 
-        auto pokedex = db.GetPokedexView();
+        auto pokedex = Database::GetPokedexView();
 
         for (size_t i = 0; i < pokedex.size(); ++i)
         {
@@ -33,11 +36,11 @@ namespace DatabaseTextView
         std::cout << '\n';
 	}
 
-    void DisplayAllMoves(const Database& db)
+    void DisplayAllMoves()
     {
         int colCount{};
 
-        auto movedex = db.GetMovedexView();
+        auto movedex = Database::GetMovedexView();
 
         for (size_t i = 0; i < movedex.size(); ++i)
         {
@@ -57,9 +60,9 @@ namespace DatabaseTextView
         std::cout << '\n';
     }
 
-    void DisplayMovesWithZeroPower(const Database& db)
+    void DisplayMovesWithZeroPower()
     {
-        auto movedex = db.GetMovedexView();
+        auto movedex = Database::GetMovedexView();
 
         for (const auto& move : movedex)
         {

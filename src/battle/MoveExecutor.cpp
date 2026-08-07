@@ -9,20 +9,12 @@ MoveExecutor::MoveExecutor(
     BattleCalculations& calculations,
     StatusEffectProcessor& statusProcessor,
     IMoveResultsUI& resultsUI,
-    RandomEngine& rng,
-    SwitchExecutor& switchExecutor
+    RandomEngine& rng
 )
-    : m_deps{
-        context,
-        calculations,
-        statusProcessor,
-        resultsUI,
-        rng,
-        switchExecutor
-    }
+    : m_deps(context, calculations, statusProcessor, resultsUI, rng)
 {}
 
 void MoveExecutor::ExecuteMove()
 {
-    MoveRoutines::Execute(m_deps.context.currentMove->GetMoveEffectEnum(), m_deps);
+    MoveRoutines::Execute(m_deps.context.currentMoveEffect, m_deps);
 }

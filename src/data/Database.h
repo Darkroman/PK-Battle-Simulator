@@ -2,36 +2,63 @@
 
 #include <span>
 
+#include "../common/EnumUtils.h"
+#include "PokemonID.h"
+#include "MoveID.h"
+#include "Pokemon.h"
+#include "Move.h"
 #include "PokedexConstexpr.h"
 #include "MovedexConstexpr.h"
 
-class Pokemon;
-class Move;
-
-class Database
+namespace Database
 {
-private:
-    Database();
-    ~Database() = default;
+    constexpr std::span<const Pokemon> GetPokedexView()
+    {
+        return global_pokedex;
+    }
 
-public:
-    Database(const Database&) = delete; // No copy constructor
-    Database& operator=(const Database&) = delete; // no copy assignment
+    constexpr std::span<const Move> GetMovedexView()
+    {
+        return global_movedex;
+    }
 
-    const Pokemon* GetPointerToPokedexNumber(size_t) const;
-    const Move*    GetPointerToMovedexNumber(size_t) const;
+    constexpr const Pokemon* GetPointerToBasePokemonByIndex(size_t index)
+    {
+        return &(global_pokedex[index]);
+    }
 
-    std::span<const Pokemon> GetPokedexView() const;
-    std::span<const Move> GetMovedexView() const;
+    constexpr const Pokemon* GetPointerToBasePokemonByID(PokemonID id)
+    {
+        return &(global_pokedex[IDToIndex(id)]);
+    }
 
-    static Database& GetInstance();
+    constexpr const Move* GetPointerToBaseMoveByIndex(size_t index)
+    {
+        return &(global_movedex[index]);
+    }
 
-    void TestingPokemonAndMoves(Pokemon*&, Pokemon*&);
+    constexpr const Move* GetPointerToBaseMoveByID(MoveID id)
+    {
+        return &(global_movedex[IDToIndex(id)]);
+    }
 
-private:
+    constexpr const Pokemon& GetBasePokemonByID(PokemonID id)
+    {
+        return global_pokedex[IDToIndex(id)];
+    }
 
-private:
+    constexpr const Pokemon& GetBasePokemonByIndex(size_t index)
+    {
+        return global_pokedex[index];
+    }
 
-    std::span<const Pokemon> pokedex = global_pokedex;
-    std::span<const Move> movedex = global_movedex;
+    constexpr const Move& GetBaseMoveByID(MoveID id)
+    {
+        return global_movedex[IDToIndex(id)];
+    }
+
+    constexpr const Move& GetBaseMoveByIndex(size_t index)
+    {
+        return global_movedex[index];
+    }
 };

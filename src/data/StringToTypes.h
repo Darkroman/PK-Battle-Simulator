@@ -1,27 +1,37 @@
 #pragma once
 
-#include <unordered_map>
-#include <string>
+#include <string_view>
+#include <array>
+#include <utility>
 
-enum class Category // Used in Moves
+#include "../common/EnumUtils.h"
+
+enum class Category : unsigned int // Used in Moves
 {
-    Physical,
+    Physical = 0,
     Special,
     Status,
-    None
+    None,
+    Count
 };
 
-using mapOfStringsToCategories = std::unordered_map<std::string_view, Category>;
+constexpr auto NumCategories = std::to_underlying(Category::Count);
 
-Category ConvertStringToCategory(std::string_view);
+constexpr std::array<std::string_view, NumCategories> kCategoryNames{
+    "Physical", "Special", "Status", "None" };
 
-enum class PokemonType : size_t // Used in Moves, Pokemon, and BattlePokemon
+constexpr std::string_view CategoryToString(Category category)
+{
+    return kCategoryNames[EnumIndex(category)];
+}
+
+enum class PokemonType : unsigned int // Used in Moves, Pokemon, and BattlePokemon
 {
     Normal = 0,
     Fire,
     Water,
-    Electric,
     Grass,
+    Electric,
     Ice,
     Fighting,
     Poison,
@@ -35,11 +45,19 @@ enum class PokemonType : size_t // Used in Moves, Pokemon, and BattlePokemon
     Dark,
     Steel,
     Fairy,
-    None
+    None,
+    Count
 };
 
-using mapOfStringsToPokemonTypes = std::unordered_map<std::string_view, PokemonType>;
+constexpr auto NumTypes = std::to_underlying(PokemonType::Count);
 
-PokemonType ConvertStringToPokemonType(std::string_view);
+constexpr std::array<std::string_view, NumTypes> kTypeNames{
+    "Normal", "Fire", "Water", "Grass", "Electric", "Ice",
+    "Fighting", "Poison", "Ground", "Flying", "Psychic", "Bug",
+    "Rock", "Ghost", "Dragon", "Dark", "Steel", "Fairy", "None"
+};
 
-bool ConvertStringToBool(const std::string&);
+constexpr std::string_view TypeToString(PokemonType type)
+{
+    return kTypeNames[EnumIndex(type)];
+}

@@ -1,133 +1,141 @@
+#include <array>
+#include <span>
+#include <algorithm>
+
 #include "MoveRoutines.h"
 
+#include "MoveEffectEnums.h"
 #include "MoveHelpers.h"
 #include "MoveRoutineDeps.h"
+#include "../common/EnumUtils.h"
 #include "../data/Database.h"
-#include "../battle/BattleCalculations.h"
-#include "../battle/StatusEffectProcessor.h"
-#include "../ui/interfaces/IMoveResultsUI.h"
-#include "../battle/RandomEngine.h"
-#include "../battle/SwitchExecutor.h"
+#include "../data/MoveID.h"
 #include "../data/Move.h"
 #include "../data/StringToTypes.h"
+#include "../battle/BattleCalculations.h"
+#include "../battle/StatusEffectProcessor.h"
+#include "../battle/BattleContext.h"
+#include "../battle/RandomEngine.h"
 #include "../entities/controllers/AIController.h"
+#include "../entities/BattlePokemon.h"
 #include "../entities/Player.h"
+#include "../entities/pokemonMove.h"
+#include "../ui/interfaces/IMoveResultsUI.h"
 
 namespace MoveRoutines
 {
-	static inline constexpr std::array<RoutineFn, static_cast<size_t>(MoveEffect::COUNT)> JumpTable = []() {
-		std::array<RoutineFn, static_cast<size_t>(MoveEffect::COUNT)> table{};
+	static inline constexpr std::array<RoutineFn, EnumIndex(MoveEffect::COUNT)> JumpTable = []() {
+		std::array<RoutineFn, EnumIndex(MoveEffect::COUNT)> table{};
 
 		table.fill(Noop);
 
-		table[static_cast<size_t>(MoveEffect::NormalHit)] = NormalHit;
-		table[static_cast<size_t>(MoveEffect::IncreasedCritical)] = IncreasedCritical;
-		table[static_cast<size_t>(MoveEffect::MultiHit)] = MultiHit;
-		table[static_cast<size_t>(MoveEffect::BurnHit)] = BurnHit;
-		table[static_cast<size_t>(MoveEffect::FreezeHit)] = FreezeHit;
-		table[static_cast<size_t>(MoveEffect::ParalyzeHit)] = ParalyzeHit;
-		table[static_cast<size_t>(MoveEffect::OHKO)] = OHKO;
-		table[static_cast<size_t>(MoveEffect::RazorWind)] = RazorWind;
-		table[static_cast<size_t>(MoveEffect::AttackUp2)] = AttackUp2;
-		table[static_cast<size_t>(MoveEffect::Gust)] = Gust;
-		table[static_cast<size_t>(MoveEffect::ForceSwitch)] = ForceSwitch;
-		table[static_cast<size_t>(MoveEffect::Fly)] = Fly;
-		table[static_cast<size_t>(MoveEffect::PartialTrap)] = PartialTrap;
-		table[static_cast<size_t>(MoveEffect::Stomp)] = Stomp;
-		table[static_cast<size_t>(MoveEffect::DoubleHit)] = DoubleHit;
-		table[static_cast<size_t>(MoveEffect::JumpKick)] = JumpKick;
-		table[static_cast<size_t>(MoveEffect::FlinchHit)] = FlinchHit;
-		table[static_cast<size_t>(MoveEffect::AccuracyDown)] = AccuracyDown;
-		table[static_cast<size_t>(MoveEffect::BodySlam)] = BodySlam;
-		table[static_cast<size_t>(MoveEffect::RecoilQuarter)] = RecoilQuarter;
-		table[static_cast<size_t>(MoveEffect::Rampage)] = Rampage;
-		table[static_cast<size_t>(MoveEffect::RecoilThird)] = RecoilThird;
-		table[static_cast<size_t>(MoveEffect::DefenseDown)] = DefenseDown;
-		table[static_cast<size_t>(MoveEffect::PoisonHit)] = PoisonHit;
-		table[static_cast<size_t>(MoveEffect::Twineedle)] = Twineedle;
-		table[static_cast<size_t>(MoveEffect::AttackDown)] = AttackDown;
-		table[static_cast<size_t>(MoveEffect::SleepMove)] = SleepMove;
-		table[static_cast<size_t>(MoveEffect::Confuse)] = Confuse;
-		table[static_cast<size_t>(MoveEffect::SonicBoom)] = SonicBoom;
-		table[static_cast<size_t>(MoveEffect::Disable)] = Disable;
-		table[static_cast<size_t>(MoveEffect::SpecialDefenseDownHit)] = SpecialDefenseDownHit;
-		table[static_cast<size_t>(MoveEffect::Mist)] = Mist;
-		table[static_cast<size_t>(MoveEffect::ConfuseHit)] = ConfuseHit;
-		table[static_cast<size_t>(MoveEffect::SpeedDownHit)] = SpeedDownHit;
-		table[static_cast<size_t>(MoveEffect::AttackDownHit)] = AttackDownHit;
-		table[static_cast<size_t>(MoveEffect::RechargeAttack)] = RechargeAttack;
-		table[static_cast<size_t>(MoveEffect::LowKick)] = LowKick;
-		table[static_cast<size_t>(MoveEffect::Counter)] = Counter;
-		table[static_cast<size_t>(MoveEffect::SeismicToss)] = SeismicToss;
-		table[static_cast<size_t>(MoveEffect::Leech)] = Leech;
-		table[static_cast<size_t>(MoveEffect::LeechSeed)] = LeechSeed;
-		table[static_cast<size_t>(MoveEffect::Growth)] = Growth;
-		table[static_cast<size_t>(MoveEffect::SolarBeam)] = SolarBeam;
-		table[static_cast<size_t>(MoveEffect::PoisonPowder)] = PoisonPowder;
-		table[static_cast<size_t>(MoveEffect::StunSpore)] = StunSpore;
-		table[static_cast<size_t>(MoveEffect::SleepPowder)] = SleepPowder;
-		table[static_cast<size_t>(MoveEffect::SpeedDown2)] = SpeedDown2;
-		table[static_cast<size_t>(MoveEffect::DragonRage)] = DragonRage;
-		table[static_cast<size_t>(MoveEffect::Paralyze)] = Paralyze;
-		table[static_cast<size_t>(MoveEffect::Earthquake)] = Earthquake;
-		table[static_cast<size_t>(MoveEffect::Dig)] = Dig;
-		table[static_cast<size_t>(MoveEffect::Toxic)] = Toxic;
-		table[static_cast<size_t>(MoveEffect::AttackUp)] = AttackUp;
-		table[static_cast<size_t>(MoveEffect::SpeedUp2)] = SpeedUp2;
-		table[static_cast<size_t>(MoveEffect::Rage)] = Rage;
-		table[static_cast<size_t>(MoveEffect::Teleport)] = Teleport;
-		table[static_cast<size_t>(MoveEffect::NightShade)] = NightShade;
-		table[static_cast<size_t>(MoveEffect::Mimic)] = Mimic;
-		table[static_cast<size_t>(MoveEffect::DefenseDown2)] = DefenseDown2;
-		table[static_cast<size_t>(MoveEffect::EvasionUp)] = EvasionUp;
-		table[static_cast<size_t>(MoveEffect::HealHalfHP)] = HealHalfHP;
-		table[static_cast<size_t>(MoveEffect::DefenseUp)] = DefenseUp;
-		table[static_cast<size_t>(MoveEffect::Minimize)] = Minimize;
-		table[static_cast<size_t>(MoveEffect::DefenseUp2)] = DefenseUp2;
-		table[static_cast<size_t>(MoveEffect::LightScreen)] = LightScreen;
-		table[static_cast<size_t>(MoveEffect::Haze)] = Haze;
-		table[static_cast<size_t>(MoveEffect::Reflect)] = Reflect;
-		table[static_cast<size_t>(MoveEffect::FocusEnergy)] = FocusEnergy;
-		table[static_cast<size_t>(MoveEffect::Bide)] = Bide;
-		table[static_cast<size_t>(MoveEffect::Metronome)] = Metronome;
-		table[static_cast<size_t>(MoveEffect::MirrorMove)] = MirrorMove;
-		table[static_cast<size_t>(MoveEffect::Explosion)] = Explosion;
-		table[static_cast<size_t>(MoveEffect::AlwaysHit)] = AlwaysHit;
-		table[static_cast<size_t>(MoveEffect::SkullBash)] = SkullBash;
-		table[static_cast<size_t>(MoveEffect::SpecialDefenseUp2)] = SpecialDefenseUp2;
-		table[static_cast<size_t>(MoveEffect::DreamEater)] = DreamEater;
-		table[static_cast<size_t>(MoveEffect::PoisonGas)] = PoisonGas;
-		table[static_cast<size_t>(MoveEffect::SkyAttack)] = SkyAttack;
-		table[static_cast<size_t>(MoveEffect::Transform)] = Transform;
-		table[static_cast<size_t>(MoveEffect::Psywave)] = Psywave;
-		table[static_cast<size_t>(MoveEffect::Splash)] = Splash;
-		table[static_cast<size_t>(MoveEffect::Rest)] = Rest;
-		table[static_cast<size_t>(MoveEffect::Conversion)] = Conversion;
-		table[static_cast<size_t>(MoveEffect::TriAttack)] = TriAttack;
-		table[static_cast<size_t>(MoveEffect::SuperFang)] = SuperFang;
-		table[static_cast<size_t>(MoveEffect::Substitute)] = Substitute;
-		table[static_cast<size_t>(MoveEffect::Struggle)] = Struggle;
+		table[EnumIndex(MoveEffect::NormalHit)] = NormalHit;
+		table[EnumIndex(MoveEffect::IncreasedCritical)] = IncreasedCritical;
+		table[EnumIndex(MoveEffect::MultiHit)] = MultiHit;
+		table[EnumIndex(MoveEffect::BurnHit)] = BurnHit;
+		table[EnumIndex(MoveEffect::FreezeHit)] = FreezeHit;
+		table[EnumIndex(MoveEffect::ParalyzeHit)] = ParalyzeHit;
+		table[EnumIndex(MoveEffect::OHKO)] = OHKO;
+		table[EnumIndex(MoveEffect::RazorWind)] = RazorWind;
+		table[EnumIndex(MoveEffect::AttackUp2)] = AttackUp2;
+		table[EnumIndex(MoveEffect::Gust)] = Gust;
+		table[EnumIndex(MoveEffect::ForceSwitch)] = ForceSwitch;
+		table[EnumIndex(MoveEffect::Fly)] = Fly;
+		table[EnumIndex(MoveEffect::PartialTrap)] = PartialTrap;
+		table[EnumIndex(MoveEffect::Stomp)] = Stomp;
+		table[EnumIndex(MoveEffect::DoubleHit)] = DoubleHit;
+		table[EnumIndex(MoveEffect::JumpKick)] = JumpKick;
+		table[EnumIndex(MoveEffect::FlinchHit)] = FlinchHit;
+		table[EnumIndex(MoveEffect::AccuracyDown)] = AccuracyDown;
+		table[EnumIndex(MoveEffect::BodySlam)] = BodySlam;
+		table[EnumIndex(MoveEffect::RecoilQuarter)] = RecoilQuarter;
+		table[EnumIndex(MoveEffect::Rampage)] = Rampage;
+		table[EnumIndex(MoveEffect::RecoilThird)] = RecoilThird;
+		table[EnumIndex(MoveEffect::DefenseDown)] = DefenseDown;
+		table[EnumIndex(MoveEffect::PoisonHit)] = PoisonHit;
+		table[EnumIndex(MoveEffect::Twineedle)] = Twineedle;
+		table[EnumIndex(MoveEffect::AttackDown)] = AttackDown;
+		table[EnumIndex(MoveEffect::SleepMove)] = SleepMove;
+		table[EnumIndex(MoveEffect::Confuse)] = Confuse;
+		table[EnumIndex(MoveEffect::SonicBoom)] = SonicBoom;
+		table[EnumIndex(MoveEffect::Disable)] = Disable;
+		table[EnumIndex(MoveEffect::SpecialDefenseDownHit)] = SpecialDefenseDownHit;
+		table[EnumIndex(MoveEffect::Mist)] = Mist;
+		table[EnumIndex(MoveEffect::ConfuseHit)] = ConfuseHit;
+		table[EnumIndex(MoveEffect::SpeedDownHit)] = SpeedDownHit;
+		table[EnumIndex(MoveEffect::AttackDownHit)] = AttackDownHit;
+		table[EnumIndex(MoveEffect::RechargeAttack)] = RechargeAttack;
+		table[EnumIndex(MoveEffect::LowKick)] = LowKick;
+		table[EnumIndex(MoveEffect::Counter)] = Counter;
+		table[EnumIndex(MoveEffect::SeismicToss)] = SeismicToss;
+		table[EnumIndex(MoveEffect::Leech)] = Leech;
+		table[EnumIndex(MoveEffect::LeechSeed)] = LeechSeed;
+		table[EnumIndex(MoveEffect::Growth)] = Growth;
+		table[EnumIndex(MoveEffect::SolarBeam)] = SolarBeam;
+		table[EnumIndex(MoveEffect::PoisonPowder)] = PoisonPowder;
+		table[EnumIndex(MoveEffect::StunSpore)] = StunSpore;
+		table[EnumIndex(MoveEffect::SleepPowder)] = SleepPowder;
+		table[EnumIndex(MoveEffect::SpeedDown2)] = SpeedDown2;
+		table[EnumIndex(MoveEffect::DragonRage)] = DragonRage;
+		table[EnumIndex(MoveEffect::Paralyze)] = Paralyze;
+		table[EnumIndex(MoveEffect::Earthquake)] = Earthquake;
+		table[EnumIndex(MoveEffect::Dig)] = Dig;
+		table[EnumIndex(MoveEffect::Toxic)] = Toxic;
+		table[EnumIndex(MoveEffect::AttackUp)] = AttackUp;
+		table[EnumIndex(MoveEffect::SpeedUp2)] = SpeedUp2;
+		table[EnumIndex(MoveEffect::Rage)] = Rage;
+		table[EnumIndex(MoveEffect::Teleport)] = Teleport;
+		table[EnumIndex(MoveEffect::NightShade)] = NightShade;
+		table[EnumIndex(MoveEffect::Mimic)] = Mimic;
+		table[EnumIndex(MoveEffect::DefenseDown2)] = DefenseDown2;
+		table[EnumIndex(MoveEffect::EvasionUp)] = EvasionUp;
+		table[EnumIndex(MoveEffect::HealHalfHP)] = HealHalfHP;
+		table[EnumIndex(MoveEffect::DefenseUp)] = DefenseUp;
+		table[EnumIndex(MoveEffect::Minimize)] = Minimize;
+		table[EnumIndex(MoveEffect::DefenseUp2)] = DefenseUp2;
+		table[EnumIndex(MoveEffect::LightScreen)] = LightScreen;
+		table[EnumIndex(MoveEffect::Haze)] = Haze;
+		table[EnumIndex(MoveEffect::Reflect)] = Reflect;
+		table[EnumIndex(MoveEffect::FocusEnergy)] = FocusEnergy;
+		table[EnumIndex(MoveEffect::Bide)] = Bide;
+		table[EnumIndex(MoveEffect::Metronome)] = Metronome;
+		table[EnumIndex(MoveEffect::MirrorMove)] = MirrorMove;
+		table[EnumIndex(MoveEffect::Explosion)] = Explosion;
+		table[EnumIndex(MoveEffect::AlwaysHit)] = AlwaysHit;
+		table[EnumIndex(MoveEffect::SkullBash)] = SkullBash;
+		table[EnumIndex(MoveEffect::SpecialDefenseUp2)] = SpecialDefenseUp2;
+		table[EnumIndex(MoveEffect::DreamEater)] = DreamEater;
+		table[EnumIndex(MoveEffect::PoisonGas)] = PoisonGas;
+		table[EnumIndex(MoveEffect::SkyAttack)] = SkyAttack;
+		table[EnumIndex(MoveEffect::Transform)] = Transform;
+		table[EnumIndex(MoveEffect::Psywave)] = Psywave;
+		table[EnumIndex(MoveEffect::Splash)] = Splash;
+		table[EnumIndex(MoveEffect::Rest)] = Rest;
+		table[EnumIndex(MoveEffect::Conversion)] = Conversion;
+		table[EnumIndex(MoveEffect::TriAttack)] = TriAttack;
+		table[EnumIndex(MoveEffect::SuperFang)] = SuperFang;
+		table[EnumIndex(MoveEffect::Substitute)] = Substitute;
+		table[EnumIndex(MoveEffect::Struggle)] = Struggle;
 
 		return table;
 		}();
 
 	void Execute(MoveEffect ID, MoveRoutineDeps& deps)
 	{
-		JumpTable[static_cast<size_t>(ID)](deps);
+		JumpTable[EnumIndex(ID)](deps);
 	}
 
 	void Noop(MoveRoutineDeps& deps)
 	{
-		auto& ctx = deps.context;
+		//auto& ctx = deps.context;
 
-		deps.resultsUI.UsedTextDialog(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView(), ctx.currentMove->GetName());
-		deps.resultsUI.UsedTextDialog(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView(), ctx.currentMove->GetName());
+		//deps.resultsUI.UsedTextDialog(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView(), ctx.currentMove->GetName());
 
-		ctx.currentMove->DeductPP();
+		//ctx.currentMove->DeductPP();
 
-		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
+		//ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 
-		deps.resultsUI.DisplayNoopMsg();
+		//deps.resultsUI.DisplayNoopMsg();
 	}
 
 	void NormalHit(MoveRoutineDeps& deps)
@@ -139,6 +147,11 @@ namespace MoveRoutines
 		ctx.currentMove->DeductPP();
 
 		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
+
+		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
+		{
+			return;
+		}
 
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
@@ -172,6 +185,11 @@ namespace MoveRoutines
 
 		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 
+		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
+		{
+			return;
+		}
+
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
 		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
@@ -188,8 +206,8 @@ namespace MoveRoutines
 			return;
 		}
 
-		size_t oldCritStage = ctx.attackingPokemon->GetCriticalHitStage();
-		size_t newCritStage = oldCritStage + 1;
+		unsigned int oldCritStage = ctx.attackingPokemon->GetCriticalHitStage();
+		unsigned int newCritStage = oldCritStage + 1;
 
 		ctx.attackingPokemon->SetCriticalHitStage(newCritStage);
 
@@ -211,6 +229,11 @@ namespace MoveRoutines
 
 		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 
+		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
+		{ 
+			return;
+		}
+
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
 		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
@@ -227,8 +250,7 @@ namespace MoveRoutines
 			return;
 		}
 
-		std::uniform_int_distribution<int> randomModDistributor(1, 100);
-		int randomNumber = randomModDistributor(deps.rng.GetGenerator());
+		int randomNumber{ deps.rng.GetPercentRoll() };
 
 		int turnCount{};
 
@@ -255,6 +277,11 @@ namespace MoveRoutines
 		ctx.currentMove->DeductPP();
 
 		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
+
+		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
+		{
+			return;
+		}
 
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
@@ -290,6 +317,11 @@ namespace MoveRoutines
 
 		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 
+		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
+		{
+			return;
+		}
+
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
 		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
@@ -323,6 +355,11 @@ namespace MoveRoutines
 		ctx.currentMove->DeductPP();
 
 		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
+
+		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
+		{
+			return;
+		}
 
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
@@ -358,6 +395,11 @@ namespace MoveRoutines
 
 		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 
+		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
+		{
+			return;
+		}
+
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
 		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
@@ -376,6 +418,8 @@ namespace MoveRoutines
 
 		// OHKO specific logic done in CalculateDamage()
 		DamageRoutine(deps);
+
+		deps.resultsUI.DisplayOHKOTextDialog();
 
 		deps.statusProcessor.CheckSubstituteCondition(ctx.defendingPlayer, ctx.defendingPokemon);
 		deps.statusProcessor.CheckFaintCondition(*ctx.attackingPlayer, *ctx.defendingPlayer, *ctx.attackingPokemon, *ctx.defendingPokemon);
@@ -396,6 +440,11 @@ namespace MoveRoutines
 
 		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 
+		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
+		{
+			return;
+		}
+
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
 		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
@@ -412,8 +461,8 @@ namespace MoveRoutines
 			return;
 		}
 
-		size_t oldCritStage = ctx.attackingPokemon->GetCriticalHitStage();
-		size_t newCritStage = oldCritStage + 1;
+		unsigned int oldCritStage = ctx.attackingPokemon->GetCriticalHitStage();
+		unsigned int newCritStage = oldCritStage + 1;
 
 		ctx.attackingPokemon->SetCriticalHitStage(newCritStage);
 
@@ -435,7 +484,7 @@ namespace MoveRoutines
 
 		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 
-		StageUpRoutine(deps, 2, "attack", [](BattlePokemon& p) { return p.GetAttackStage(); }, [](BattlePokemon& p, size_t val) { p.SetAttackStage(val); });
+		StageUpRoutine(deps, 2, "attack", [](BattlePokemon& p) { return p.GetAttackStage(); }, [](BattlePokemon& p, int val) { p.SetAttackStage(val); });
 	}
 
 	void Gust(MoveRoutineDeps& deps)
@@ -447,6 +496,11 @@ namespace MoveRoutines
 		ctx.currentMove->DeductPP();
 
 		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
+
+		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
+		{
+			return;
+		}
 
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
@@ -483,6 +537,11 @@ namespace MoveRoutines
 
 		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 
+		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
+		{
+			return;
+		}
+
 		if (ctx.defendingPlayer->GetPokemonLeft() == 1 || !ctx.defendingPlayer->IsFirst())
 		{
 			deps.resultsUI.DisplayFailedTextDialog();
@@ -511,8 +570,7 @@ namespace MoveRoutines
 
 		std::span<BattlePokemon*> enemyListView{ enemyPokemonList.data(), count };
 
-		std::uniform_int_distribution<size_t> randomModDistributor(0, count - 1);
-		BattlePokemon* newMon = enemyListView[randomModDistributor(deps.rng.GetGenerator())];
+		BattlePokemon* newMon{ enemyListView[deps.rng.RandomRange(0, count - 1)] };
 
 		// Reset stats for the Pokémon being forced out
 		ctx.defendingPokemon->ResetStatsOnSwitch();
@@ -560,6 +618,11 @@ namespace MoveRoutines
 
 		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 
+		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
+		{
+			return;
+		}
+
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
 		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
@@ -591,6 +654,11 @@ namespace MoveRoutines
 		ctx.currentMove->DeductPP();
 
 		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
+
+		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
+		{
+			return;
+		}
 
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
@@ -624,13 +692,12 @@ namespace MoveRoutines
 				ctx.defendingPlayer->SetCanSwitch(false);
 			}
 
-			std::uniform_int_distribution<unsigned int> randomModDistributor(4, 5);
-			unsigned int randomMod = randomModDistributor(deps.rng.GetGenerator());
+			unsigned int randomMod{ deps.rng.GetBoundTurnRoll() };
 			ctx.defendingPokemon->SetBoundTurnCount(randomMod);
 			ctx.defendingPokemon->ResetBoundCounter();
-			ctx.defendingPokemon->SetBoundMoveName(ctx.currentMove->GetMoveIndex());
+			ctx.defendingPokemon->SetBoundMoveName(ctx.currentMove->GetMoveID());
 
-			deps.resultsUI.BoundMoveText(ctx.attackingPlayer->GetPlayerNameView(), ctx.defendingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView(), ctx.defendingPokemon->GetNameView(), ctx.currentMove->GetMoveIndex());
+			deps.resultsUI.BoundMoveText(ctx.attackingPlayer->GetPlayerNameView(), ctx.defendingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView(), ctx.defendingPokemon->GetNameView(), ctx.currentMove->GetMoveID());
 		}
 	}
 
@@ -643,6 +710,11 @@ namespace MoveRoutines
 		ctx.currentMove->DeductPP();
 
 		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
+
+		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
+		{
+			return;
+		}
 
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
@@ -690,6 +762,11 @@ namespace MoveRoutines
 
 		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 
+		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
+		{
+			return;
+		}
+
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
 		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
@@ -706,7 +783,7 @@ namespace MoveRoutines
 			return;
 		}
 
-		int turnCount = 2;
+		int turnCount{ 2 };
 
 		MultiStrikeRoutine(deps, turnCount);
 
@@ -722,6 +799,11 @@ namespace MoveRoutines
 		ctx.currentMove->DeductPP();
 
 		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
+
+		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
+		{
+			return;
+		}
 
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
@@ -760,6 +842,11 @@ namespace MoveRoutines
 
 		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 
+		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
+		{
+			return;
+		}
+
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
 		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
@@ -794,6 +881,11 @@ namespace MoveRoutines
 
 		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 
+		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
+		{
+			return;
+		}
+
 		ctx.flags.hit = deps.calculations.CalculateHitChance(*ctx.currentMove, *ctx.attackingPokemon, *ctx.defendingPokemon);
 
 		if (ctx.flags.hit && ctx.defendingPokemon->HasSubstitute() && !ctx.currentMove->CanBypassSubstitute())
@@ -814,7 +906,7 @@ namespace MoveRoutines
 			return;
 		}
 
-		StageDownRoutine(deps, 1, "accuracy", [](BattlePokemon& p) { return p.GetAccuracyStage(); }, [](BattlePokemon& p, size_t val) { p.SetAccuracyStage(val); });
+		StageDownRoutine(deps, 1, "accuracy", [](BattlePokemon& p) { return p.GetAccuracyStage(); }, [](BattlePokemon& p, int val) { p.SetAccuracyStage(val); });
 	}
 
 	void BodySlam(MoveRoutineDeps& deps)
@@ -826,6 +918,11 @@ namespace MoveRoutines
 		ctx.currentMove->DeductPP();
 
 		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
+
+		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
+		{
+			return;
+		}
 
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
@@ -873,6 +970,11 @@ namespace MoveRoutines
 
 		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 
+		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
+		{
+			return;
+		}
+
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
 		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
@@ -907,22 +1009,31 @@ namespace MoveRoutines
 	{
 		auto& ctx = deps.context;
 
-		if (!ctx.attackingPokemon->IsThrashing())
+		if (!ctx.attackingPokemon->IsRampaging())
 		{
 			ctx.currentMove->DeductPP();
 
-			ctx.attackingPokemon->SetThrashing(true);
+			ctx.attackingPokemon->SetRampaging(true);
 			ctx.attackingPlayer->SetCanSwitch(false);
 
-			std::uniform_int_distribution<unsigned int> randomModDistributor(1, 2);
-			unsigned int randomMod(randomModDistributor(deps.rng.GetGenerator()));
-			ctx.attackingPokemon->SetThrashTurnCount(randomMod);
-			ctx.attackingPokemon->ResetThrashCounter();
+			unsigned int randomMod{ deps.rng.GetRampageTurnRoll() };
+			ctx.attackingPokemon->SetRampageTurnCount(randomMod);
+			ctx.attackingPokemon->ResetRampageCounter();
 		}
 
 		deps.resultsUI.UsedTextDialog(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView(), ctx.currentMove->GetName());
 
 		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
+
+		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
+		{
+			if (ctx.attackingPokemon->GetRampageCounter() >= ctx.attackingPokemon->GetRampageTurnCount() && !ctx.attackingPokemon->IsConfused())
+			{
+				deps.statusProcessor.RampageConfuse();
+			}
+
+			return;
+		}
 
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
@@ -949,18 +1060,17 @@ namespace MoveRoutines
 			deps.statusProcessor.CheckFaintCondition(*ctx.attackingPlayer, *ctx.defendingPlayer, *ctx.attackingPokemon, *ctx.defendingPokemon);
 		}
 
-		bool reachedEnd = ctx.attackingPokemon->GetThrashCounter() >= ctx.attackingPokemon->GetThrashTurnCount();
+		bool reachedEnd = ctx.attackingPokemon->GetRampageCounter() >= ctx.attackingPokemon->GetRampageTurnCount();
 		bool moveFailed = !ctx.flags.hit || ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No;
 
 		if (moveFailed || reachedEnd)
 		{
 			if (reachedEnd && !ctx.attackingPokemon->IsConfused())
 			{
-				deps.statusProcessor.ThrashConfuse();
+				deps.statusProcessor.RampageConfuse();
 			}
 
-			deps.statusProcessor.ThrashStop();
-			deps.statusProcessor.ThrashReset();
+			deps.statusProcessor.ResetRampageState();
 		}
 	}
 
@@ -975,6 +1085,11 @@ namespace MoveRoutines
 		ctx.currentMove->DeductPP();
 
 		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
+
+		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
+		{
+			return;
+		}
 
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
@@ -1014,6 +1129,11 @@ namespace MoveRoutines
 
 		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 
+		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
+		{
+			return;
+		}
+
 		ctx.flags.hit = deps.calculations.CalculateHitChance(*ctx.currentMove, *ctx.attackingPokemon, *ctx.defendingPokemon);
 
 		if (ctx.flags.hit && ctx.defendingPokemon->HasSubstitute() && !ctx.currentMove->CanBypassSubstitute())
@@ -1034,7 +1154,7 @@ namespace MoveRoutines
 			return;
 		}
 
-		StageDownRoutine(deps, 1, "defense", [](BattlePokemon& p) { return p.GetDefenseStage(); }, [](BattlePokemon& p, size_t val) { p.SetDefenseStage(val); });
+		StageDownRoutine(deps, 1, "defense", [](BattlePokemon& p) { return p.GetDefenseStage(); }, [](BattlePokemon& p, int val) { p.SetDefenseStage(val); });
 	}
 
 	void PoisonHit(MoveRoutineDeps& deps)
@@ -1046,6 +1166,11 @@ namespace MoveRoutines
 		ctx.currentMove->DeductPP();
 
 		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
+
+		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
+		{
+			return;
+		}
 
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
@@ -1081,6 +1206,11 @@ namespace MoveRoutines
 
 		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 
+		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
+		{
+			return;
+		}
+
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
 		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
@@ -1114,6 +1244,11 @@ namespace MoveRoutines
 
 		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 
+		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
+		{
+			return;
+		}
+
 		ctx.flags.hit = deps.calculations.CalculateHitChance(*ctx.currentMove, *ctx.attackingPokemon, *ctx.defendingPokemon);
 
 		if (ctx.flags.hit && ctx.defendingPokemon->HasSubstitute() && !ctx.currentMove->CanBypassSubstitute())
@@ -1134,7 +1269,7 @@ namespace MoveRoutines
 			return;
 		}
 
-		StageDownRoutine(deps, 1, "attack", [](BattlePokemon& p) { return p.GetAttackStage(); }, [](BattlePokemon& p, size_t val) { p.SetAttackStage(val); });
+		StageDownRoutine(deps, 1, "attack", [](BattlePokemon& p) { return p.GetAttackStage(); }, [](BattlePokemon& p, int val) { p.SetAttackStage(val); });
 	}
 
 	void SleepMove(MoveRoutineDeps& deps)
@@ -1146,6 +1281,11 @@ namespace MoveRoutines
 		ctx.currentMove->DeductPP();
 
 		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
+
+		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
+		{
+			return;
+		}
 
 		ctx.flags.hit = deps.calculations.CalculateHitChance(*ctx.currentMove, *ctx.attackingPokemon, *ctx.defendingPokemon);
 
@@ -1180,6 +1320,11 @@ namespace MoveRoutines
 
 		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 
+		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
+		{
+			return;
+		}
+
 		ctx.flags.hit = deps.calculations.CalculateHitChance(*ctx.currentMove, *ctx.attackingPokemon, *ctx.defendingPokemon);
 
 		if (!ctx.flags.hit)
@@ -1196,8 +1341,7 @@ namespace MoveRoutines
 
 		ctx.defendingPokemon->SetConfusedStatus(true);
 
-		std::uniform_int_distribution<unsigned int> randomModDistributor(1, 4);
-		unsigned int randomMod(randomModDistributor(deps.rng.GetGenerator()));
+		unsigned int randomMod{ deps.rng.GetConfusionTurnRoll() };
 		ctx.defendingPokemon->SetConfusedTurnCount(randomMod);
 		ctx.defendingPokemon->ResetConfusedCounter();
 
@@ -1213,6 +1357,11 @@ namespace MoveRoutines
 		ctx.currentMove->DeductPP();
 
 		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
+
+		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
+		{
+			return;
+		}
 
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
@@ -1248,6 +1397,11 @@ namespace MoveRoutines
 
 		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 
+		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
+		{
+			return;
+		}
+
 		ctx.flags.hit = deps.calculations.CalculateHitChance(*ctx.currentMove, *ctx.attackingPokemon, *ctx.defendingPokemon);
 
 		if (!ctx.flags.hit)
@@ -1260,7 +1414,7 @@ namespace MoveRoutines
 
 		if (!lastUsed ||
 			ctx.defendingPokemon->MoveIsDisabled() ||
-			ctx.defendingPokemon->GetLastUsedMove()->m_currentPP == 0 ||
+			ctx.defendingPokemon->GetLastUsedMove()->m_currentPP <= 0 ||
 			ctx.defendingPokemon->GetLastUsedMove()->GetMoveEffectEnum() == MoveEffect::Struggle)
 		{
 			deps.resultsUI.DisplayFailedTextDialog();
@@ -1284,6 +1438,11 @@ namespace MoveRoutines
 
 		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 
+		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
+		{
+			return;
+		}
+
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
 		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
@@ -1305,7 +1464,7 @@ namespace MoveRoutines
 		deps.statusProcessor.CheckSubstituteCondition(ctx.defendingPlayer, ctx.defendingPokemon);
 		deps.statusProcessor.CheckFaintCondition(*ctx.attackingPlayer, *ctx.defendingPlayer, *ctx.attackingPokemon, *ctx.defendingPokemon);
 
-		StageDownDamageRoutine(deps, 1, "special defense", [](BattlePokemon& p) { return p.GetSpecialDefenseStage(); }, [](BattlePokemon& p, size_t val) { p.SetSpecialDefenseStage(val); });
+		StageDownDamageRoutine(deps, 1, "special defense", [](BattlePokemon& p) { return p.GetSpecialDefenseStage(); }, [](BattlePokemon& p, int val) { p.SetSpecialDefenseStage(val); });
 	}
 
 	void Mist(MoveRoutineDeps& deps)
@@ -1339,6 +1498,11 @@ namespace MoveRoutines
 
 		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 
+		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
+		{
+			return;
+		}
+
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
 		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
@@ -1361,8 +1525,7 @@ namespace MoveRoutines
 
 		if (!ctx.defendingPokemon->IsFainted() && !ctx.defendingPokemon->IsConfused() && !ctx.flags.hitSubstitute)
 		{
-			std::uniform_int_distribution<int> randomModDistributor(1, 100);
-			int randomNumber{ randomModDistributor(deps.rng.GetGenerator()) };
+			int randomNumber{ deps.rng.GetPercentRoll() };
 
 			if (randomNumber <= ctx.currentMove->GetEffectChance())
 			{
@@ -1370,8 +1533,7 @@ namespace MoveRoutines
 
 				ctx.defendingPokemon->SetConfusedStatus(true);
 
-				std::uniform_int_distribution<unsigned int> randomModDistributor(1, 4);
-				unsigned int randomMod(randomModDistributor(deps.rng.GetGenerator()));
+				unsigned int randomMod{ deps.rng.GetConfusionTurnRoll() };
 				ctx.defendingPokemon->SetConfusedTurnCount(randomMod);
 				ctx.defendingPokemon->ResetConfusedCounter();
 			}
@@ -1388,6 +1550,11 @@ namespace MoveRoutines
 
 		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 
+		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
+		{
+			return;
+		}
+
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
 		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
@@ -1409,7 +1576,7 @@ namespace MoveRoutines
 		deps.statusProcessor.CheckSubstituteCondition(ctx.defendingPlayer, ctx.defendingPokemon);
 		deps.statusProcessor.CheckFaintCondition(*ctx.attackingPlayer, *ctx.defendingPlayer, *ctx.attackingPokemon, *ctx.defendingPokemon);
 
-		StageDownDamageRoutine(deps, 1, "speed", [](BattlePokemon& p) { return p.GetSpeedStage(); }, [](BattlePokemon& p, size_t val) { p.SetSpeedStage(val); });
+		StageDownDamageRoutine(deps, 1, "speed", [](BattlePokemon& p) { return p.GetSpeedStage(); }, [](BattlePokemon& p, int val) { p.SetSpeedStage(val); });
 	}
 
 	void AttackDownHit(MoveRoutineDeps& deps)
@@ -1422,6 +1589,11 @@ namespace MoveRoutines
 
 		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 
+		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
+		{
+			return;
+		}
+
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
 		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
@@ -1443,7 +1615,7 @@ namespace MoveRoutines
 		deps.statusProcessor.CheckSubstituteCondition(ctx.defendingPlayer, ctx.defendingPokemon);
 		deps.statusProcessor.CheckFaintCondition(*ctx.attackingPlayer, *ctx.defendingPlayer, *ctx.attackingPokemon, *ctx.defendingPokemon);
 
-		StageDownDamageRoutine(deps, 1, "attack", [](BattlePokemon& p) { return p.GetAttackStage(); }, [](BattlePokemon& p, size_t val) { p.SetAttackStage(val); });
+		StageDownDamageRoutine(deps, 1, "attack", [](BattlePokemon& p) { return p.GetAttackStage(); }, [](BattlePokemon& p, int val) { p.SetAttackStage(val); });
 	}
 
 	void RechargeAttack(MoveRoutineDeps& deps)
@@ -1455,6 +1627,11 @@ namespace MoveRoutines
 		ctx.currentMove->DeductPP();
 
 		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
+
+		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
+		{
+			return;
+		}
 
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
@@ -1494,6 +1671,11 @@ namespace MoveRoutines
 
 		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 
+		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
+		{
+			return;
+		}
+
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
 		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
@@ -1521,28 +1703,25 @@ namespace MoveRoutines
 	{
 		auto& ctx = deps.context;
 
-		ctx.currentMove->DeductPP();
-
 		deps.resultsUI.UsedTextDialog(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView(), ctx.currentMove->GetName());
+
+		ctx.currentMove->DeductPP();
 
 		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 
-		int counterDamage = ctx.damageTaken * 2;
-
-		const unsigned int lastDamage = ctx.damageTaken;
-
-		ctx.damageTaken = 0;
-
-		if (ctx.attackingPlayer->IsFirst())
+		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
 		{
-			deps.resultsUI.DisplayFailedTextDialog();
 			return;
 		}
+
+		int counterDamage = ctx.damageTaken * 2;
 
 		const auto* lastMove = ctx.defendingPokemon->GetLastUsedMove();
 		const bool lastWasPhysical = lastMove && lastMove->GetCategoryEnum() == Category::Physical;
 
-		if (!lastWasPhysical || lastDamage <= 0 || ctx.flags.hitSubstitute)
+		bool fail = ctx.attackingPlayer->IsFirst() || counterDamage == 0 || !lastWasPhysical || ctx.flags.hitSubstitute;
+
+		if (fail)
 		{
 			deps.resultsUI.DisplayFailedTextDialog();
 			return;
@@ -1580,6 +1759,11 @@ namespace MoveRoutines
 
 		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 
+		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
+		{
+			return;
+		}
+
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
 		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
@@ -1614,6 +1798,11 @@ namespace MoveRoutines
 
 		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 
+		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
+		{
+			return;
+		}
+
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
 		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
@@ -1634,7 +1823,7 @@ namespace MoveRoutines
 
 		unsigned int leechedHealth{ ctx.damageTaken / 2 };
 
-		unsigned int finalLeech = std::min(std::max((unsigned int)1, leechedHealth), ctx.attackingPokemon->GetMaxHP() - ctx.attackingPokemon->GetCurrentHP());
+		unsigned int finalLeech = std::min(std::max(1u, leechedHealth), ctx.attackingPokemon->GetMaxHP() - ctx.attackingPokemon->GetCurrentHP());
 
 		ctx.attackingPokemon->HealCurrentHP(finalLeech);
 
@@ -1657,6 +1846,11 @@ namespace MoveRoutines
 		ctx.currentMove->DeductPP();
 
 		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
+
+		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
+		{
+			return;
+		}
 
 		bool isImmune = ctx.defendingPokemon->GetTypeOneEnum() == PokemonType::Grass || ctx.defendingPokemon->GetTypeTwoEnum() == PokemonType::Grass;
 
@@ -1695,8 +1889,8 @@ namespace MoveRoutines
 
 		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 
-		StageUpRoutine(deps, 1, "attack", [](BattlePokemon& p) { return p.GetAttackStage(); }, [](BattlePokemon& p, size_t val) { p.SetAttackStage(val); });
-		StageUpRoutine(deps, 1, "special attack", [](BattlePokemon& p) { return p.GetSpecialAttackStage(); }, [](BattlePokemon& p, size_t val) { p.SetSpecialAttackStage(val); });
+		StageUpRoutine(deps, 1, "attack", [](BattlePokemon& p) { return p.GetAttackStage(); }, [](BattlePokemon& p, int val) { p.SetAttackStage(val); });
+		StageUpRoutine(deps, 1, "special attack", [](BattlePokemon& p) { return p.GetSpecialAttackStage(); }, [](BattlePokemon& p, int val) { p.SetSpecialAttackStage(val); });
 	}
 
 	void SolarBeam(MoveRoutineDeps& deps)
@@ -1713,6 +1907,11 @@ namespace MoveRoutines
 		ctx.currentMove->DeductPP();
 
 		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
+
+		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
+		{
+			return;
+		}
 
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
@@ -1745,6 +1944,11 @@ namespace MoveRoutines
 		ctx.currentMove->DeductPP();
 
 		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
+
+		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
+		{
+			return;
+		}
 
 		bool isImmune = ((ctx.defendingPokemon->GetTypeOneEnum() == PokemonType::Grass || ctx.defendingPokemon->GetTypeTwoEnum() == PokemonType::Grass) ||
 			(ctx.defendingPokemon->GetTypeOneEnum() == PokemonType::Poison || ctx.defendingPokemon->GetTypeTwoEnum() == PokemonType::Poison) ||
@@ -1789,6 +1993,11 @@ namespace MoveRoutines
 
 		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 
+		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
+		{
+			return;
+		}
+
 		bool isImmune = ((ctx.defendingPokemon->GetTypeOneEnum() == PokemonType::Grass || ctx.defendingPokemon->GetTypeTwoEnum() == PokemonType::Grass) ||
 			(ctx.defendingPokemon->GetTypeOneEnum() == PokemonType::Electric || ctx.defendingPokemon->GetTypeTwoEnum() == PokemonType::Electric));
 
@@ -1831,6 +2040,11 @@ namespace MoveRoutines
 
 		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 
+		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
+		{
+			return;
+		}
+
 		bool isImmune = (ctx.defendingPokemon->GetTypeOneEnum() == PokemonType::Grass || ctx.defendingPokemon->GetTypeTwoEnum() == PokemonType::Grass);
 
 		if (isImmune)
@@ -1872,6 +2086,11 @@ namespace MoveRoutines
 
 		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 
+		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
+		{
+			return;
+		}
+
 		ctx.flags.hit = deps.calculations.CalculateHitChance(*ctx.currentMove, *ctx.attackingPokemon, *ctx.defendingPokemon);
 
 		if (ctx.flags.hit && ctx.defendingPokemon->HasSubstitute() && !ctx.currentMove->CanBypassSubstitute())
@@ -1892,7 +2111,7 @@ namespace MoveRoutines
 			return;
 		}
 
-		StageDownRoutine(deps, 2, "speed", [](BattlePokemon& p) { return p.GetSpeedStage(); }, [](BattlePokemon& p, size_t val) { p.SetSpeedStage(val); });
+		StageDownRoutine(deps, 2, "speed", [](BattlePokemon& p) { return p.GetSpeedStage(); }, [](BattlePokemon& p, int val) { p.SetSpeedStage(val); });
 	}
 
 	void DragonRage(MoveRoutineDeps& deps)
@@ -1904,6 +2123,11 @@ namespace MoveRoutines
 		ctx.currentMove->DeductPP();
 
 		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
+
+		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
+		{
+			return;
+		}
 
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
@@ -1939,6 +2163,11 @@ namespace MoveRoutines
 
 		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 
+		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
+		{
+			return;
+		}
+
 		bool isElectricType = (ctx.defendingPokemon->GetTypeOneEnum() == PokemonType::Electric ||
 			ctx.defendingPokemon->GetTypeTwoEnum() == PokemonType::Electric);
 
@@ -1948,7 +2177,7 @@ namespace MoveRoutines
 		bool isImmune = (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No || isElectricType || electricVsGround);
 
 		// Special case: Glare affects Ghosts despite being Normal-type
-		if (ctx.currentMove->GetName() == "Glare")
+		if (ctx.currentMove->GetMoveID() == MoveID::Glare)
 		{
 			bool isGhostType = (ctx.defendingPokemon->GetTypeOneEnum() == PokemonType::Ghost ||
 				ctx.defendingPokemon->GetTypeTwoEnum() == PokemonType::Ghost);
@@ -1996,6 +2225,11 @@ namespace MoveRoutines
 
 		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 
+		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
+		{
+			return;
+		}
+
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
 		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
@@ -2038,6 +2272,11 @@ namespace MoveRoutines
 
 		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 
+		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
+		{
+			return;
+		}
+
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
 		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
@@ -2069,6 +2308,11 @@ namespace MoveRoutines
 		ctx.currentMove->DeductPP();
 
 		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
+
+		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
+		{
+			return;
+		}
 
 		bool isImmune = ((ctx.defendingPokemon->GetTypeOneEnum() == PokemonType::Poison || ctx.defendingPokemon->GetTypeTwoEnum() == PokemonType::Poison) ||
 			(ctx.defendingPokemon->GetTypeOneEnum() == PokemonType::Steel || ctx.defendingPokemon->GetTypeTwoEnum() == PokemonType::Steel));
@@ -2119,7 +2363,7 @@ namespace MoveRoutines
 
 		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 
-		StageUpRoutine(deps, 1, "attack", [](BattlePokemon& p) { return p.GetAttackStage(); }, [](BattlePokemon& p, size_t val) { p.SetAttackStage(val); });
+		StageUpRoutine(deps, 1, "attack", [](BattlePokemon& p) { return p.GetAttackStage(); }, [](BattlePokemon& p, int val) { p.SetAttackStage(val); });
 	}
 
 	void SpeedUp2(MoveRoutineDeps& deps)
@@ -2132,7 +2376,7 @@ namespace MoveRoutines
 
 		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 
-		StageUpRoutine(deps, 2, "speed", [](BattlePokemon& p) { return p.GetSpeedStage(); }, [](BattlePokemon& p, size_t val) { p.SetSpeedStage(val); });
+		StageUpRoutine(deps, 2, "speed", [](BattlePokemon& p) { return p.GetSpeedStage(); }, [](BattlePokemon& p, int val) { p.SetSpeedStage(val); });
 	}
 
 	void Rage(MoveRoutineDeps& deps)
@@ -2144,6 +2388,11 @@ namespace MoveRoutines
 		ctx.currentMove->DeductPP();
 
 		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
+
+		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
+		{
+			return;
+		}
 
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
@@ -2161,23 +2410,23 @@ namespace MoveRoutines
 			return;
 		}
 
+		ctx.attackingPokemon->SetRaging(true);
+
 		DamageRoutine(deps);
 
 		deps.statusProcessor.CheckSubstituteCondition(ctx.defendingPlayer, ctx.defendingPokemon);
 		deps.statusProcessor.CheckFaintCondition(*ctx.attackingPlayer, *ctx.defendingPlayer, *ctx.attackingPokemon, *ctx.defendingPokemon);
-
-		ctx.attackingPokemon->SetRaging(true);
 	}
 
 	void Teleport(MoveRoutineDeps& deps)
 	{
 		auto& ctx = deps.context;
 
+		deps.resultsUI.UsedTextDialog(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView(), ctx.currentMove->GetName());
+
 		ctx.currentMove->DeductPP();
 
 		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
-
-		deps.resultsUI.UsedTextDialog(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView(), ctx.currentMove->GetName());
 
 		if (ctx.attackingPlayer->GetPokemonLeft() == 1)
 		{
@@ -2185,10 +2434,7 @@ namespace MoveRoutines
 			return;
 		}
 
-		BattlePokemon* newPokemon = ctx.attackingPlayer->GetController().PromptForSwitch(*ctx.attackingPlayer, *ctx.defendingPlayer, *ctx.attackingPokemon, *ctx.defendingPokemon);
-		ctx.attackingPlayer->SetPokemonToSwitchTo(newPokemon);
-
-		deps.switchExecutor.ExecuteSwitch(*ctx.attackingPlayer, ctx.attackingPokemon);
+		ctx.attackingPlayer->SetPendingSwitch(true);
 	}
 
 	void NightShade(MoveRoutineDeps& deps)
@@ -2200,6 +2446,11 @@ namespace MoveRoutines
 		ctx.currentMove->DeductPP();
 
 		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
+
+		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
+		{
+			return;
+		}
 
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
@@ -2235,15 +2486,29 @@ namespace MoveRoutines
 
 		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 
-		if (ctx.defendingPokemon->GetLastUsedMove() == nullptr)
+		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
 		{
-			deps.resultsUI.DisplayFailedTextDialog();
 			return;
 		}
 
-		if (ctx.defendingPokemon->GetLastUsedMove()->GetName() == "Transform" ||
-			ctx.defendingPokemon->GetLastUsedMove()->GetName() == "Struggle" ||
-			ctx.defendingPokemon->GetLastUsedMove()->GetName() == "Metronome")
+		pokemonMove* targetLastUsedMove = ctx.defendingPokemon->GetLastUsedMove();
+
+		bool alreadyHasMove{};
+		for (const auto& move : ctx.attackingPokemon->GetMoveArray())
+		{
+			if (targetLastUsedMove->GetMoveID() == move.GetMoveID())
+			{
+				alreadyHasMove = true;
+			}
+		}
+
+		bool fail = ctx.defendingPokemon->GetLastUsedMove() == nullptr || alreadyHasMove ||
+			targetLastUsedMove->GetMoveID() == MoveID::Transform ||
+			targetLastUsedMove->GetMoveID() == MoveID::Struggle ||
+			targetLastUsedMove->GetMoveID() == MoveID::Metronome ||
+			ctx.attackingPokemon->IsTransformed();
+
+		if (fail)
 		{
 			deps.resultsUI.DisplayFailedTextDialog();
 			return;
@@ -2260,10 +2525,12 @@ namespace MoveRoutines
 		ctx.attackingPokemon->SetUsedMimic(true);
 		ctx.attackingPokemon->SetMimicPP(ctx.currentMove->m_currentPP);
 
-		deps.resultsUI.DisplayLearnedMimicMoveMsg(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView(), ctx.defendingPokemon->GetLastUsedMove()->GetName());
+		const Move* copiedMove = Database::GetPointerToBaseMoveByIndex(targetLastUsedMove->GetMoveIndex());
 
-		ctx.currentMove->SetMovePointer(Database::GetInstance().GetPointerToMovedexNumber(
-		ctx.defendingPokemon->GetLastUsedMove()->GetMoveIndex() - 1));
+		deps.resultsUI.DisplayLearnedMimicMoveMsg(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView(), targetLastUsedMove->GetName());
+
+		ctx.currentMove->SetMovePointer(copiedMove);
+
 		ctx.currentMove->m_currentPP = ctx.defendingPokemon->GetLastUsedMove()->GetPP();
 		ctx.currentMove->m_maxPP = ctx.defendingPokemon->GetLastUsedMove()->GetPP();
 		ctx.currentMove->b_isMimicked = true;
@@ -2278,6 +2545,11 @@ namespace MoveRoutines
 		ctx.currentMove->DeductPP();
 
 		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
+
+		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
+		{
+			return;
+		}
 
 		ctx.flags.hit = deps.calculations.CalculateHitChance(*ctx.currentMove, *ctx.attackingPokemon, *ctx.defendingPokemon);
 
@@ -2299,7 +2571,7 @@ namespace MoveRoutines
 			return;
 		}
 
-		StageDownRoutine(deps, 2, "defense", [](BattlePokemon& p) { return p.GetDefenseStage(); }, [](BattlePokemon& p, size_t val) { p.SetDefenseStage(val); });
+		StageDownRoutine(deps, 2, "defense", [](BattlePokemon& p) { return p.GetDefenseStage(); }, [](BattlePokemon& p, int val) { p.SetDefenseStage(val); });
 	}
 
 	void EvasionUp(MoveRoutineDeps& deps)
@@ -2312,8 +2584,8 @@ namespace MoveRoutines
 
 		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 
-		StageUpRoutine(deps, 1, "evasion", [](BattlePokemon& p) { return p.GetEvasionStage(); }, [](BattlePokemon& p, size_t val) { p.SetEvasionStage(val); });
-	}
+		StageUpRoutine(deps, 1, "evasion", [](BattlePokemon& p) { return p.GetEvasionStage(); }, [](BattlePokemon& p, int val) { p.SetEvasionStage(val); });
+	}	 
 
 	void HealHalfHP(MoveRoutineDeps& deps)
 	{
@@ -2350,7 +2622,7 @@ namespace MoveRoutines
 
 		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 
-		StageUpRoutine(deps, 1, "defense", [](BattlePokemon& p) { return p.GetDefenseStage(); }, [](BattlePokemon& p, size_t val) { p.SetDefenseStage(val); });
+		StageUpRoutine(deps, 1, "defense", [](BattlePokemon& p) { return p.GetDefenseStage(); }, [](BattlePokemon& p, int val) { p.SetDefenseStage(val); });
 	}
 
 	void Minimize(MoveRoutineDeps& deps)
@@ -2363,7 +2635,7 @@ namespace MoveRoutines
 
 		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 
-		StageUpRoutine(deps, 2, "evasion", [](BattlePokemon& p) { return p.GetEvasionStage(); }, [](BattlePokemon& p, size_t val) { p.SetEvasionStage(val); });
+		StageUpRoutine(deps, 2, "evasion", [](BattlePokemon& p) { return p.GetEvasionStage(); }, [](BattlePokemon& p, int val) { p.SetEvasionStage(val); });
 	}
 
 	void DefenseUp2(MoveRoutineDeps& deps)
@@ -2376,7 +2648,7 @@ namespace MoveRoutines
 
 		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 
-		StageUpRoutine(deps, 2, "defense", [](BattlePokemon& p) { return p.GetDefenseStage(); }, [](BattlePokemon& p, size_t val) { p.SetDefenseStage(val); });
+		StageUpRoutine(deps, 2, "defense", [](BattlePokemon& p) { return p.GetDefenseStage(); }, [](BattlePokemon& p, int val) { p.SetDefenseStage(val); });
 
 	}
 
@@ -2411,21 +2683,21 @@ namespace MoveRoutines
 
 		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 
-		ctx.attackingPokemon->SetAttackStage(0);
-		ctx.attackingPokemon->SetDefenseStage(0);
-		ctx.attackingPokemon->SetSpecialAttackStage(0);
-		ctx.attackingPokemon->SetSpecialDefenseStage(0);
-		ctx.attackingPokemon->SetSpeedStage(0);
-		ctx.attackingPokemon->SetEvasionStage(0);
-		ctx.attackingPokemon->SetAccuracyStage(0);
+		ctx.attackingPokemon->SetAttackStage(6);
+		ctx.attackingPokemon->SetDefenseStage(6);
+		ctx.attackingPokemon->SetSpecialAttackStage(6);
+		ctx.attackingPokemon->SetSpecialDefenseStage(6);
+		ctx.attackingPokemon->SetSpeedStage(6);
+		ctx.attackingPokemon->SetEvasionStage(6);
+		ctx.attackingPokemon->SetAccuracyStage(6);
 
-		ctx.defendingPokemon->SetAttackStage(0);
-		ctx.defendingPokemon->SetDefenseStage(0);
-		ctx.defendingPokemon->SetSpecialAttackStage(0);
-		ctx.defendingPokemon->SetSpecialDefenseStage(0);
-		ctx.defendingPokemon->SetSpeedStage(0);
-		ctx.defendingPokemon->SetEvasionStage(0);
-		ctx.defendingPokemon->SetAccuracyStage(0);
+		ctx.defendingPokemon->SetAttackStage(6);
+		ctx.defendingPokemon->SetDefenseStage(6);
+		ctx.defendingPokemon->SetSpecialAttackStage(6);
+		ctx.defendingPokemon->SetSpecialDefenseStage(6);
+		ctx.defendingPokemon->SetSpeedStage(6);
+		ctx.defendingPokemon->SetEvasionStage(6);
+		ctx.defendingPokemon->SetAccuracyStage(6);
 
 		deps.resultsUI.DisplayHazeMsg();
 	}
@@ -2477,97 +2749,113 @@ namespace MoveRoutines
 	{
 		auto& ctx = deps.context;
 
+		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
+
 		if (!ctx.attackingPokemon->IsBiding())
 		{
-			ctx.currentMove->DeductPP();
-
 			deps.resultsUI.UsedTextDialog(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView(), ctx.currentMove->GetName());
 
-			ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
+			ctx.currentMove->DeductPP();
 
 			ctx.attackingPokemon->SetBide(true);
 			ctx.attackingPlayer->SetCanSwitch(false);
 
 			ctx.attackingPokemon->SetBideTurnCount(2);
 			ctx.attackingPokemon->ResetBideCounter();
-		}
 
-		bool isUnleashing = ctx.attackingPokemon->GetBideCounter() >= ctx.attackingPokemon->GetBideTurnCount();
-
-		if (isUnleashing)
-		{
-			deps.resultsUI.DisplayBideUnleashedMsg(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView());
-
-			deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
-
-			if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
-			{
-				deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.flags.currentEffectiveness));
-			}
-
-			if (ctx.flags.currentEffectiveness != BattleStateFlags::Effectiveness::No)
-			{
-				ctx.flags.hit = !ctx.defendingPokemon->IsSemiInvulnerable();
-			}
-
-			if (ctx.flags.currentEffectiveness != BattleStateFlags::Effectiveness::No && !ctx.flags.hit)
-			{
-				deps.resultsUI.DisplayAttackMissedTextDialog(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView());
-			}
-		}
-
-		if (isUnleashing && ctx.flags.hit && ctx.flags.currentEffectiveness != BattleStateFlags::Effectiveness::No)
-		{
-			int bideDamage = ctx.attackingPokemon->GetBideDamage() * 2;
-
-			if (bideDamage <= 0)
-			{
-				deps.resultsUI.DisplayFailedTextDialog();
-			}
-			else
-			{
-				FixedDamageRoutine(deps, bideDamage);
-			}
-
-			deps.statusProcessor.CheckSubstituteCondition(ctx.defendingPlayer, ctx.defendingPokemon);
-			deps.statusProcessor.CheckFaintCondition(*ctx.attackingPlayer, *ctx.defendingPlayer, *ctx.attackingPokemon, *ctx.defendingPokemon);
-		}
-
-		if (isUnleashing)
-		{
-			deps.statusProcessor.BideStop();
-			deps.statusProcessor.BideReset();
-		}
-		else
-		{
 			deps.resultsUI.DisplayBideStoringEnergyMsg(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView());
+
+			return;
 		}
+
+		deps.resultsUI.DisplayBideUnleashedMsg(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView());
+
+		int bideDamage = ctx.attackingPokemon->GetBideDamage() * 2;
+
+		deps.statusProcessor.ResetBideState();
+
+		if (bideDamage <= 0)
+		{
+			deps.resultsUI.DisplayFailedTextDialog();
+
+			return;
+		}
+
+		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
+
+		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
+		{
+			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.flags.currentEffectiveness));
+
+			return;
+		}
+
+		ctx.flags.hit = !ctx.defendingPokemon->IsSemiInvulnerable();
+
+		if (!ctx.flags.hit)
+		{
+			deps.resultsUI.DisplayAttackMissedTextDialog(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView());
+			return;
+		}
+		
+		FixedDamageRoutine(deps, bideDamage);
+		
+		deps.statusProcessor.CheckSubstituteCondition(ctx.defendingPlayer, ctx.defendingPokemon);
+		deps.statusProcessor.CheckFaintCondition(*ctx.attackingPlayer, *ctx.defendingPlayer, *ctx.attackingPokemon, *ctx.defendingPokemon);
 	}
 
 	void Metronome(MoveRoutineDeps& deps)
 	{
 		auto& ctx = deps.context;
 
-		deps.resultsUI.UsedTextDialog(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView(), ctx.currentMove->GetName());
-
 		ctx.currentMove->DeductPP();
 
-		size_t randomMod{ 67 };
-		while (randomMod == 67 || randomMod == 101 || randomMod == 117 || randomMod == 118 || randomMod == 143)
+		/* ---
+		Metronome cannot call these moves:
+		counter - 68
+		mimic - 102
+		metronome - 118
+		mirror move - 119
+		transform - 144
+		struggle - 165
+		  --- */
+
+		MoveID id = MoveID::Counter;
+
+		do
 		{
-			std::uniform_int_distribution<size_t> randomModDistributor(0, 163);
-			randomMod = randomModDistributor(deps.rng.GetGenerator());
+			id = RandomEnum(deps.rng.GetGenerator(), MoveID::Pound, MoveID::Substitute);
+		}
+		while (id == MoveID::Counter || id == MoveID::Mimic || id == MoveID::Metronome || id == MoveID::MirrorMove || id == MoveID::Transform);
+
+		const Move& selectedMove = Database::GetBaseMoveByID(id);
+
+		deps.resultsUI.DisplayMetronomeMsg(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView(), selectedMove.GetName());
+
+		ctx.attackingPokemon->SetMetronomeMove(selectedMove);
+
+		pokemonMove* metronome = ctx.currentMove;
+
+		ctx.currentMove = ctx.attackingPokemon->GetMetronomeMove();
+		
+		if (ctx.attackingPlayer == ctx.playerOne)
+		{
+			ctx.playerOneCurrentMoveEffect = selectedMove.GetMoveEffectEnum();
+		}
+		else
+		{
+			ctx.playerTwoCurrentMoveEffect = selectedMove.GetMoveEffectEnum();
 		}
 
-		const Move* selectedMove = Database::GetInstance().GetPointerToMovedexNumber(randomMod);
-
-		deps.resultsUI.DisplayMetronomeMsg(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView(), selectedMove->GetName());
-
-		ctx.attackingPokemon->SetMetronome(*selectedMove);
+		ctx.currentMoveEffect = (ctx.attackingPlayer == ctx.playerOne) ? ctx.playerOneCurrentMoveEffect : ctx.playerTwoCurrentMoveEffect;
 
 		{
-			Execute(deps.context.currentMove->GetMoveEffectEnum(), deps);
+			Execute(selectedMove.GetMoveEffectEnum(), deps);
 		}
+
+		ctx.currentMove = metronome;
+
+		ctx.attackingPokemon->ResetMetronome();
 	}
 
 	void MirrorMove(MoveRoutineDeps& deps)
@@ -2578,6 +2866,12 @@ namespace MoveRoutines
 
 		ctx.currentMove->DeductPP();
 
+		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
+		{
+			ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
+			return;
+		}
+
 		pokemonMove* targetLastUsedMove = ctx.defendingPokemon->GetLastUsedMove();
 
 		if (!targetLastUsedMove || !targetLastUsedMove->IsAffectedByMirrorMove())
@@ -2586,13 +2880,33 @@ namespace MoveRoutines
 			return;
 		}
 
-		const Move* selectedMove = Database::GetInstance().GetPointerToMovedexNumber(targetLastUsedMove->GetMoveIndex() - 1);
+		const Move& selectedMove = Database::GetBaseMoveByIndex(targetLastUsedMove->GetMoveIndex());
 
-		ctx.attackingPokemon->SetMirrorMove(*selectedMove);
+		ctx.attackingPokemon->SetMirrorMove(selectedMove);
+
+		pokemonMove* mirrorMove = ctx.currentMove;
+
+		ctx.currentMove = ctx.attackingPokemon->GetMirrorMoveCopiedMove();
+
+		if (ctx.attackingPlayer == ctx.playerOne)
+		{
+			ctx.playerOneCurrentMoveEffect = selectedMove.GetMoveEffectEnum();
+		}
+		else
+		{
+			ctx.playerTwoCurrentMoveEffect = selectedMove.GetMoveEffectEnum();
+		}
+
+
+		ctx.currentMoveEffect = (ctx.attackingPlayer == ctx.playerOne) ? ctx.playerOneCurrentMoveEffect : ctx.playerTwoCurrentMoveEffect;
 
 		{
-			Execute(deps.context.currentMove->GetMoveEffectEnum(), deps);
+			Execute(selectedMove.GetMoveEffectEnum(), deps);
 		}
+
+		ctx.currentMove = mirrorMove;
+
+		ctx.attackingPokemon->ResetMirrorMove();
 	}
 
 	void Explosion(MoveRoutineDeps& deps)
@@ -2606,6 +2920,12 @@ namespace MoveRoutines
 		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 
 		ctx.attackingPokemon->DamageCurrentHP(ctx.attackingPokemon->GetCurrentHP());
+
+		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
+		{
+			deps.statusProcessor.CheckFaintCondition(*ctx.defendingPlayer, *ctx.attackingPlayer, *ctx.defendingPokemon, *ctx.attackingPokemon);
+			return;
+		}
 
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
@@ -2629,9 +2949,9 @@ namespace MoveRoutines
 			return;
 		}
 
-		deps.statusProcessor.CheckFaintCondition(*ctx.defendingPlayer, *ctx.attackingPlayer, *ctx.defendingPokemon, *ctx.attackingPokemon);
-
 		DamageRoutine(deps);
+
+		deps.statusProcessor.CheckFaintCondition(*ctx.defendingPlayer, *ctx.attackingPlayer, *ctx.defendingPokemon, *ctx.attackingPokemon);
 
 		deps.statusProcessor.CheckSubstituteCondition(ctx.defendingPlayer, ctx.defendingPokemon);
 		deps.statusProcessor.CheckFaintCondition(*ctx.attackingPlayer, *ctx.defendingPlayer, *ctx.attackingPokemon, *ctx.defendingPokemon);
@@ -2646,6 +2966,11 @@ namespace MoveRoutines
 		ctx.currentMove->DeductPP();
 
 		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
+
+		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
+		{
+			return;
+		}
 
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
@@ -2676,7 +3001,7 @@ namespace MoveRoutines
 		ChargingMoveHooks hooks;
 		hooks.stageUp = &StageUpRoutine;
 		hooks.getStage = [](BattlePokemon& p) { return p.GetDefenseStage(); };
-		hooks.setStage = [](BattlePokemon& p, size_t val) { p.SetDefenseStage(val); };
+		hooks.setStage = [](BattlePokemon& p, int val) { p.SetDefenseStage(val); };
 		hooks.stageIncreaseAmount = 1;
 		hooks.stageName = "defense";
 
@@ -2690,6 +3015,11 @@ namespace MoveRoutines
 		ctx.currentMove->DeductPP();
 
 		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
+
+		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
+		{
+			return;
+		}
 
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
@@ -2723,7 +3053,7 @@ namespace MoveRoutines
 
 		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 
-		StageUpRoutine(deps, 2, "special defense", [](BattlePokemon& p) { return p.GetSpecialDefenseStage(); }, [](BattlePokemon& p, size_t val) { p.SetSpecialDefenseStage(val); });
+		StageUpRoutine(deps, 2, "special defense", [](BattlePokemon& p) { return p.GetSpecialDefenseStage(); }, [](BattlePokemon& p, int val) { p.SetSpecialDefenseStage(val); });
 	}
 
 	void DreamEater(MoveRoutineDeps& deps)
@@ -2735,6 +3065,11 @@ namespace MoveRoutines
 		ctx.currentMove->DeductPP();
 
 		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
+
+		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
+		{
+			return;
+		}
 
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
@@ -2756,7 +3091,7 @@ namespace MoveRoutines
 
 		unsigned int leechedHealth{ ctx.damageTaken / 2 };
 
-		unsigned int finalLeech = std::min(std::max((unsigned int)1, leechedHealth), ctx.attackingPokemon->GetMaxHP() - ctx.attackingPokemon->GetCurrentHP());
+		unsigned int finalLeech = std::min(std::max(1u, leechedHealth), ctx.attackingPokemon->GetMaxHP() - ctx.attackingPokemon->GetCurrentHP());
 
 		ctx.attackingPokemon->HealCurrentHP(finalLeech);
 
@@ -2779,6 +3114,11 @@ namespace MoveRoutines
 		ctx.currentMove->DeductPP();
 
 		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
+
+		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
+		{
+			return;
+		}
 
 		bool isImmune = ((ctx.defendingPokemon->GetTypeOneEnum() == PokemonType::Poison || ctx.defendingPokemon->GetTypeTwoEnum() == PokemonType::Poison) ||
 			(ctx.defendingPokemon->GetTypeOneEnum() == PokemonType::Steel || ctx.defendingPokemon->GetTypeTwoEnum() == PokemonType::Steel));
@@ -2827,6 +3167,11 @@ namespace MoveRoutines
 
 		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 
+		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
+		{
+			return;
+		}
+
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
 		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
@@ -2843,8 +3188,8 @@ namespace MoveRoutines
 			return;
 		}
 
-		size_t oldCritStage = ctx.attackingPokemon->GetCriticalHitStage();
-		size_t newCritStage = oldCritStage + 1;
+		unsigned int oldCritStage = ctx.attackingPokemon->GetCriticalHitStage();
+		unsigned int newCritStage = oldCritStage + 1;
 
 		ctx.attackingPokemon->SetCriticalHitStage(newCritStage);
 
@@ -2867,6 +3212,11 @@ namespace MoveRoutines
 		ctx.currentMove->DeductPP();
 
 		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
+
+		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
+		{
+			return;
+		}
 
 		if (ctx.attackingPokemon->IsTransformed() || ctx.defendingPokemon->IsTransformed() || ctx.defendingPokemon->HasSubstitute())
 		{
@@ -2896,6 +3246,11 @@ namespace MoveRoutines
 
 		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 
+		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
+		{
+			return;
+		}
+
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
 		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
@@ -2914,10 +3269,9 @@ namespace MoveRoutines
 
 		unsigned int psywaveDamage = 0;
 
-		std::uniform_int_distribution<unsigned int> rngDist(0, 100);
-		unsigned int randomNumber{ rngDist(deps.rng.GetGenerator()) };
+		unsigned int randomNumber{ deps.rng.GetPsywaveDamageRoll() };
 
-		psywaveDamage = std::max((unsigned int)1, ctx.attackingPokemon->GetLevel() * (randomNumber + 50) / 100);
+		psywaveDamage = std::max(1u, ctx.attackingPokemon->GetLevel() * (randomNumber + 50) / 100);
 
 		FixedDamageRoutine(deps, psywaveDamage);
 
@@ -2975,6 +3329,13 @@ namespace MoveRoutines
 
 		ctx.currentMove->DeductPP();
 
+		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
+
+		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
+		{
+			return;
+		}
+
 		if (ctx.attackingPokemon->GetTypeOneEnum() == ctx.currentMove->GetMoveTypeEnum() ||
 			ctx.attackingPokemon->GetTypeTwoEnum() == ctx.currentMove->GetMoveTypeEnum() ||
 			ctx.attackingPokemon->IsConverted())
@@ -2987,8 +3348,6 @@ namespace MoveRoutines
 
 			deps.resultsUI.DisplayConversionMsg(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView(), ctx.attackingPokemon->GetTypeOne());
 		}
-
-		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 	}
 
 	void TriAttack(MoveRoutineDeps& deps)
@@ -3000,6 +3359,11 @@ namespace MoveRoutines
 		ctx.currentMove->DeductPP();
 
 		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
+
+		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
+		{
+			return;
+		}
 
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
@@ -3019,15 +3383,13 @@ namespace MoveRoutines
 
 		DamageRoutine(deps);
 
-		std::uniform_int_distribution<int> randomModDistributor(1, 100);
-		int randomNumber{ randomModDistributor(deps.rng.GetGenerator()) };
+		int randomNumber{ deps.rng.GetPercentRoll() };
 
 		if (randomNumber <= ctx.currentMove->GetEffectChance() &&
 			(!ctx.defendingPokemon->HasSubstitute() || ctx.currentMove->CanBypassSubstitute()) &&
 			ctx.defendingPokemon->GetCurrentHP() != 0)
 		{
-			std::uniform_int_distribution<unsigned int> statusDist(1, 3);
-			unsigned int randomStatus{ statusDist(deps.rng.GetGenerator()) };
+			unsigned int randomStatus{ deps.rng.GetTriAttackStatusRoll() };
 
 			switch (randomStatus)
 			{
@@ -3062,6 +3424,11 @@ namespace MoveRoutines
 
 		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 
+		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
+		{
+			return;
+		}
+
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
 		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
@@ -3080,12 +3447,14 @@ namespace MoveRoutines
 
 		bool hasSubstitute = ctx.defendingPokemon->HasSubstitute() && !ctx.currentMove->CanBypassSubstitute();
 
-		int hpSource = hasSubstitute ? ctx.defendingPokemon->GetSubstituteHP() : ctx.defendingPokemon->GetCurrentHP();
+		unsigned int hpSource = hasSubstitute ? ctx.defendingPokemon->GetSubstituteHP() : ctx.defendingPokemon->GetCurrentHP();
 
-		int finalDamage = std::max(1, hpSource / 2);
+		unsigned int finalDamage = std::max(1u, hpSource / 2);
 
 		deps.calculations.ApplyDamage(*ctx.currentMove, *ctx.defendingPokemon, finalDamage);
 		deps.resultsUI.DisplaySubstituteDamageTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ctx.defendingPokemon->GetSubstituteHP(), ctx.defendingPokemon->HasSubstitute(), ctx.flags.hitSubstitute);
+
+		TryDamageReactions(deps);
 
 		deps.statusProcessor.CheckSubstituteCondition(ctx.defendingPlayer, ctx.defendingPokemon);
 		deps.statusProcessor.CheckFaintCondition(*ctx.attackingPlayer, *ctx.defendingPlayer, *ctx.attackingPokemon, *ctx.defendingPokemon);
@@ -3136,6 +3505,11 @@ namespace MoveRoutines
 
 		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 
+		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
+		{
+			return;
+		}
+
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
 		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
@@ -3157,9 +3531,9 @@ namespace MoveRoutines
 		deps.statusProcessor.CheckSubstituteCondition(ctx.defendingPlayer, ctx.defendingPokemon);
 		deps.statusProcessor.CheckFaintCondition(*ctx.attackingPlayer, *ctx.defendingPlayer, *ctx.attackingPokemon, *ctx.defendingPokemon);
 
-		int recoilDamage = (ctx.attackingPokemon->GetMaxHP() + 2) / 4;
+		unsigned int recoilDamage = (ctx.attackingPokemon->GetMaxHP() + 2) / 4;
 
-		int finalDamage = std::max(1, recoilDamage);
+		unsigned int finalDamage = std::max(1u, recoilDamage);
 
 		ctx.attackingPokemon->DamageCurrentHP(finalDamage);
 

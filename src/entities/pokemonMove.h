@@ -4,24 +4,29 @@
 
 class Move;
 
-enum class PokemonType : size_t;
-enum class Category;
-enum class MoveEffect;
+enum class MoveID : unsigned int;
+enum class PokemonType : unsigned int;
+enum class Category : unsigned int;
+enum class MoveEffect : unsigned int;
 
 struct pokemonMove
 {
+public:
     pokemonMove();
-    pokemonMove(size_t);
+    pokemonMove(MoveID);
 
     bool HasMove() const;
     bool IsActive() const;
-    bool IsDisabled() const;
 
     void SetMovePointer(const Move*);
     const Move* GetMovePointer() const;
     void ResetMove();
 
-    size_t   GetMoveIndex() const;
+    void DeductPP();
+
+    MoveID            GetMoveID() const;
+    size_t     GetMovedexNumber() const;
+    size_t         GetMoveIndex() const;
     std::string_view    GetName() const;
 
     std::string_view GetCategory() const;
@@ -33,12 +38,9 @@ struct pokemonMove
     MoveEffect GetMoveEffectEnum() const;
     int          GetEffectChance() const;
 
-    int       GetPP() const;
-    int    GetMaxPP() const;
+    int                GetPP() const;
     unsigned int    GetPower() const;
-    int GetAccuracy() const;
-
-    void DeductPP();
+    int          GetAccuracy() const;
 
     bool        DoesMakeContact() const;
     bool    IsAffectedByProtect() const;

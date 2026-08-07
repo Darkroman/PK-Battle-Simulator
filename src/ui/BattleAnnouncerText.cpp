@@ -1,6 +1,9 @@
+#include <algorithm>
+
 #include "BattleAnnouncerText.h"
 
 #include "../battle/BattleContext.h"
+#include "../entities/BattlePokemon.h"
 #include "../entities/Player.h"
 
 #include <iostream>
@@ -25,7 +28,7 @@ void BattleAnnouncerText::DisplayFightingPokemon(const BattleContext& context) c
 
         unsigned int pixelsOfHP = ((currentHP * HP_BAR_WIDTH) / maxHP) / 2;
 
-        pixelsOfHP = std::max((unsigned int)1, pixelsOfHP);
+        pixelsOfHP = std::max(1u, pixelsOfHP);
 
         unsigned int quarterPercent = pixelsOfHP * 25;
 
@@ -63,16 +66,13 @@ void BattleAnnouncerText::DisplayFightingPokemon(const BattleContext& context) c
 
 bool BattleAnnouncerText::AnnounceWinner(const BattleContext& context)
 {
-    /*
-    if (m_context.playerOne->HasWon() && m_context.playerTwo->HasWon())
+    if (context.playerOne->HasForfeited() && context.playerTwo->HasForfeited())
     {
-        std::cout << "Both players Pokemon have fainted in the same turn!\n";
-        std::cout << "It is a tie game!\n\n";
-        m_context.playerOne->SetWinCondition(false);
-        m_context.playerTwo->SetWinCondition(false);
+        std::cout << "Both players have forfeited!\n\n";
+        context.playerOne->SetWinCondition(false);
+        context.playerTwo->SetWinCondition(false);
         return false;
     }
-    */
 
     if (context.playerOne->HasWon())
     {

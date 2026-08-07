@@ -3,8 +3,6 @@
 class Player;
 class BattlePokemon;
 struct pokemonMove;
-class BattleCalculations;
-class RandomEngine;
 struct ScoringResults;
 
 namespace BasicScoring

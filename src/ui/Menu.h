@@ -1,8 +1,11 @@
 #pragma once
 
 #include <vector>
-#include <array>
 #include <memory>
+#include <array>
+#include <string>
+#include <string_view>
+#include <cstdint>
 #include <filesystem>
 
 #include "../common/PartyEditResults.h"

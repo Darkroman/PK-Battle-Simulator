@@ -1,4 +1,5 @@
 #include <iostream>
+#include <filesystem>
 
 #include "SaveParty.h"
 
@@ -60,7 +61,7 @@ void SaveParty::SavePokemonName(int i)
 
 	if (player->GetBelt(i).HasNickname())
 	{
-		outFile << player->GetBelt(i).GetNickname()
+		outFile << player->GetBelt(i).GetNicknameView()
 			<< " (" << player->GetBelt(i).GetPokemonNameView() << ")\n";
 	}
 	else

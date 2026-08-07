@@ -6,6 +6,51 @@
 ## UPDATES
 
    </summary>
+   
+### 8/7/2026
+**BIG UPDATE. Many bug fixes and changes.**
+- **Started work on Hard/Expert AI move scoring. It is in the code but commented out for now as it's not complete.**
+- **I will be basing the scoring from Da Squyd's gen 5 expert AI script reverse engineering.**
+- **Fixed stat-lowering move routines incorrectly setting the target's stat stage instead of reducing it by the intended amount.**
+- **Made sure to reset all Battle State upon battle ending (not doing that before didn't affect anything but good to be safe).**
+- **Fixed turn-based performative effects (such as sleep turn count progression and confusion turn progression) not progressing if faster pokemon faints first (such as from recoil damage).**
+    - This caused the slower affected pokemon to not progress its turn and performative status turn counts.
+    - If a pokemon was asleep, other pokemon attacks first and does recoil damage thereby fainting itself, sleep would last an extra turn.
+- **Fixed move routines against defending Pokemon not correctly exiting and printing failed text if target was already fainted.**
+- **Fixed Rage move routine.**
+  - Will now always reset upon start of user's next turn and will be triggered correctly right after the user is hit if rage is still up.
+- **Fixed Metronome and Mirror Move. Should be fully working now.**
+  - Metronome threw itself into a loop (recursive) and crashed the program. Fixed.
+  - Both Metronome and Mirror Move used the wrong move assigned when going to execute the move. Fixed.
+  - If Metronome called Bide or any charging move and enemy uses Disable, Metronome would be disabled but so would have the called move. Fixed: Bide and charging moves now continue.
+- **Fixed Transform not correctly setting to user's last used move.**
+  - The issue was if disable was used on the transformer, it would disable the move slot transform was in prior.
+- **Fixed self-inflicted confusion damage not checking for faint.**
+- **Fixed Mimic.**
+  - Fixed Mimic not failing when checking user's current moves to see if it already has that move.
+  - Fixed Mimic not failing if user is already transformed.
+- **Fixed Explosion user's faint message ordering.**
+- **Fixed Thrash's confuse turn range from 2-4 to 1-4.**
+- **Fixed Disable's counter being prematurely incremented which caused disable to end a turn early.**
+- **Simulation battles are slightly faster in some circumstances due to some code refactoring.**
+- **Battle simulations still use a loop as the AI decisions don't require a blocked call (from console) or state (from GUI).**
+
+Dev Notes:
+**- What had happened with the turn-based performative effects is that, when the opposing pokemon fainted from recoil damage,**
+**- ExecuteTurn originally had a check that if either pokemon had already fainted, it would completely skip the action phase where performative statuses were checked.**
+  - This caused certain non-post turn statuses to incorrectly not advance their turn counts.
+**- Refactored the battle loop into a state machine and implemented a turn-level state machine to support mid-turn switch prompts (e.g. Teleport).**
+  - This lays the groundwork for the GUI implementation while preserving the existing console simulation path.
+**- Added PlayerOne/TwoCurrentMoveEffect and a turn based currentMoveEffect in BattleContext to correctly mirror tested behavior with Metronome and Mirror Move as well as Metronome's interaction with Bide and charging moves.**
+**- Added to the Disable check in CheckPerformativeStatus() to continue performing if currentMove's Move Effect is not equal to the called Move Effect such as from Metronome.**
+**- Cleaned up some include headers and forward declarations.**
+**- Renamed all methods and fields having to do with the Rampage move effect from Thrash to Rampage.**
+**- Combined functions BideStop/BideReset and RampageStop/RampageReset to respective ResetBideState and ResetRampageState.**
+**- Used Visual Studio's #include cleanup tool to track transitively included headers and unused headers. Still used forward declarations wherever I could and deleted others I didn't need anymore.**
+**- Random distribution ranges are cached in RandomEngine and made appropriate getters for each range.**
+**- Made use of std::to_underlying and made a few templated wrapper functions: EnumIndex, IDToIndex, ToEnum and RandomEnum.**
+  - IDToIndex subtracts the underlying type by 1 for 0 index array lookup, ToEnum does a reverse lookup for appropriate data type and casts it to the proper enum type, and RandomEnum gives a range between enums passed then casts to underlying types for the uniform_int_distribution.
+**- With Transform I just made sure to set the last used move to the detransformdata backup slot of Transform, therefore dereferencing the right memory address.**
 
 ### 6/1/2026
 - **Improved performance in simulation times by 35-40%**

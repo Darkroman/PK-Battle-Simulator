@@ -1,0 +1,59 @@
+#pragma once
+
+#include <string_view>
+
+#include "../ui/interfaces/IStatusEffectUI.h"
+
+class BattleUIEventQueue;
+
+class StatusEffectQueuedConsole : public IStatusEffectUI
+{
+public:
+	StatusEffectQueuedConsole(BattleUIEventQueue& queue);
+
+	// Status changes
+	void DisplayFellAsleepMsg(std::string_view, std::string_view) const override;
+	void DisplayWokenUpMsg(std::string_view) const override;
+	void DisplayIsAsleepMsg(std::string_view) const override;
+	void DisplayFrozenSolidMsg(std::string_view) const override;
+	void DisplayThawedMsg(std::string_view) const override;
+	void DisplayNoLongerConfusedMsg(std::string_view, std::string_view) const override;
+	void DisplayIsConfusedMsg(std::string_view, std::string_view) const override;
+	void DisplayHurtItselfConfuseMsg() const override;
+	void DisplayCantMoveParalysisMsg(std::string_view) const override;
+	void DisplayFlinchMsg(std::string_view, std::string_view) const override;
+	void DisplayRechargeMsg(std::string_view, std::string_view) const override;
+
+	// Barriers / field effects
+	void DisplayNoLongerProtectedMist(std::string_view) const override;
+	void DisplayFieldEffectFadedMsg(std::string_view, std::string_view) const override;
+
+	// Post-turn effects
+	void DisplayLeechSeedSappedMsg(std::string_view, std::string_view) const override;
+	void DisplayDamagedByStatusPostTurn(std::string_view, std::string_view, std::string_view) const override;
+	void DisplayHurtByBoundMsg(std::string_view, std::string_view, std::string_view) const override;
+	void DisplayFreedFromBoundMsg(std::string_view, std::string_view, std::string_view) const override;
+
+	// Rampage
+	void DisplayRampageConfusionMsg(std::string_view, std::string_view) const override;
+
+	// Bide
+	void DisplayBideStoringEnergyMsg(std::string_view, std::string_view) const override;
+
+	// Disable
+	void DisplayMoveIsDisabledMsg(std::string_view, std::string_view, std::string_view) const override;
+	void DisplayMoveNoLongerDisabledMsg(std::string_view, std::string_view, std::string_view) const override;
+
+	void DisplaySubstituteFadedMsg(std::string_view, std::string_view) const override;
+
+	// Faint
+	void DisplayFaintedMsg(std::string_view, std::string_view) const override;
+
+	void NewLine() const override;
+
+	// Blocking Events
+	void BlockForSwitching() const override;
+
+private:
+	BattleUIEventQueue& m_queue;
+};

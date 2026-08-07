@@ -1,5 +1,15 @@
+#include <string>
+#include <string_view>
+#include <memory>
+#include <utility>
+#include <span>
+#include <array>
+#include <algorithm>
+
 #include "Player.h"
 
+#include "BattlePokemon.h"
+#include "controllers/IPlayerController.h"
 #include "controllers/AIController.h"
 
 Player::Player(std::string_view name) :
@@ -206,6 +216,16 @@ void Player::SetIsSwitching(bool Switching)
     b_isSwitching = Switching;
 }
 
+bool Player::IsPendingSwitch() const
+{
+    return b_isPendingSwitch;
+}
+
+void Player::SetPendingSwitch(bool pendingSwitch)
+{
+    b_isPendingSwitch = pendingSwitch;
+}
+
 void Player::SetPokemonToSwitchTo(BattlePokemon* pokemon)
 {
     pokemonToSwitchTo = pokemon;
@@ -328,7 +348,7 @@ void Player::ResetValues()
 
     b_canSwitch = true;
     b_isSwitching = false;
-    b_hasSwitched = false;
+    b_isPendingSwitch = false;
     b_hasWon = false;
     b_hasForfeited = false;
 

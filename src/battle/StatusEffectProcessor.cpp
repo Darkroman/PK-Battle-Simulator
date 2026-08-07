@@ -1,10 +1,17 @@
+#include <algorithm>
+#include <vector>
+
 #include "StatusEffectProcessor.h"
 
 #include "BattleContext.h"
 #include "RandomEngine.h"
 #include "../ui/interfaces/IStatusEffectUI.h"
-#include "../moves/MoveEffectEnums.h"
+#include "../entities/BattlePokemon.h"
 #include "../entities/Player.h"
+
+constexpr int ConfusionTurnChance{ 33 };
+constexpr int ThawTurnChance{ 20 };
+constexpr int ParalysisTurnChance{ 25 };
 
 StatusEffectProcessor::StatusEffectProcessor(BattleContext& context, RandomEngine& rng, IStatusEffectUI& statusEffectUI)
 	: m_context(context), m_rng(rng), m_statusEffectUI(statusEffectUI) {}
@@ -22,9 +29,9 @@ bool StatusEffectProcessor::CheckPerformativeStatus()
 		return false;
 	}
 
-	if (m_context.attackingPokemon->IsThrashing())
+	if (m_context.attackingPokemon->IsRampaging())
 	{
-		m_context.attackingPokemon->IncrementThrashCounter();
+		m_context.attackingPokemon->IncrementRampageCounter();
 	}
 
 	if (m_context.attackingPokemon->IsBiding())
@@ -43,28 +50,28 @@ bool StatusEffectProcessor::CheckPerformativeStatus()
 		break;
 	}
 
-	if (m_context.currentMove->b_isDisabled && canPerform == true)
+	if (m_context.currentMove->b_isDisabled && m_context.currentMove->GetMoveEffectEnum() == m_context.currentMoveEffect && canPerform)
 	{
 		canPerform = false;
 		m_statusEffectUI.DisplayMoveIsDisabledMsg(m_context.attackingPlayer->GetPlayerNameView(), m_context.attackingPokemon->GetNameView(), m_context.currentMove->GetName());
 	}
 
-	if (m_context.attackingPokemon->IsFlinched() && canPerform == true)
+	if (m_context.attackingPokemon->IsFlinched() && canPerform)
 	{
 		canPerform = FlinchStatus();
 	}
 
-	if (m_context.attackingPokemon->IsConfused() && canPerform == true)
+	if (m_context.attackingPokemon->IsConfused() && canPerform)
 	{
 		canPerform = ConfusedStatus();
 	}
 
-	if (m_context.attackingPokemon->GetStatus() == Status::Paralyzed && canPerform == true)
+	if (m_context.attackingPokemon->GetStatus() == Status::Paralyzed && canPerform)
 	{
 		canPerform = ParalysisStatus();
 	}
 
-	if (m_context.attackingPokemon->IsCharging() && canPerform == false)
+	if (m_context.attackingPokemon->IsCharging() && !canPerform)
 	{
 		m_context.attackingPokemon->SetCharging(false);
 		m_context.attackingPlayer->SetCanSwitch(true);
@@ -76,21 +83,29 @@ bool StatusEffectProcessor::CheckPerformativeStatus()
 		}
 	}
 
-	if (m_context.attackingPokemon->IsThrashing() && canPerform == false)
+	if (m_context.attackingPokemon->IsRampaging() && !canPerform)
 	{
-		if (m_context.attackingPokemon->GetThrashCounter() >= m_context.attackingPokemon->GetThrashTurnCount() && !m_context.attackingPokemon->IsConfused())
+		if (m_context.attackingPokemon->GetRampageCounter() >= m_context.attackingPokemon->GetRampageTurnCount() && !m_context.attackingPokemon->IsConfused())
 		{
-			ThrashConfuse();
+			RampageConfuse();
 		}
 
-		ThrashStop();
-		ThrashReset();
+		ResetRampageState();
 	}
 
-	if (m_context.attackingPokemon->IsBiding() && canPerform == false)
+	if (m_context.attackingPokemon->IsBiding())
 	{
-		BideStop();
-		BideReset();
+		if (!canPerform)
+		{
+			ResetBideState();
+		}
+
+		else if (canPerform && !(m_context.attackingPokemon->GetBideCounter() >= m_context.attackingPokemon->GetBideTurnCount()))
+		{
+			m_statusEffectUI.DisplayBideStoringEnergyMsg(m_context.attackingPlayer->GetPlayerNameView(), m_context.attackingPokemon->GetNameView());
+
+			return !canPerform;
+		}
 	}
 
 	return canPerform;
@@ -117,10 +132,9 @@ bool StatusEffectProcessor::SleepStatus()
 
 bool StatusEffectProcessor::FrozenStatus()
 {
-	std::uniform_int_distribution<int> randomModDistributor(1, 100);
-	int randomMod(randomModDistributor(m_rng.GetGenerator()));
+	int randomMod{ m_rng.GetPercentRoll() };
 
-	if (randomMod <= 80)
+	if (randomMod > ThawTurnChance)
 	{
 		m_statusEffectUI.DisplayFrozenSolidMsg(m_context.attackingPokemon->GetNameView());
 		return false;
@@ -157,10 +171,9 @@ bool StatusEffectProcessor::ConfusedStatus()
 		m_context.attackingPokemon->IncrementConfusedCounter();
 		m_statusEffectUI.DisplayIsConfusedMsg(m_context.attackingPlayer->GetPlayerNameView(), m_context.attackingPokemon->GetNameView());
 
-		std::uniform_int_distribution<int> randomModDistributor(1, 100);
-		int randomMod(randomModDistributor(m_rng.GetGenerator()));
+		int randomMod{ m_rng.GetPercentRoll() };
 
-		if (randomMod > 33)
+		if (randomMod > ConfusionTurnChance)
 		{
 			return true;
 		}
@@ -170,18 +183,19 @@ bool StatusEffectProcessor::ConfusedStatus()
 
 			// Confused damage does not take into account Pokemon's stat boosts, burn status, stab, nor critical, and is a typeless physical move
 			unsigned int level{ m_context.attackingPokemon->GetLevel() };
-			unsigned int confusePower{ 40 };
+			constexpr unsigned int confusePower{ 40 };
 
 			unsigned int sourceAttack{ m_context.attackingPokemon->GetAttack() };
 			unsigned int targetDefense{ m_context.attackingPokemon->GetDefense() };
 
 			unsigned int baseDamage = (((((2 * level / 5) + 2) * confusePower * sourceAttack) / targetDefense) / 50) + 2;
 
-			std::uniform_int_distribution<unsigned int> damagemoddistributor(85, 100);
-			unsigned int damageMod{ damagemoddistributor(m_rng.GetGenerator()) };
+			unsigned int damageMod{ m_rng.GetDamageRoll() };
 			unsigned int finalDamage = baseDamage * damageMod / 100;
 
 			m_context.attackingPokemon->DamageCurrentHP(finalDamage);
+
+			CheckFaintCondition(*m_context.defendingPlayer, *m_context.attackingPlayer, *m_context.defendingPokemon, *m_context.attackingPokemon);
 
 			return false;
 		}
@@ -190,14 +204,14 @@ bool StatusEffectProcessor::ConfusedStatus()
 
 bool StatusEffectProcessor::ParalysisStatus()
 {
-	std::uniform_int_distribution<int> randomModDistributor(1, 100);
-	int randomMod(randomModDistributor(m_rng.GetGenerator()));
+	int randomMod{ m_rng.GetPercentRoll() };
 
-	if (randomMod <= 25)
+	if (randomMod <= ParalysisTurnChance)
 	{
 		m_statusEffectUI.DisplayCantMoveParalysisMsg(m_context.attackingPokemon->GetNameView());
 
 		return false;
+		
 	}
 	else
 	{
@@ -206,41 +220,32 @@ bool StatusEffectProcessor::ParalysisStatus()
 
 }
 
-void StatusEffectProcessor::ThrashStop()
+void StatusEffectProcessor::ResetRampageState()
 {
-	m_context.attackingPokemon->SetThrashing(false);
+	m_context.attackingPokemon->SetRampaging(false);
+	m_context.attackingPokemon->ResetRampageCounter();
+	m_context.attackingPokemon->SetRampageTurnCount(0);
 	m_context.attackingPlayer->SetCanSwitch(true);
 }
 
-void StatusEffectProcessor::ThrashConfuse()
+void StatusEffectProcessor::RampageConfuse()
 {
-	m_statusEffectUI.DisplayThrashConfusionMsg(m_context.attackingPlayer->GetPlayerNameView(), m_context.attackingPokemon->GetNameView());
+	m_statusEffectUI.DisplayRampageConfusionMsg(m_context.attackingPlayer->GetPlayerNameView(), m_context.attackingPokemon->GetNameView());
 
 	m_context.attackingPokemon->SetConfusedStatus(true);
 
-	std::uniform_int_distribution<unsigned int> randomModDistributor(2, 4);
-	unsigned int randomMod(randomModDistributor(m_rng.GetGenerator()));
+	unsigned int randomMod{ m_rng.GetConfusionTurnRoll() };
 	m_context.attackingPokemon->SetConfusedTurnCount(randomMod);
 	m_context.attackingPokemon->ResetConfusedCounter();
 }
 
-void StatusEffectProcessor::ThrashReset()
-{
-	m_context.attackingPokemon->ResetThrashCounter();
-	m_context.attackingPokemon->SetThrashTurnCount(0);
-}
-
-void StatusEffectProcessor::BideStop()
+void StatusEffectProcessor::ResetBideState()
 {
 	m_context.attackingPokemon->SetBide(false);
-	m_context.attackingPlayer->SetCanSwitch(true);
-}
-
-void StatusEffectProcessor::BideReset()
-{
 	m_context.attackingPokemon->ResetBideCounter();
 	m_context.attackingPokemon->SetBideTurnCount(0);
 	m_context.attackingPokemon->ResetBideDamage();
+	m_context.attackingPlayer->SetCanSwitch(true);
 }
 
 void StatusEffectProcessor::CheckSubstituteCondition(Player* targetPlayer, BattlePokemon* targetPokemon)
@@ -249,44 +254,6 @@ void StatusEffectProcessor::CheckSubstituteCondition(Player* targetPlayer, Battl
 	{
 		targetPokemon->SetSubstitute(false);
 		m_statusEffectUI.DisplaySubstituteFadedMsg(targetPlayer->GetPlayerNameView(), targetPokemon->GetNameView());
-	}
-}
-
-void StatusEffectProcessor::RageCheck()
-{
-	if (!m_context.attackingPokemon->IsRaging() && !m_context.defendingPokemon->IsRaging())
-	{
-		return;
-	}
-
-	if ((m_context.defendingPokemon->IsRaging() && (m_context.damageTaken > 0 && !m_context.defendingPokemon->HasSubstitute()))
-		|| m_context.currentMove->GetMoveEffectEnum() == MoveEffect::Disable) // Target took damage or was targeted by Disable while raging
-	{
-		size_t attackStage = m_context.defendingPokemon->GetAttackStage();
-
-		if (attackStage >= 12)
-		{
-			m_statusEffectUI.DisplayStatRaiseFailMsg("attack", m_context.defendingPlayer->GetPlayerNameView(), m_context.defendingPokemon->GetNameView());
-		}
-		else
-		{
-			++attackStage;
-			m_context.defendingPokemon->SetAttackStage(attackStage);
-			m_statusEffectUI.DisplayStatRaised1Msg("attack", m_context.defendingPlayer->GetPlayerNameView(), m_context.defendingPokemon->GetNameView());
-		}
-	}
-
-	if (m_context.attackingPokemon->IsRaging() && m_context.currentMove->GetMoveEffectEnum() != MoveEffect::Rage)
-	{
-		m_context.attackingPokemon->SetRaging(false);
-	}
-	else if (m_context.attackingPokemon->IsRaging() && m_context.currentMove->GetMoveEffectEnum() == MoveEffect::Rage && m_context.currentMove->b_isDisabled)
-	{
-		m_context.attackingPokemon->SetRaging(false);
-	}
-	else if (m_context.attackingPokemon->IsRaging() && m_context.currentMove->GetMoveEffectEnum() == MoveEffect::Rage && !m_context.currentMove->b_isDisabled)
-	{
-		m_statusEffectUI.DisplayRageStartedMsg(m_context.attackingPlayer->GetPlayerNameView(), m_context.attackingPokemon->GetNameView());
 	}
 }
 
@@ -317,32 +284,5 @@ void StatusEffectProcessor::CheckFaintCondition(Player& sourcePlayer, Player& ta
 		}
 
 		targetPlayer.SetCanSwitch(true);
-	}
-
-	if (source.GetCurrentHP() <= 0 && !source.IsFainted())
-	{
-		source.SetFainted(true);
-		m_statusEffectUI.DisplayFaintedMsg(sourcePlayer.GetPlayerNameView(), source.GetNameView());
-		sourcePlayer.IncrementFaintedCount();
-
-		if (target.IsBound())
-		{
-			target.SetBound(false);
-			targetPlayer.SetCanSwitch(true);
-			target.ResetBoundCounter();
-			target.SetBoundTurnCount(0);
-
-			m_statusEffectUI.DisplayFreedFromBoundMsg(targetPlayer.GetPlayerNameView(), target.GetNameView(), target.GetBoundMoveName());
-		}
-
-		if (sourcePlayer.GetPokemonCount() == sourcePlayer.GetFaintedCount())
-		{
-			if (std::find(m_context.vec_outOfPokemon.begin(), m_context.vec_outOfPokemon.end(), &sourcePlayer) == m_context.vec_outOfPokemon.end())
-			{
-				m_context.vec_outOfPokemon.emplace_back(&sourcePlayer);
-			}
-		}
-
-		sourcePlayer.SetCanSwitch(true);
 	}
 }

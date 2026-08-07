@@ -1,19 +1,24 @@
 #include "Pokemon.h"
+#include <string_view>
+#include <span>
 
-Pokemon::Pokemon
-(unsigned int nationalDexNumber, std::string_view name,
-    unsigned int basehp, unsigned int baseattack, unsigned int basedefense,
-    unsigned int basespecialattack, unsigned int basespecialdefense, unsigned int basespeed,
-    std::string_view type1, PokemonType type1e, std::string_view type2, PokemonType type2e, unsigned int weight)
-    : m_nationalDexNumber{ nationalDexNumber }, m_name{ name },
-    m_basehp{ basehp }, m_baseattack{ baseattack }, m_basedefense{ basedefense },
-    m_basespecialattack{ basespecialattack }, m_basespecialdefense{ basespecialdefense }, m_basespeed{ basespeed },
-    m_type1{ type1 }, m_type1e{ type1e }, m_type2{ type2 }, m_type2e{ type2e }, m_weight{ weight }//, b_isDynamic(true)
-{ }
+#include "../common//EnumUtils.h"
+#include "StringToTypes.h"
+#include "PokemonID.h"
+
+PokemonID Pokemon::GetPokemonID() const
+{
+    return e_id;
+}
 
 unsigned int Pokemon::GetNationalDexNumber() const
 {
-    return m_nationalDexNumber;
+    return EnumIndex(e_id);
+}
+
+size_t Pokemon::GetPokemonIndex() const
+{
+    return IDToIndex(e_id);
 }
 
 std::string_view Pokemon::GetName() const
@@ -53,22 +58,22 @@ unsigned int Pokemon::GetBaseSpeed() const
 
 std::string_view Pokemon::GetFirstType() const
 {
-    return m_type1;
+    return TypeToString(e_type1);
 }
 
 PokemonType Pokemon::GetFirstTypeEnum() const
 {
-    return m_type1e;
+    return e_type1;
 }
 
 std::string_view Pokemon::GetSecondType() const
 {
-    return m_type2;
+    return TypeToString(e_type2);
 }
 
 PokemonType Pokemon::GetSecondTypeEnum() const
 {
-    return m_type2e;
+    return e_type2;
 }
 
 int Pokemon::GetPokemonWeightHg() const
@@ -83,29 +88,13 @@ double Pokemon::GetPokemonWeightKg() const
 
 std::span<const size_t> Pokemon::GetMoveList() const
 {
-    /*
-    if (b_isDynamic)
-    {
-        return std::span<const size_t>(m_debugMovelist.data(), m_debugMoveCount);
-    }
-    */
     return m_movelist;
 }
 
 bool Pokemon::CheckPokemonMoveList(size_t movenum) const
 {
     ++movenum;
-    /*
-    if (b_isDynamic)
-    {
-        for (size_t index = 1; index < 165; ++index)
-        {
-            if (movenum == index)
-                return true;
-        }
-        return false;
-    }
-    */
+
     for (auto index = m_movelist.begin(); index != m_movelist.end(); ++index)
     {
         if (movenum == *index)
@@ -118,12 +107,3 @@ size_t Pokemon::FetchMoveNumber(size_t index) const
 {
     return index - 1;
 }
-/*
-void Pokemon::DebugAddMove(size_t moveId)
-{
-    if (b_isDynamic && m_debugMoveCount < m_debugMovelist.size())
-    {
-        m_debugMovelist[m_debugMoveCount++] = moveId;
-    }
-}
-*/

@@ -2,13 +2,17 @@
 
 #include <memory>
 #include <span>
+#include <array>
+#include <string>
+#include <string_view>
+#include <cstdint>
 
 #include "BattlePokemon.h"
 
 class IPlayerController;
 class AIController;
 
-enum class ControllerType : uint8_t { Human, AI };
+enum class ControllerType : uint16_t { Human, AI };
 
 class Player
 {
@@ -60,6 +64,9 @@ public:
     bool IsSwitching() const;
     void SetIsSwitching(bool);
 
+    bool IsPendingSwitch() const;
+    void SetPendingSwitch(bool);
+
     void SetPokemonToSwitchTo(BattlePokemon*);
     BattlePokemon* GetPokemonToSwitchTo() const;
 
@@ -92,16 +99,20 @@ public:
     void ResetValues();
 
 protected:
-    std::unique_ptr<IPlayerController> uptr_controller;
-
     std::array<BattlePokemon, 6> belt;
-
-    BattlePokemon* pokemonToSwitchTo{ nullptr };
 
     std::string m_name;
 
+    BattlePokemon* pokemonToSwitchTo{ nullptr };
+
+    std::unique_ptr<IPlayerController> uptr_controller;
+
     int m_PokemonCount{ 0 };
     int m_faintedPokemon{ 0 };
+
+    int m_mistCounter{};
+    int m_lightscreenCounter{};
+    int m_reflectCounter{};
 
     ControllerType e_type{};
 
@@ -111,15 +122,11 @@ protected:
 
     bool b_canSwitch{ true };
     bool b_isSwitching{ false };
-    bool b_hasSwitched{ false };
+    bool b_isPendingSwitch{ false };
     bool b_hasWon{ false };
     bool b_hasForfeited{ false };
 
     bool b_hasMist{ false };
     bool b_hasLightScreen{ false };
     bool b_hasReflect{ false };
-
-    int m_mistCounter{};
-    int m_lightscreenCounter{};
-    int m_reflectCounter{};
 };

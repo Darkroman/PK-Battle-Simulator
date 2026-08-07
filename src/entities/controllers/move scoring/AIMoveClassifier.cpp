@@ -1,6 +1,8 @@
 #include "AIMoveClassifier.h"
 
+#include "AIScoreTag.h"
 #include "../../pokemonMove.h"
+#include "../../../moves/MoveEffectEnums.h"
 
 AIScoreTag AIMoveClassifier::Classify(const pokemonMove& move)
 {

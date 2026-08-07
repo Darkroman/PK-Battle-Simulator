@@ -7,31 +7,34 @@
 
 #include <string_view>
 
-enum class PokemonType : size_t;
-enum class Category;
-enum class MoveEffect;
+enum class MoveID : unsigned int;
+enum class PokemonType : unsigned int;
+enum class Category : unsigned int;
+enum class MoveEffect : unsigned int;
 
 class Move
 {
 public:
     constexpr Move
-    (size_t movenum, std::string_view name,
-        std::string_view type, PokemonType typee, std::string_view category, Category categorye,
+    (MoveID id, std::string_view name,
+        PokemonType type, Category category,
         int priority, MoveEffect moveEffectEnum, int effectChance,
-        int pp, int maxpp, unsigned int power, int accuracy,
+        int pp, unsigned int power, int accuracy,
         bool contact, bool protect, bool magicCoat,
         bool snatch, bool mirrorMove, bool kingRock, bool soundBased, bool bypassSubstitute)
-        : m_movenum{ movenum }, m_name{ name },
-        m_type{ type }, m_typee{ typee }, m_category{ category }, m_categorye{ categorye },
-        m_priority{ priority }, m_moveEffectEnum{ moveEffectEnum }, m_effectChance{ effectChance },
-        m_pp{ pp }, m_maxpp{ maxpp }, m_power{ power }, m_accuracy{ accuracy },
+        : e_id{ id }, m_name{ name },
+        e_type{ type }, e_category{ category },
+        m_priority{ priority }, e_moveEffect{ moveEffectEnum }, m_effectChance{ effectChance },
+        m_pp{ pp }, m_power{ power }, m_accuracy{ accuracy },
         b_DoesMakeContact{ contact }, b_IsAffectedByProtect{ protect }, b_IsAffectedByMagicCoat{ magicCoat },
         b_IsAffectedBySnatch{ snatch }, b_IsAffectedByMirrorMove{ mirrorMove }, b_IsAffectedByKingRock{ kingRock }, b_isSoundBased{ soundBased }, b_bypassSubstitute{ bypassSubstitute }
     {
     }
 
-    size_t         GetMoveIndex() const;
-    std::string_view    GetName() const;
+    MoveID                  GetMoveID() const;
+    unsigned int     GetMovedexNumber() const;
+    size_t               GetMoveIndex() const;
+    std::string_view          GetName() const;
     
     std::string_view     GetCategory() const;
     Category         GetCategoryEnum() const;
@@ -43,7 +46,6 @@ public:
     int          GetEffectChance() const;
     
     int             GetPP() const;
-    int          GetMaxPP() const;
     unsigned int GetPower() const;
     int       GetAccuracy() const;
 
@@ -57,23 +59,19 @@ public:
     bool    CanBypassSubstitute() const;
 
 private:
-    std::string_view     m_name;
-    std::string_view     m_type;
-    std::string_view m_category;
+    std::string_view      m_name;
 
-    size_t            m_movenum;
+    MoveID                  e_id;
+    PokemonType           e_type;
+    Category          e_category;
+    MoveEffect      e_moveEffect;
 
-    PokemonType         m_typee;
-    Category        m_categorye;
-    MoveEffect m_moveEffectEnum;
+    int               m_priority;
+    int           m_effectChance;
 
-    int              m_priority;
-    int          m_effectChance;
-
-    int                    m_pp;
-    int                 m_maxpp;
-    unsigned int        m_power;
-    int        m_accuracy;
+    int                     m_pp;
+    unsigned int         m_power;
+    int               m_accuracy;
 
     bool        b_DoesMakeContact;
     bool    b_IsAffectedByProtect;

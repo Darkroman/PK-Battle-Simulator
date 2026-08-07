@@ -1,10 +1,13 @@
 #include <algorithm>
+#include <array>
+#include <span>
 
 #include "MediumMoveScoring.h"
 
+#include "AIScoreTag.h"
 #include "ScoringResultsStruct.h"
-#include "AIMoveClassifier.h"
-#include "../../Player.h"
+#include "../../BattlePokemon.h"
+#include "../../../moves/MoveEffectEnums.h"
 
 namespace MediumMoveScoring
 {
@@ -39,7 +42,7 @@ namespace MediumMoveScoring
 		{
 			bool isRechargeMove = result->tag == AIScoreTag::RechargeMove;
 
-			bool canKill{ false };
+			bool canKill{};
 			if (result->damage >= targetMon.GetCurrentHP())
 			{
 				canKill = true;

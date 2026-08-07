@@ -1,10 +1,16 @@
+#include <algorithm>
+#include <string_view>
+
 #include "MoveHelpers.h"
 
+#include "../ui/EffectivenessText.h"
 #include "MoveRoutineDeps.h"
 #include "MoveEffectEnums.h"
+#include "../entities/BattlePokemon.h"
 #include "../entities/Player.h"
 #include "../data/StringToTypes.h"
 #include "../battle/RandomEngine.h"
+#include "../battle/BattleContext.h"
 #include "../ui/interfaces/IMoveResultsUI.h"
 #include "../battle/BattleCalculations.h"
 #include "../battle/StatusEffectProcessor.h"
@@ -15,15 +21,15 @@ EffectivenessText ToEffectivenessText(BattleStateFlags::Effectiveness e)
 
 	switch (e)
 	{
-	case E::Less:  return EffectivenessText::Less;
-	case E::Super: return EffectivenessText::Super;
-	case E::No:	   return EffectivenessText::No;
-	case E::OHKO:  return EffectivenessText::OHKO;
-	default:	   return EffectivenessText::Normal;
+	case E::Normal: return EffectivenessText::Normal;
+	case E::Super:  return EffectivenessText::Super;
+	case E::Less:   return EffectivenessText::Less;
+	case E::No:	    return EffectivenessText::No;
+	default:	    return EffectivenessText::Normal;
 	}
 }
 
-void InflictNVStatus(Status status, int chance, MoveRoutineDeps& deps)
+void InflictNVStatus(Status status, int effectChance, MoveRoutineDeps& deps)
 {
 	auto& ctx = deps.context;
 
@@ -53,29 +59,42 @@ void InflictNVStatus(Status status, int chance, MoveRoutineDeps& deps)
 		return;
 	}
 
-	std::uniform_int_distribution<int> randomModDistributor(1, 100);
-	int randomNumber{ randomModDistributor(deps.rng.GetGenerator()) };
+	int randomNumber{ deps.rng.GetPercentRoll() };
 
-	if (randomNumber > chance)
+	if (randomNumber > effectChance)
 	{
 		return;
 	}
 
-	std::string statusMessage = ctx.defendingPlayer->GetPlayerName() + "'s " + ctx.defendingPokemon->GetName() + " ";
+	switch (status)
+	{
+		case Status::Burned:
+			deps.resultsUI.DisplayBurnSuccess(ctx.defendingPlayer->GetPlayerName(), ctx.defendingPokemon->GetNameView());
+			break;
 
-	if (status == Status::Burned)
-		statusMessage += "was burned!";
-	else if (status == Status::Frozen)
-		statusMessage += "was frozen solid!";
-	else if (status == Status::Paralyzed)
-		statusMessage += "is paralyzed! It may be unable to move!";
-	else if (status == Status::Poisoned)
-		statusMessage += "was poisoned!";
-	else if (status == Status::Badly_Poisoned)
-		statusMessage += "was badly poisoned!";
-	else if (status == Status::Sleeping)
-		statusMessage += "fell asleep!";
+		case Status::Frozen:
+			deps.resultsUI.DisplayFreezeSuccess(ctx.defendingPlayer->GetPlayerName(), ctx.defendingPokemon->GetNameView());
+			break;
 
+		case Status::Paralyzed:
+			deps.resultsUI.DisplayParalyzeSuccess(ctx.defendingPlayer->GetPlayerName(), ctx.defendingPokemon->GetNameView());
+			break;
+
+		case Status::Poisoned:
+			deps.resultsUI.DisplayPoisonSuccess(ctx.defendingPlayer->GetPlayerName(), ctx.defendingPokemon->GetNameView());
+			break;
+
+		case Status::Badly_Poisoned:
+			deps.resultsUI.DisplayBadlyPoisonSuccess(ctx.defendingPlayer->GetPlayerName(), ctx.defendingPokemon->GetNameView());
+			break;
+
+		case Status::Sleeping:
+			deps.resultsUI.DisplaySleepSuccess(ctx.defendingPlayer->GetPlayerName(), ctx.defendingPokemon->GetNameView());
+			break;
+
+		default:
+			deps.resultsUI.DisplayNoopMsg();
+	}
 
 	ctx.defendingPokemon->ChangeStatus(status);
 	if (status == Status::Badly_Poisoned)
@@ -85,13 +104,20 @@ void InflictNVStatus(Status status, int chance, MoveRoutineDeps& deps)
 
 	if (status == Status::Sleeping)
 	{
-		std::uniform_int_distribution<unsigned int> sleepTurnDistributor(1, 3);
-		unsigned int randomMod(sleepTurnDistributor(deps.rng.GetGenerator()));
+		unsigned int randomMod{ deps.rng.GetSleepTurnRoll() };
 		ctx.defendingPokemon->SetSleepTurnCount(randomMod);
 		ctx.defendingPokemon->ResetSleepCounter();
 	}
+}
 
-	deps.resultsUI.DisplayNVStatusMsg(statusMessage);
+bool DefendingPokemonIsFainted(BattleContext& context, IMoveResultsUI& resultsUI)
+{
+	if (context.defendingPokemon->IsFainted())
+	{
+		resultsUI.DisplayFailedTextDialog();
+		return true;
+	}
+	return false;
 }
 
 void DamageRoutine(MoveRoutineDeps& deps)
@@ -106,6 +132,8 @@ void DamageRoutine(MoveRoutineDeps& deps)
 	resultsUI.DisplayCritTextDialog(ctx.flags.isCriticalHit);
 	resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.flags.currentEffectiveness));
 	resultsUI.DisplaySubstituteDamageTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ctx.defendingPokemon->GetSubstituteHP(), ctx.defendingPokemon->HasSubstitute(), ctx.flags.hitSubstitute);
+
+	TryDamageReactions(deps);
 }
 
 void MultiStrikeRoutine(MoveRoutineDeps& deps, int turnCount)
@@ -119,10 +147,13 @@ void MultiStrikeRoutine(MoveRoutineDeps& deps, int turnCount)
 	{
 		unsigned int damage = deps.calculations.CalculateDamage(ctx, *ctx.defendingPlayer, *ctx.currentMove, *ctx.attackingPokemon, *ctx.defendingPokemon);
 		deps.calculations.ApplyDamage(*ctx.currentMove, *ctx.defendingPokemon, damage);
+
 		totalDamage += damage;
 		deps.resultsUI.DisplayCritTextDialog(ctx.flags.isCriticalHit);
 		deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.flags.currentEffectiveness));
 		deps.resultsUI.DisplaySubstituteDamageTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ctx.defendingPokemon->GetSubstituteHP(), ctx.defendingPokemon->HasSubstitute(), ctx.flags.hitSubstitute);
+
+		TryDamageReactions(deps);
 
 		deps.statusProcessor.CheckSubstituteCondition(ctx.defendingPlayer, ctx.defendingPokemon);
 
@@ -160,6 +191,8 @@ void FixedDamageRoutine(MoveRoutineDeps& deps, unsigned int fixedDamage)
 	deps.calculations.ApplyDamage(*ctx.currentMove, *ctx.defendingPokemon, finalDamage);
 	deps.resultsUI.DisplayDirectDamageInflictedMsg(fixedDamage);
 	deps.resultsUI.DisplaySubstituteDamageTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ctx.defendingPokemon->GetSubstituteHP(), ctx.defendingPokemon->HasSubstitute(), ctx.flags.hitSubstitute);
+
+	TryDamageReactions(deps);
 }
 
 void FlinchRoutine(MoveRoutineDeps& deps)
@@ -168,8 +201,7 @@ void FlinchRoutine(MoveRoutineDeps& deps)
 
 	if (ctx.defendingPokemon->GetCurrentHP() > 0 && !ctx.flags.hitSubstitute && !ctx.defendingPlayer->IsFirst())
 	{
-		std::uniform_int_distribution<int> randomModDistributor(1, 100);
-		int randomMod = randomModDistributor(deps.rng.GetGenerator());
+		int randomMod{ deps.rng.GetPercentRoll() };
 
 		if (randomMod <= ctx.currentMove->GetEffectChance())
 		{
@@ -184,7 +216,7 @@ void RecoilRoutine(MoveRoutineDeps& deps, unsigned int recoilDivisor, unsigned i
 
 	unsigned int recoilDamage = (targetHPBegin - targetHPEnd) / recoilDivisor;
 
-	unsigned int finalDamage = std::max((unsigned int)1, recoilDamage);
+	unsigned int finalDamage = std::max(1u, recoilDamage);
 
 	ctx.attackingPokemon->DamageCurrentHP(finalDamage);
 
@@ -201,7 +233,7 @@ bool HandleCharging(MoveRoutineDeps& deps, ChargeMsgMemFn chargeMsg, const Charg
 
 	if (!atkPkmn->IsCharging())
 	{
-		(deps.resultsUI.*chargeMsg)(atkPlayer->GetPlayerNameView(), atkPkmn->GetPokemonNameView());
+		(deps.resultsUI.*chargeMsg)(atkPlayer->GetPlayerNameView(), atkPkmn->GetNameView());
 
 		if (hooks.preCharge)
 		{
@@ -210,7 +242,7 @@ bool HandleCharging(MoveRoutineDeps& deps, ChargeMsgMemFn chargeMsg, const Charg
 
 		if (hooks.stageUp)
 		{
-			size_t amount = hooks.stageIncreaseAmount;
+			unsigned int amount = hooks.stageIncreaseAmount;
 			std::string_view stageName = hooks.stageName;
 
 			hooks.stageUp(deps, amount, stageName, hooks.getStage, hooks.setStage);
@@ -233,7 +265,7 @@ bool HandleCharging(MoveRoutineDeps& deps, ChargeMsgMemFn chargeMsg, const Charg
 	return false;
 }
 
-void StageUpRoutine(MoveRoutineDeps& deps, size_t amount, std::string_view stageName, GetStageFn getStage, SetStageFn setStage)
+void StageUpRoutine(MoveRoutineDeps& deps, int amount, std::string_view stageName, GetStageFn getStage, SetStageFn setStage)
 {
 	auto& ctx = deps.context;
 	auto& atkPlayer = *ctx.attackingPlayer;
@@ -241,10 +273,10 @@ void StageUpRoutine(MoveRoutineDeps& deps, size_t amount, std::string_view stage
 	auto playerName = atkPlayer.GetPlayerNameView();
 	auto pokemonName = atkPkmn.GetNameView();
 
-	size_t stage{ getStage(atkPkmn) };
+	int stage{ getStage(atkPkmn) };
 
-	size_t max{ 12 };
-	size_t rise{ std::min(amount, max - stage) };
+	int max{ 12 };
+	int rise{ std::min(amount, max - stage) };
 
 	if (rise <= 0)
 	{
@@ -256,7 +288,7 @@ void StageUpRoutine(MoveRoutineDeps& deps, size_t amount, std::string_view stage
 	DisplayStatChange(deps.resultsUI, rise, true, stageName, playerName, pokemonName);
 }
 
-void StageDownRoutine(MoveRoutineDeps& deps, size_t amount, std::string_view stageName, GetStageFn getStage, SetStageFn setStage)
+void StageDownRoutine(MoveRoutineDeps& deps, int amount, std::string_view stageName, GetStageFn getStage, SetStageFn setStage)
 {
 	auto& ctx = deps.context;
 	auto& defPlayer = *ctx.defendingPlayer;
@@ -264,9 +296,9 @@ void StageDownRoutine(MoveRoutineDeps& deps, size_t amount, std::string_view sta
 	auto playerName = defPlayer.GetPlayerNameView();
 	auto pokemonName = defPkmn.GetNameView();
 
-	size_t stage{ getStage(defPkmn) };
+	int stage{ getStage(defPkmn) };
 
-	size_t drop{ std::min(amount, stage) };
+	int drop{ std::min(amount, stage) };
 
 	if (drop <= 0)
 	{
@@ -274,12 +306,12 @@ void StageDownRoutine(MoveRoutineDeps& deps, size_t amount, std::string_view sta
 		return;
 	}
 
-	setStage(defPkmn, drop);
+	setStage(defPkmn, stage - drop);
 
 	DisplayStatChange(deps.resultsUI, drop, false, stageName, playerName, pokemonName);
 }
 
-void StageDownDamageRoutine(MoveRoutineDeps& deps, size_t amount, std::string_view stageName, GetStageFn getStage, SetStageFn setStage)
+void StageDownDamageRoutine(MoveRoutineDeps& deps, int amount, std::string_view stageName, GetStageFn getStage, SetStageFn setStage)
 {
 	auto& ctx = deps.context;
 	auto& defPlayer = *ctx.defendingPlayer;
@@ -292,17 +324,16 @@ void StageDownDamageRoutine(MoveRoutineDeps& deps, size_t amount, std::string_vi
 		return;
 	}
 
-	size_t stage = getStage(defPkmn);
+	int stage = getStage(defPkmn);
 
-	size_t drop{ std::min(amount, stage) };
+	int drop{ std::min(amount, stage) };
 
 	if (drop <= 0)
 	{
 		return;
 	}
 
-	std::uniform_int_distribution<int> randomModDistributor(1, 100);
-	int roll{ randomModDistributor(deps.rng.GetGenerator()) };
+	int roll{ deps.rng.GetPercentRoll() };
 
 	if (roll <= ctx.currentMove->GetEffectChance())
 	{
@@ -312,7 +343,7 @@ void StageDownDamageRoutine(MoveRoutineDeps& deps, size_t amount, std::string_vi
 	}
 }
 
-void DisplayStatChange(IMoveResultsUI& ui, size_t amount, bool isUp, std::string_view stageName, std::string_view playerName, std::string_view pokemonName)
+void DisplayStatChange(IMoveResultsUI& ui, int amount, bool isUp, std::string_view stageName, std::string_view playerName, std::string_view pokemonName)
 {
 	if (amount == 1)
 	{
@@ -323,5 +354,44 @@ void DisplayStatChange(IMoveResultsUI& ui, size_t amount, bool isUp, std::string
 	{
 		isUp ? ui.DisplayStatRaised2Msg(stageName, playerName, pokemonName)
 			: ui.DisplayStatLowered2Msg(stageName, playerName, pokemonName);
+	}
+}
+
+void TryDamageReactions(MoveRoutineDeps& deps)
+{
+	ProcessRage(deps);
+}
+
+void ProcessRage(MoveRoutineDeps& deps)
+{
+	auto& ctx = deps.context;
+	auto& resultsUI = deps.resultsUI;
+
+	if (!ctx.attackingPokemon->IsRaging() && !ctx.defendingPokemon->IsRaging())
+	{
+		return;
+	}
+
+	if (ctx.defendingPokemon->IsRaging() && 
+		((ctx.damageTaken > 0 && !ctx.defendingPokemon->HasSubstitute()) ||
+		 ctx.currentMove->GetMoveEffectEnum() == MoveEffect::Disable)) // Target took damage or was targeted by Disable while raging
+	{
+		unsigned int attackStage = ctx.defendingPokemon->GetAttackStage();
+
+		if (attackStage >= 12)
+		{
+			resultsUI.DisplayStatRaiseFailMsg("attack", ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView());
+		}
+		else
+		{
+			++attackStage;
+			ctx.defendingPokemon->SetAttackStage(attackStage);
+			resultsUI.DisplayStatRaised1Msg("attack", ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView());
+		}
+	}
+
+	if (ctx.currentMove->GetMoveEffectEnum() == MoveEffect::Rage && !ctx.currentMove->b_isDisabled)
+	{
+		resultsUI.DisplayRageStartedMsg(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView());
 	}
 }

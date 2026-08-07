@@ -1,7 +1,6 @@
 #pragma once
 
 struct BattleContext;
-class Player;
 
 class IBattleAnnouncerUI
 {

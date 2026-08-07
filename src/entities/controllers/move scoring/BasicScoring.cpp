@@ -2,19 +2,23 @@
 
 #include "BasicScoring.h"
 
-#include "AIMoveClassifier.h"
+#include "AIScoreTag.h"
 #include "ScoringResultsStruct.h"
-#include "../../../data/StringToTypes.h"
-#include "../../Player.h"
 #include "../AIController.h"
+#include "../../Player.h"
+#include "../../pokemonMove.h"
+#include "../../BattlePokemon.h"
+#include "../../../data/MoveID.h"
+#include "../../../data/StringToTypes.h"
+#include "../../../moves/MoveEffectEnums.h"
 
 namespace BasicScoring
 {
-	int BaseDamageScoring(ScoringResults& results, const Player& self, const Player& targetPlayer, const pokemonMove& move, const BattlePokemon& selfMon, const BattlePokemon& targetMon)
+	int BaseDamageScoring(ScoringResults& result, const Player& self, const Player& targetPlayer, const pokemonMove& move, const BattlePokemon& selfMon, const BattlePokemon& targetMon)
 	{
 		int delta{};
 
-		auto tags = results.tag;
+		auto tags = result.tag;
 
 		delta += CheckDamageImmunity(move, self, targetMon); // score -10 if immune
 
@@ -258,7 +262,7 @@ namespace BasicScoring
 
 		bool isThunderWaveImmune = (targetMon.GetTypeOneEnum() == PokemonType::Ground
 			|| targetMon.GetTypeTwoEnum() == PokemonType::Ground)
-			&& move.GetName() == "Thunder Wave";
+			&& move.GetMoveID() == MoveID::ThunderWave;
 
 		bool isGrassType = targetMon.GetTypeOneEnum() == PokemonType::Grass || targetMon.GetTypeTwoEnum() == PokemonType::Grass;
 		bool isPowderImmune = isGrassType && move.GetMoveEffectEnum() == MoveEffect::PoisonPowder;

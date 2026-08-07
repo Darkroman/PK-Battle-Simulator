@@ -1,27 +1,44 @@
 #include <iostream>
 #include <chrono>
 #include <thread>
+#include <mutex>
+#include <vector>
+#include <memory>
+#include <algorithm>
+#include <cstdint>
 
 #include "GameEngine.h"
 
-#include "data/Database.h"
 #include "entities/Player.h"
 #include "entities/controllers/AIController.h"
 #include "entities/controllers/HumanControllerConsole.h"
 
-#include "ui/ConsoleTextSink.h"
-#include "ui/MoveResultsText.h"
+#include "ui/interfaces/IOutputTarget.h"
+#include "ui/ConsoleOutput.h"
+
+#include "ui/interfaces/IBattleAnnouncerUI.h"
 #include "ui/BattleAnnouncerText.h"
+#include "ui/BattleAnnouncerHeadless.h"
+
+#include "ui/interfaces/IMoveResultsUI.h"
+#include "ui/MoveResultsQueuedConsole.h"
+#include "ui/MoveResultsHeadless.h"
+#include "ui/MoveResultsText.h"
+
+#include "ui/interfaces/IStatusEffectUI.h"
+#include "ui/StatusEffectQueuedConsole.h"
+#include "ui/StatusEffectHeadless.h"
 #include "ui/StatusEffectText.h"
 
-#include "ui/BattleAnnouncerHeadless.h"
-#include "ui/MoveResultsHeadless.h"
-#include "ui/StatusEffectHeadless.h"
+#include "common/AppState.h"
+#include "common/BattleState.h"
+
+#include "battle/BattleContext.h"
+#include "battle/RandomEngine.h"
+#include "battle/BattleManager.h"
 
 GameEngine::GameEngine()
-    : db(Database::GetInstance()),
-    rng(),
-    players([&] {
+    : players([&] {
         std::vector<std::unique_ptr<Player>> v;
         v.push_back(std::make_unique<Player>("Player One"));
         v.push_back(std::make_unique<Player>("Player Two"));
@@ -29,26 +46,10 @@ GameEngine::GameEngine()
         v.at(1)->SetController(std::make_unique<AIController>(Difficulty::Easy), ControllerType::AI);
         return v;
         }()),
-    context(players)
+    context(players),
+    rng()
 {
     Bootstrap();
-}
-
-void GameEngine::SetupUI(bool headless)
-{
-    if (headless)
-    {
-        battleAnnouncer = std::make_unique<BattleAnnouncerHeadless>();
-        moveResults = std::make_unique<MoveResultsHeadless>();
-        statusEffect = std::make_unique<StatusEffectHeadless>();
-    }
-    else
-    {
-        textSink = std::make_unique<ConsoleTextSink>();
-        battleAnnouncer = std::make_unique<BattleAnnouncerText>();
-        moveResults = std::make_unique<MoveResultsText>(*textSink);
-        statusEffect = std::make_unique<StatusEffectText>(*textSink);
-    }
 }
 
 void GameEngine::Bootstrap()
@@ -85,16 +86,18 @@ void GameEngine::Run()
 
             case AppState::InitBattle:
 
-                textSink = std::make_unique<ConsoleTextSink>();
+                outputTarget = std::make_unique<ConsoleOutput>();
                 battleAnnouncer = std::make_unique<BattleAnnouncerText>();
-                moveResults = std::make_unique<MoveResultsText>(*textSink);
-                statusEffect = std::make_unique<StatusEffectText>(*textSink);
+                //moveResults = std::make_unique<MoveResultsText>(*outputTarget);
+                //statusEffect = std::make_unique<StatusEffectText>(*outputTarget);
+                moveResults = std::make_unique<MoveResultsQueuedConsole>(m_uiEventQueue);
+                statusEffect = std::make_unique<StatusEffectQueuedConsole>(m_uiEventQueue);
 
                 PresetupBattle();
 
                 if (!battleManager)
                 {
-                    battleManager.emplace(context, rng, *battleAnnouncer, *moveResults, *statusEffect);
+                    battleManager.emplace(context, rng, *battleAnnouncer, *moveResults, *statusEffect, *outputTarget, m_uiEventQueue);
                 }
 
                 currentState = AppState::Battle;
@@ -102,7 +105,7 @@ void GameEngine::Run()
                 break;
 
             case AppState::Battle:
-                if (battleManager->RunBattleLoop())
+                if (battleManager->RunBattle() == BattleState::Victory)
                 {
                     currentState = AppState::Victory;
                 }
@@ -119,7 +122,7 @@ void GameEngine::Run()
 
             case AppState::Simulate:
             {
-                RunSimulate();
+                RunSimulations();
 
                 currentState = AppState::MainMenu;
 
@@ -133,17 +136,29 @@ void GameEngine::Run()
     }
 }
 
-void GameEngine::RunSimulate()
+void GameEngine::RunSimulations()
 {
-    battleAnnouncer = std::make_unique<BattleAnnouncerHeadless>();
-    moveResults = std::make_unique<MoveResultsHeadless>();
-    statusEffect = std::make_unique<StatusEffectHeadless>();
-
     if (simIterations <= 0)
     {
         std::cerr << "Simulation iterations must be greater than zero.\n";
         return;
     }
+    /*
+    struct ThreadDebugInfo
+    {
+        unsigned int threadIndex{};
+        uint64_t seed{};
+        unsigned int localBattleIndex{};
+        unsigned int turns{};
+        uint64_t iterationNum{};
+    };
+    */
+
+    std::chrono::time_point<std::chrono::high_resolution_clock> start, end;
+
+    start = std::chrono::high_resolution_clock::now();
+
+    std::mutex localWinsMutex;
 
     unsigned int numThreads = std::thread::hardware_concurrency();
 
@@ -157,24 +172,30 @@ void GameEngine::RunSimulate()
     unsigned int baseBattlesPerThread = simIterations / numThreads;
     unsigned int remainder = simIterations % numThreads;
 
-    std::atomic<int> pOneVictories{};
-    std::atomic<int> pTwoVictories{};
+    std::atomic<uint64_t> numOfIterations{};
 
-    std::atomic<uint64_t> totalTurns{};
+    uint64_t pOneVictories{};
+    uint64_t pTwoVictories{};
+
+    uint64_t totalTurns{};
 
     std::vector<std::thread> workers;
     workers.reserve(numThreads);
+    
+    //std::vector<ThreadDebugInfo> debugResults;
+    //std::mutex debugMutex;
+    
+    std::unique_ptr<IOutputTarget> outputTarget = std::make_unique<ConsoleOutput>();
+    std::unique_ptr<IBattleAnnouncerUI> battleAnnouncer = std::make_unique<BattleAnnouncerHeadless>();
+    std::unique_ptr<IMoveResultsUI> moveResults = std::make_unique<MoveResultsHeadless>();
+    std::unique_ptr<IStatusEffectUI> statusEffect = std::make_unique<StatusEffectHeadless>();
 
-    std::chrono::time_point<std::chrono::high_resolution_clock> start, end;
-
-    start = std::chrono::high_resolution_clock::now();
-
+    //std::atomic<bool> found{};
+    //ThreadDebugInfo info;
     for (unsigned int t = 0; t < numThreads; ++t)
     {
         workers.emplace_back([&, t]()
         {
-            RandomEngine localRng(t);
-
             std::vector<std::unique_ptr<Player>> localPlayers;
             localPlayers.reserve(players.size());
 
@@ -185,25 +206,53 @@ void GameEngine::RunSimulate()
 
             BattleContext localContext(localPlayers);
 
-            BattleManager localManager(localContext, localRng, *battleAnnouncer, *moveResults, *statusEffect);
-
-            int localP1Wins = 0;
-            int localP2Wins = 0;
-            uint64_t localThreadTurns = 0;
+            RandomEngine localRng(t);
 
             localContext.playerOne = localPlayers[0].get();
             localContext.playerTwo = localPlayers[1].get();
 
-            localContext.vec_aiPlayers.clear();
             if (localContext.playerOne->IsAI()) localContext.vec_aiPlayers.emplace_back(localContext.playerOne);
             if (localContext.playerTwo->IsAI()) localContext.vec_aiPlayers.emplace_back(localContext.playerTwo);
+
+            BattleManager localManager(localContext, localRng, *battleAnnouncer, *moveResults, *statusEffect, *outputTarget, m_uiEventQueue);
+
+            uint64_t localP1Wins = 0;
+            uint64_t localP2Wins = 0;
+            uint64_t localThreadTurns = 0;
+            uint64_t localNumOfIterations = 0;
 
             unsigned int battlesForThisThread =
             baseBattlesPerThread + (t < remainder ? 1 : 0);
 
-            for (unsigned int i = 0; i < battlesForThisThread; ++i)
+            unsigned int i{};
+            for (i; i < battlesForThisThread; ++i)
             {
-                localManager.RunBattleLoop();
+                /*
+                for (unsigned int j = 0; j < 332; ++j)
+                {
+                    localManager.RunBattleSimulation();
+                    localManager.ResetValues();
+                }
+                
+                //localRng.GetCallAmount();
+
+                auto battleAnnouncerText = std::make_unique<BattleAnnouncerText>();
+                auto moveResultsText = std::make_unique<MoveResultsText>(*outputTarget);
+                auto statusEffectText = std::make_unique<StatusEffectText>(*outputTarget);
+
+                BattleManager debugManager(
+                    localContext,
+                    localRng,
+                    *battleAnnouncerText,
+                    *moveResultsText,
+                    *statusEffectText,
+                    *outputTarget,
+                    m_uiEventQueue);
+                    
+
+                debugManager.RunBattleSimulation();
+                */
+                localManager.RunBattleSimulation();
 
                 if (localPlayers[0]->HasWon())
                 {
@@ -213,22 +262,82 @@ void GameEngine::RunSimulate()
                 {
                     ++localP2Wins;
                 }
+                /*
+                else
+                {
+                    info.threadIndex = t;
+                    info.seed = 12345 + t;
+                    info.localBattleIndex = i;
+                    info.turns = localContext.battleTurn;
+                    info.iterationNum = ++numOfIterations;
 
+                    if (!found)
+                    {
+                        found = true;
+                        debugResults.push_back(info);
+                    }
+                }
+                //debugManager.ResetValues();
+                //++localNumOfIterations;
+                */
                 localThreadTurns += localContext.battleTurn;
-
                 localManager.ResetValues();
             }
 
-            pOneVictories += localP1Wins;
-            pTwoVictories += localP2Wins;
-            totalTurns += localThreadTurns;
+            {
+                std::scoped_lock lock(localWinsMutex);
+
+                pOneVictories += localP1Wins;
+                pTwoVictories += localP2Wins;
+                totalTurns += localThreadTurns;
+                //numOfIterations += localNumOfIterations;
+            }
+            /*
+            ThreadDebugInfo info;
+            info.threadIndex = t;
+            info.seed = 12345 + t;
+            info.localBattleIndex = i;
+            info.turns = localContext.battleTurn;
+            info.iterationNum = numOfIterations;
+            */
+            /*
+            {
+                std::scoped_lock lock(debugMutex);
+
+                debugResults.push_back(info);
+            }
+            
+            {
+                std::scoped_lock lock(localWinsMutex);
+            }
+            */
         });
     }
 
     for (auto& th : workers) th.join();
 
     end = std::chrono::high_resolution_clock::now();
+    /*
+    std::sort(
+        debugResults.begin(),
+        debugResults.end(),
+        [](const auto& a, const auto& b)
+        {
+            return a.threadIndex < b.threadIndex ||
+                (a.threadIndex == b.threadIndex &&
+                    a.localBattleIndex < b.localBattleIndex);
+        });
 
+    for (const auto& debug : debugResults)
+    {
+        std::cout
+            << "Thread: " << debug.threadIndex
+            << " Local Battle: " << debug.localBattleIndex
+            << " Turns: " << debug.turns
+            << " Iteration: " << debug.iterationNum
+            << '\n';
+    }
+    */
     std::chrono::duration<double> elapsed = (end - start);
 
     std::cout << "Time it took to do simulation: " << elapsed.count() << " seconds" << "\n\n";

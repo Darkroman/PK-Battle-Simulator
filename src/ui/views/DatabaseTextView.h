@@ -1,12 +1,10 @@
 #pragma once
 
-class Database;
-
 namespace DatabaseTextView
 {
-	void DisplayAllPokemon(const Database&);
+	void DisplayAllPokemon();
 
-	void DisplayAllMoves(const Database&);
+	void DisplayAllMoves();
 
-	void DisplayMovesWithZeroPower(const Database& db);
+	void DisplayMovesWithZeroPower();
 }

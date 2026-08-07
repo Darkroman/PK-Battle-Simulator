@@ -2,46 +2,44 @@
 
 #include <array>
 #include <string>
+#include <string_view>
 #include <span>
+
+enum class PokemonType : unsigned int;
+enum class MoveID : unsigned int;
+class Pokemon;
+class Move;
 
 #include "pokemonMove.h"
 
 #include "../common/PartyEditResults.h"
-
-class Pokemon;
 
 enum struct Status { Normal = 0, Burned, Frozen, Paralyzed, Poisoned, Badly_Poisoned, Sleeping };
 
 class BattlePokemon
 {
 public:
-
     struct DetransformData
     {
         DetransformData();
 
         void BackupOriginalPokemonData(BattlePokemon*);
 
-        std::string m_type1{};
-        std::string m_type2{};
-
         std::array<pokemonMove, 4> m_array_moves{};
 
         const Pokemon* mp_pokemon{ nullptr };
 
-        size_t m_attackstage{ 0 };
-        size_t m_defensestage{ 0 };
-        size_t m_specialattackstage{ 0 };
-        size_t m_specialdefensestage{ 0 };
-        size_t m_speedstage{ 0 };
-        size_t m_evasionstage{ 0 };
-        size_t m_accuracystage{ 0 };
-        size_t m_criticalhitstage{ 0 };
-
         PokemonType m_type1e{};
         PokemonType m_type2e{};
 
-        unsigned int m_ev_total{ 0 };
+        unsigned int m_attackstage{ 0 };
+        unsigned int m_defensestage{ 0 };
+        unsigned int m_specialattackstage{ 0 };
+        unsigned int m_specialdefensestage{ 0 };
+        unsigned int m_speedstage{ 0 };
+        unsigned int m_evasionstage{ 0 };
+        unsigned int m_accuracystage{ 0 };
+        unsigned int m_criticalhitstage{ 0 };
 
         unsigned int m_attack_iv{ 0 };
         unsigned int m_defense_iv{ 0 };
@@ -56,6 +54,8 @@ public:
         unsigned int m_speed_ev{ 0 };
 
         unsigned int m_moveCount{ 0 };
+
+        unsigned int m_ev_total{ 0 };
     };
 
 public:
@@ -63,7 +63,6 @@ public:
     const Pokemon* GetPokemonDatabasePointer() const;
 
     SetPokemonOutcome SetPokemon(std::string_view);
-    void SetPokemon(Pokemon*);
     void ReleasePokemon();
 
     SetMoveOutcome SetMove(size_t, std::string_view);
@@ -72,7 +71,6 @@ public:
 
     void SetNickname(std::string_view);
     bool HasNickname() const;
-    std::string_view GetNickname() const;
 
     void SetLevel(unsigned int);
 
@@ -114,8 +112,8 @@ public:
 
     const std::string& GetPokemonName() const;
     std::string_view GetPokemonNameView() const;
-    const std::string& GetNickName() const;
-    std::string_view GetNickNameView() const;
+    const std::string& GetNickname() const;
+    std::string_view GetNicknameView() const;
 
     const std::string& GetName() const;
     std::string_view GetNameView() const;
@@ -128,7 +126,7 @@ public:
     void SwapMoves(size_t, size_t);
     void ReorderMoves(size_t, size_t);
     unsigned int GetPP(size_t) const;
-    unsigned int GetMaxPP(size_t) const;
+
     bool WillPerformStruggle() const;
 
     bool HasPokemon() const;
@@ -140,6 +138,7 @@ public:
     unsigned int GetMoveCount() const;
 
     std::string_view GetMoveName(size_t) const;
+    MoveID GetMoveID(size_t) const;
 
     pokemonMove* GetLastUsedMove() const;
     void SetLastUsedMove(pokemonMove*);
@@ -165,23 +164,23 @@ public:
     std::string_view GetTypeTwo() const;
     PokemonType GetTypeTwoEnum() const;
 
-    size_t GetAttackStage() const;
-    size_t GetDefenseStage() const;
-    size_t GetSpecialAttackStage() const;
-    size_t GetSpecialDefenseStage() const;
-    size_t GetSpeedStage() const;
-    size_t GetEvasionStage() const;
-    size_t GetAccuracyStage() const;
-    size_t GetCriticalHitStage() const;
+    int GetAttackStage() const;
+    int GetDefenseStage() const;
+    int GetSpecialAttackStage() const;
+    int GetSpecialDefenseStage() const;
+    int GetSpeedStage() const;
+    int GetEvasionStage() const;
+    int GetAccuracyStage() const;
+    int GetCriticalHitStage() const;
 
-    void SetAttackStage(size_t);
-    void SetDefenseStage(size_t);
-    void SetSpecialAttackStage(size_t);
-    void SetSpecialDefenseStage(size_t);
-    void SetSpeedStage(size_t);
-    void SetEvasionStage(size_t);
-    void SetAccuracyStage(size_t);
-    void SetCriticalHitStage(size_t);
+    void SetAttackStage(int);
+    void SetDefenseStage(int);
+    void SetSpecialAttackStage(int);
+    void SetSpecialDefenseStage(int);
+    void SetSpeedStage(int);
+    void SetEvasionStage(int);
+    void SetAccuracyStage(int);
+    void SetCriticalHitStage(int);
 
     bool IsConfused() const;
     void SetConfusedStatus(bool);
@@ -196,7 +195,7 @@ public:
 
     bool IsBound() const;
     void SetBound(bool);
-    void SetBoundMoveName(size_t);
+    void SetBoundMoveName(MoveID);
     std::string_view GetBoundMoveName() const;
     void SetBoundTurnCount(unsigned int);
     unsigned int GetBoundTurnCount() const;
@@ -222,13 +221,13 @@ public:
     unsigned int GetSleepCounter() const;
     void ResetSleepCounter();
 
-    bool IsThrashing() const;
-    void SetThrashing(bool);
-    void SetThrashTurnCount(unsigned int);
-    unsigned int GetThrashTurnCount() const;
-    void IncrementThrashCounter();
-    unsigned int GetThrashCounter() const;
-    void ResetThrashCounter();
+    bool IsRampaging() const;
+    void SetRampaging(bool);
+    void SetRampageTurnCount(unsigned int);
+    unsigned int GetRampageTurnCount() const;
+    void IncrementRampageCounter();
+    unsigned int GetRampageCounter() const;
+    void ResetRampageCounter();
 
     void SetDisabledStatus(bool);
     void IncrementDisabledCounter();
@@ -288,8 +287,13 @@ public:
     unsigned int GetSubstituteHP() const;
     void DamageSubstitute(unsigned int);
 
-    void SetMetronome(const Move& move);
+    void SetMetronomeMove(const Move& move);
+    pokemonMove* GetMetronomeMove();
+    void ResetMetronome();
+
     void SetMirrorMove(const Move& move);
+    pokemonMove* GetMirrorMoveCopiedMove();
+    void ResetMirrorMove();
 
 private:
     void ResetStatsAndMoves();
@@ -299,47 +303,36 @@ public:
     void ResetValues();
 
 private:
-    DetransformData m_detransformData;
+    std::array<pokemonMove, 4> m_array_moves{};
 
     std::string m_name{};
     std::string m_nickname{};
-    std::string m_type1{};
-    std::string m_type2{};
-    std::string m_beforeConversionType{};
     std::string m_boundMove{};
-
-    std::array<pokemonMove, 4> m_array_moves{};
 
     pokemonMove metronomeMove;
     pokemonMove mirrorMove;
 
+    pokemonMove* lastUsedMove{ nullptr };
+
     const Pokemon* mp_pokemon{ nullptr };
 
-    pokemonMove* lastUsedMove{ nullptr };
-    pokemonMove* disabledMove{ nullptr };
-
     unsigned int m_currentHP{ 0 };
-    
-    unsigned int m_ev_total{ 0 };
-
-    unsigned int m_bideDamageTaken{ 0 };
 
     PokemonType m_type1e{};
     PokemonType m_type2e{};
-    PokemonType m_beforeConversionType_e{};
 
     Status currentStatus{ Status::Normal };
 
-    size_t m_attackstage{ 6 };
-    size_t m_defensestage{ 6 };
-    size_t m_specialattackstage{ 6 };
-    size_t m_specialdefensestage{ 6 };
-    size_t m_speedstage{ 6 };
-    size_t m_evasionstage{ 6 };
-    size_t m_accuracystage{ 6 };
-    size_t m_criticalhitstage{ 0 };
-
     unsigned int m_level{ 50 };
+
+    int m_attackstage{ 6 };
+    int m_defensestage{ 6 };
+    int m_specialattackstage{ 6 };
+    int m_specialdefensestage{ 6 };
+    int m_speedstage{ 6 };
+    int m_evasionstage{ 6 };
+    int m_accuracystage{ 6 };
+    int m_criticalhitstage{ 0 };
 
     unsigned int m_hp_iv{ 31 };
     unsigned int m_attack_iv{ 31 };
@@ -355,46 +348,75 @@ private:
     unsigned int m_specialdefense_ev{ 0 };
     unsigned int m_speed_ev{ 0 };
 
-    unsigned int m_moveCount{ 0 };
-
     unsigned int m_sleepCounter{ 0 };
     unsigned int m_sleepTurnCount{ 0 };
+
+    unsigned int m_substituteHealth{ 0 };
+
+    unsigned int m_badlyPoisonCounter{ 0 };
+
+    pokemonMove* disabledMove{ nullptr };
+    unsigned int m_disabledCounter{ 0 };
+
     unsigned int m_boundCounter{ 0 };
     unsigned int m_boundTurnCount{ 0 };
+
     unsigned int m_confusedCounter{ 0 };
     unsigned int m_confusedTurnCount{ 0 };
-    unsigned int m_thrashCounter{ 0 };
-    unsigned int m_thrashTurnCount{ 0 };
-    unsigned int m_disabledCounter{ 0 };
-    unsigned int m_badlyPoisonCounter{ 0 };
-    unsigned int m_substituteHealth{ 0 };
-    int m_mimicPP{ 0 };
+
+    unsigned int m_rampageCounter{ 0 };
+    unsigned int m_rampageTurnCount{ 0 };
+
+    unsigned int m_bideDamageTaken{ 0 };
     unsigned int m_bideCounter{ 0 };
     unsigned int m_bideTurnCount{ 0 };
+
+    unsigned int m_moveCount{ 0 };
+
+    int m_mimicPP{ 0 };
+
+    unsigned int m_ev_total{ 0 };
+
+    PokemonType m_beforeConversionType_e{};
 
     bool b_hasNickname{ false };
 
     bool b_isFainted{ false };
 
-    bool b_isConfused{ false };
-    bool b_isSeeded{ false };
+    bool b_isCharging{ false };
+    bool b_isRecharging{ false };
+    bool b_isFlinched{ false };
+
+    bool b_hasSubstitute{ false };
+
     bool b_isSemiInvulnerableFly{ false };
     bool b_isSemiInvulnerableDig{ false };
-    bool b_isRecharging{ false };
-    bool b_isCharging{ false };
-    bool b_isBound{ false };
-    bool b_isFlinched{ false };
+
     bool b_hasUsedMinimize{ false };
-    bool b_isThrashing{ false };
+
+    bool b_isSeeded{ false };
+
     bool b_moveIsDisabled{ false };
-    bool b_hasSubstitute{ false };
-    bool b_isRaging{ false };
-    bool b_usedMimic{ false };
+
+    bool b_isBound{ false };
+
+    bool b_isConfused{ false };
+
+    bool b_isRampaging{ false };
+
     bool b_hasFocusEnergy{ false };
+
+    bool b_isRaging{ false };
+
     bool b_isBiding{ false };
-    bool b_isTransformed{ false };
+
     bool b_isConverted{ false };
 
+    bool b_usedMimic{ false };
+
+    bool b_isTransformed{ false };
     bool b_transformBurnPenalty{ false };
     bool b_transformParalysisPenalty{ false };
+
+    DetransformData m_detransformData;
 };

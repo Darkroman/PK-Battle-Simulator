@@ -1,16 +1,41 @@
+#include <string_view>
+
 #include "pokemonMove.h"
 
+#include "../data/MoveID.h"
 #include "../data/Move.h"
 #include "../data/Database.h"
+#include "../data/StringToTypes.h"
+#include "../moves/MoveEffectEnums.h"
 
 pokemonMove::pokemonMove() {}
 
-pokemonMove::pokemonMove(size_t dexNumber) :
-    mp_move(Database::GetInstance().GetPointerToMovedexNumber(dexNumber)),
+pokemonMove::pokemonMove(MoveID id) :
+    mp_move(Database::GetPointerToBaseMoveByID(id)),
     m_currentPP(1),
     m_maxPP(1)
 {
 
+}
+
+bool pokemonMove::HasMove() const
+{
+    return mp_move != nullptr;
+}
+
+bool pokemonMove::IsActive() const
+{
+    if (mp_move != nullptr)
+    {
+        if (m_currentPP <= 0 || b_isDisabled)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    return false;
 }
 
 void pokemonMove::SetMovePointer(const Move* move)
@@ -32,29 +57,19 @@ void pokemonMove::ResetMove()
     b_isMimicked = false;
 }
 
-bool pokemonMove::HasMove() const
+void pokemonMove::DeductPP()
 {
-    return mp_move != nullptr;
+    m_currentPP -= 1;
 }
 
-bool pokemonMove::IsActive() const
+MoveID pokemonMove::GetMoveID() const
 {
-    if (mp_move != nullptr)
-    {
-        if (m_currentPP <= 0 || b_isDisabled)
-        {
-            return false;
-        }
-        
-        return true;
-    }
-
-    return false;
+    return mp_move->GetMoveID();
 }
 
-bool pokemonMove::IsDisabled() const
+size_t pokemonMove::GetMovedexNumber() const
 {
-    return b_isDisabled;
+    return mp_move->GetMovedexNumber();
 }
 
 size_t pokemonMove::GetMoveIndex() const
@@ -107,11 +122,6 @@ int pokemonMove::GetPP() const
     return mp_move->GetPP();
 }
 
-int pokemonMove::GetMaxPP() const
-{
-    return mp_move->GetMaxPP();
-}
-
 unsigned int pokemonMove::GetPower() const
 {
     return mp_move->GetPower();
@@ -120,11 +130,6 @@ unsigned int pokemonMove::GetPower() const
 int pokemonMove::GetAccuracy() const
 {
     return mp_move->GetAccuracy();
-}
-
-void pokemonMove::DeductPP()
-{
-    m_currentPP -= 1;
 }
 
 bool pokemonMove::DoesMakeContact() const

@@ -23,15 +23,7 @@ namespace BattleAIProcedures
 		}
 	}
 
-	void RefineEnemyModelFirstTurn(const BattleContext& context)
-	{
-		for (const auto& player : context.vec_aiPlayers)
-		{
-			player->GetAIController().OnMoveResolved(context);
-		}
-	}
-
-	void RefineEnemyModelSecondTurn(const BattleContext& context)
+	void RefineEnemyModel(const BattleContext& context)
 	{
 		for (const auto& player : context.vec_aiPlayers)
 		{

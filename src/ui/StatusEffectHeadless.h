@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string_view>
+
 #include "interfaces/IStatusEffectUI.h"
 
 class StatusEffectHeadless : public IStatusEffectUI
@@ -28,13 +30,11 @@ public:
 	void DisplayHurtByBoundMsg(std::string_view, std::string_view, std::string_view) const override {}
 	void DisplayFreedFromBoundMsg(std::string_view, std::string_view, std::string_view) const override {}
 
-	// Thrash
-	void DisplayThrashConfusionMsg(std::string_view, std::string_view) const override {}
+	// Rampage
+	void DisplayRampageConfusionMsg(std::string_view, std::string_view) const override {}
 
-	// Rage
-	void DisplayRageStartedMsg(std::string_view, std::string_view) const override {}
-	void DisplayStatRaised1Msg(std::string_view, std::string_view, std::string_view) const override {}
-	void DisplayStatRaiseFailMsg(std::string_view, std::string_view, std::string_view) const override {}
+	// Bide
+	void DisplayBideStoringEnergyMsg(std::string_view, std::string_view) const override {}
 
 	// Disable
 	void DisplayMoveIsDisabledMsg(std::string_view, std::string_view, std::string_view) const override {}
@@ -46,4 +46,7 @@ public:
 	void DisplayFaintedMsg(std::string_view, std::string_view) const override {}
 
 	void NewLine() const override {}
+
+	// Blocking Events
+	void BlockForSwitching() const override {}
 };

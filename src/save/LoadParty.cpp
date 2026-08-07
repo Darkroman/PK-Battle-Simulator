@@ -1,5 +1,9 @@
 #include <iostream>
+#include <istream>
 #include <sstream>
+#include <filesystem>
+#include <string>
+#include <string_view>
 #include <algorithm>
 
 #include "LoadParty.h"

@@ -2,12 +2,10 @@
 
 #include <span>
 
-struct BattleContext;
 struct ScoringResults;
 class Player;
 class BattlePokemon;
 struct pokemonMove;
-class BattleCalculations;
 class RandomEngine;
 
 namespace AIMoveScoring

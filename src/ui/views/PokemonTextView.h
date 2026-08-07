@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string_view>
+
 class BattlePokemon;
 class Player;
 struct pokemonMove;

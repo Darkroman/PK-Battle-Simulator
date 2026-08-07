@@ -5,10 +5,8 @@ set(SOURCES
     GameEngine.cpp
 
     # data
-    data/Database.cpp
     data/Move.cpp
     data/Pokemon.cpp
-    data/StringToTypes.cpp
 
     # entities
     entities/BattlePokemon.cpp
@@ -23,6 +21,7 @@ set(SOURCES
     "entities/controllers/move scoring/AIMoveClassifier.cpp"
     "entities/controllers/move scoring/AIMoveScoring.cpp"
     "entities/controllers/move scoring/BasicScoring.cpp"
+    "entities/controllers/move scoring/HardAIScoring.cpp"
     "entities/controllers/move scoring/MediumMoveScoring.cpp"
 
     # switch logic
@@ -47,9 +46,12 @@ set(SOURCES
 
     # UI
     ui/BattleAnnouncerText.cpp
-    ui/ConsoleTextSink.cpp
+    ui/BattleUIEventQueue.cpp
+    ui/ConsoleOutput.cpp
     ui/Menu.cpp
+    ui/MoveResultsQueuedConsole.cpp
     ui/MoveResultsText.cpp
+    ui/StatusEffectQueuedConsole.cpp
     ui/StatusEffectText.cpp
     ui/views/DatabaseTextView.cpp
     ui/views/PokemonTextView.cpp

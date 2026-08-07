@@ -1,8 +1,24 @@
+#include <string_view>
+
 #include "Move.h"
+
+#include "../common/EnumUtils.h"
+#include "MoveID.h"
+#include "StringToTypes.h"
+
+MoveID Move::GetMoveID() const
+{
+    return e_id;
+}
+
+unsigned int Move::GetMovedexNumber() const
+{
+    return EnumIndex(e_id);
+}
 
 size_t Move::GetMoveIndex() const
 {
-    return m_movenum;
+    return IDToIndex(e_id);
 }
 
 std::string_view Move::GetName() const
@@ -12,22 +28,22 @@ std::string_view Move::GetName() const
 
 std::string_view Move::GetCategory() const
 {
-    return m_category;
+    return CategoryToString(e_category);
 }
 
 Category Move::GetCategoryEnum() const
 {
-    return m_categorye;
+    return e_category;
 }
 
 std::string_view Move::GetMoveType() const
 {
-    return m_type;
+    return TypeToString(e_type);
 }
 
 PokemonType Move::GetMoveTypeEnum() const
 {
-    return m_typee;
+    return e_type;
 }
 
 int Move::GetPriority() const
@@ -37,7 +53,7 @@ int Move::GetPriority() const
 
 MoveEffect Move::GetMoveEffectEnum() const
 {
-    return m_moveEffectEnum;
+    return e_moveEffect;
 }
 
 int Move::GetEffectChance() const
@@ -48,11 +64,6 @@ int Move::GetEffectChance() const
 int Move::GetPP() const
 {
     return m_pp;
-}
-
-int Move::GetMaxPP() const
-{
-    return m_maxpp;
 }
 
 unsigned int Move::GetPower() const

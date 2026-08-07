@@ -10,4 +10,5 @@ struct ScoringResults
 	int score{ 0 };
 	pokemonMove* move{};
 	AIScoreTag tag{};
+	//bool isKO{ false };
 };

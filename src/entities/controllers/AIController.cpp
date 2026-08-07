@@ -1,17 +1,34 @@
 #include <algorithm>
+#include <utility>
+#include <memory>
+#include <span>
 
 #include "AIController.h"
 
+#include "IPlayerController.h"
+
+#include "../../common/EnumUtils.h"
+
+#include "move scoring/AIMoveScoring.h"
+#include "switch logic/AISwitchLogic.h"
+#include "../PlayerDecisionOutcome.h"
+#include "../pokemonMove.h"
+#include "../BattlePokemon.h"
+#include "../Player.h"
+#include "../../battle/BattleAction.h"
 #include "../../battle/BattleContext.h"
 #include "../../battle/Typechart.h"
 #include "../../battle/StageRatios.h"
-#include "../Player.h"
 #include "../../moves/MoveEffectEnums.h"
 #include "../../data/StringToTypes.h"
 #include "../../data/Pokemon.h"
-#include "../PlayerDecisionOutcome.h"
-#include "move scoring/AIMoveScoring.h"
-#include "switch logic/AISwitchLogic.h"
+
+constexpr unsigned int FixedPointBase = 4096;
+
+constexpr unsigned int HalfMultiplier = FixedPointBase / 2;
+constexpr unsigned int NormalMultiplier = FixedPointBase;
+constexpr unsigned int OneAndHalfMultiplier = FixedPointBase + FixedPointBase / 2;
+constexpr unsigned int DoubleMultiplier = FixedPointBase * 2;
 
 AIController::AIController(Difficulty difficulty)
 	: m_difficulty(difficulty)
@@ -24,40 +41,59 @@ std::unique_ptr<IPlayerController> AIController::clone() const
 
 PlayerDecisionOutcome AIController::ChooseAction(Player& player, const Player& targetPlayer, BattlePokemon& selfMon, const BattlePokemon& targetMon, RandomEngine& rng)
 {
-	PlayerDecisionOutcome decision{};
-
 	if (player.GetAIController().GetDifficulty() >= Difficulty::Medium)
 	{
 		if (AISwitchLogic::WantsToSwitch(player, targetPlayer, selfMon, targetMon, rng))
 		{
-			decision.action = BattleAction::SwitchPokemon;
-			decision.chosenPokemon = SwitchAction(player, targetPlayer, selfMon, targetMon);
+			m_decisionOutcome.action = BattleAction::SwitchPokemon;
+			m_decisionOutcome.chosenPokemon = SwitchAction(player, targetPlayer, selfMon, targetMon);
 
-			if (decision.chosenPokemon != nullptr)
+			if (m_decisionOutcome.chosenPokemon != nullptr)
 			{
-				return decision;
+				return m_decisionOutcome;
 			}
 		}
 	}
 
-	decision.chosenMove = FightAction(player, targetPlayer, selfMon, targetMon, rng);
+	m_decisionOutcome.chosenMove = FightAction(player, targetPlayer, selfMon, targetMon, rng);
 
-	if (decision.chosenMove == &GetStruggle())
+	/*
+	if (m_decisionOutcome.chosenMove == &GetStruggle())
 	{
-		decision.action = BattleAction::Struggle;
+		m_decisionOutcome.action = BattleAction::Struggle;
 	}
 	else
 	{
-		decision.action = BattleAction::Fight;
+		m_decisionOutcome.action = BattleAction::Fight;
 	}
+	*/
 
-	return decision;
+	m_decisionOutcome.action = BattleAction::Fight;
+
+	return m_decisionOutcome;
+}
+
+void AIController::SkipChooseAction()
+{
+	m_decisionOutcome.action = BattleAction::Skip;
+	b_hasDecision = true;
 }
 
 BattlePokemon* AIController::PromptForSwitch(Player& player, const Player& targetPlayer, const BattlePokemon& selfMon, const BattlePokemon& targetMon)
 {
-	BattlePokemon* selectedPokemon = SwitchActionPostKO(player, targetPlayer, selfMon, targetMon);
-	return selectedPokemon;
+	m_decisionOutcome.chosenPokemon = SwitchActionPostKO(player, targetPlayer, selfMon, targetMon);
+	return m_decisionOutcome.chosenPokemon;
+}
+
+bool AIController::HasDecision()
+{
+	return b_hasDecision;
+}
+
+PlayerDecisionOutcome AIController::TakeDecision()
+{
+	b_hasDecision = false;
+	return std::exchange(m_decisionOutcome, {});
 }
 
 Difficulty AIController::GetDifficulty() const
@@ -69,30 +105,32 @@ pokemonMove* AIController::FightAction(const Player& player, const Player& targe
 {
 	if (selfMon.WillPerformStruggle())
 	{
+		b_hasDecision = true;
 		return &GetStruggle();
 	}
 
 	pokemonMove* selectedMove = AIMoveScoring::GetWinningMove(player, targetPlayer, selfMon, targetMon, rng);
-
+	b_hasDecision = true;
     return selectedMove;
 }
 
 BattlePokemon* AIController::SwitchAction(Player& player, const Player& targetPlayer, const BattlePokemon& selfMon, const BattlePokemon& targetMon)
 {
 	BattlePokemon* selectedPokemon = AISwitchLogic::ChooseSwitch(player, targetPlayer, selfMon, targetMon);
-
+	b_hasDecision = true;
 	return selectedPokemon;
 }
 
 BattlePokemon* AIController::SwitchActionPostKO(Player& player, const Player& targetPlayer, const BattlePokemon& selfMon, const BattlePokemon& targetMon)
 {
 	BattlePokemon* selectedPokemon = AISwitchLogic::ChoosePostKOSwitch(player, targetPlayer, selfMon, targetMon);
-
+	b_hasDecision = true;
 	return selectedPokemon;
 }
 
 BattleAction AIController::ForfeitAction(const Player&)
 {
+	b_hasDecision = true;
 	return BattleAction::Forfeit;
 }
 
@@ -159,7 +197,7 @@ void AIController::UpdateObservedMoves(const pokemonMove& currentMove)
 
 	for (size_t moveSlot = 0; moveSlot < observed.moves.size(); ++moveSlot)
 	{
-		if (observed.moves[moveSlot] != nullptr && observed.moves[moveSlot]->GetName() == currentMove.GetName())
+		if (observed.moves[moveSlot] != nullptr && observed.moves[moveSlot]->GetMoveID() == currentMove.GetMoveID())
 		{
 			return;
 		}
@@ -190,8 +228,11 @@ void AIController::ResetObservedMoves()
 
 void AIController::UpdateOpponentActivePokemon(const BattlePokemon& activeOpponentMon)
 {
-	memory.activeOpponent.opponentActivePokemon = &activeOpponentMon;
-	memory.slotOfActivePokemon = FindActivePokemonSlot();
+	if (!(&activeOpponentMon == memory.activeOpponent.opponentActivePokemon))
+	{
+		memory.activeOpponent.opponentActivePokemon = &activeOpponentMon;
+		memory.slotOfActivePokemon = FindActivePokemonSlot();
+	}
 }
 
 void AIController::OnMoveResolved(const BattleContext& context)
@@ -219,23 +260,23 @@ void AIController::OnMoveResolved(const BattleContext& context)
 
 unsigned int AIController::AICalculatePokemonTypeEffectiveness(const BattlePokemon& source, const BattlePokemon& target) const
 {
-	size_t atk1 = static_cast<size_t>(source.GetTypeOneEnum());
-	size_t atk2 = static_cast<size_t>(source.GetTypeTwoEnum());
-	size_t def1 = static_cast<size_t>(target.GetTypeOneEnum());
-	size_t def2 = static_cast<size_t>(target.GetTypeTwoEnum());
+	unsigned int atk1 = EnumIndex(source.GetTypeOneEnum());
+	unsigned int atk2 = EnumIndex(source.GetTypeTwoEnum());
+	unsigned int def1 = EnumIndex(target.GetTypeOneEnum());
+	unsigned int def2 = EnumIndex(target.GetTypeTwoEnum());
 
 	bool atk2Exists = (atk2 != 18);
 
 	unsigned int score1 = typeChart[atk1][def1];
 	if (def2 != 18)
-		score1 = (score1 * typeChart[atk1][def2]) / 4096;
+		score1 = (score1 * typeChart[atk1][def2]) / FixedPointBase;
 
 	unsigned int score2 = 0;
 	if (atk2Exists)
 	{
 		score2 = typeChart[atk2][def1];
 		if (def2 != 18)
-			score2 = (score2 * typeChart[atk2][def2]) / 4096;
+			score2 = (score2 * typeChart[atk2][def2]) / FixedPointBase;
 	}
 
 	return std::max(score1, score2);
@@ -248,12 +289,12 @@ unsigned int AIController::AICalculateMoveTypeEffectiveness(const pokemonMove& c
 		return 0;
 	}
 
-	size_t moveType = static_cast<size_t>(currentMove.GetMoveTypeEnum());
-	size_t defensiveTypeOne = static_cast<size_t>(target.GetTypeOneEnum());
-	size_t defensiveTypeTwo = static_cast<size_t>(target.GetTypeTwoEnum());
+	unsigned int moveType = EnumIndex(currentMove.GetMoveTypeEnum());
+	unsigned int defensiveTypeOne = EnumIndex(target.GetTypeOneEnum());
+	unsigned int defensiveTypeTwo = EnumIndex(target.GetTypeTwoEnum());
 
 	unsigned int effect1 = typeChart[moveType][defensiveTypeOne];
-	unsigned int effect2 = (defensiveTypeTwo == 18) ? 4096 : typeChart[moveType][defensiveTypeTwo];
+	unsigned int effect2 = (defensiveTypeTwo == 18) ? NormalMultiplier : typeChart[moveType][defensiveTypeTwo];
 
 	if (effect1 == 0 || effect2 == 0)
 	{
@@ -261,7 +302,7 @@ unsigned int AIController::AICalculateMoveTypeEffectiveness(const pokemonMove& c
 	}
 
 	unsigned int product = effect1 * effect2;
-	return (product / 4096);
+	return (product / FixedPointBase);
 }
 
 unsigned int AIController::AICalculateDamage(const pokemonMove& currentMove, const Player& targetPlayer, const BattlePokemon& source, const BattlePokemon& target) const
@@ -287,8 +328,8 @@ unsigned int AIController::AICalculateDamage(const pokemonMove& currentMove, con
 	unsigned int baseSourceAttack{ isPhysical ? source.GetAttack() : source.GetSpecialAttack() };
 	unsigned int baseTargetDefense{ isPhysical ? target.GetDefense() : target.GetSpecialDefense() };
 
-	size_t sourceStage{ isPhysical ? source.GetAttackStage() : source.GetSpecialAttackStage() };
-	size_t targetStage{ isPhysical ? target.GetDefenseStage() : target.GetSpecialDefenseStage() };
+	int sourceStage{ isPhysical ? source.GetAttackStage() : source.GetSpecialAttackStage() };
+	int targetStage{ isPhysical ? target.GetDefenseStage() : target.GetSpecialDefenseStage() };
 
 	auto [atkNumerator, atkDenominator] = GetStageRatio(sourceStage);
 	unsigned int sourceAttack{ baseSourceAttack * atkNumerator / atkDenominator };
@@ -359,43 +400,43 @@ unsigned int AIController::AICalculateDamage(const pokemonMove& currentMove, con
 
 	if (hasStab)
 	{
-		interimDamage = interimDamage * 6144 / 4096;
+		interimDamage = interimDamage * OneAndHalfMultiplier / FixedPointBase;
 	}
 
-	interimDamage = interimDamage * effectiveness / 4096;
+	interimDamage = interimDamage * effectiveness / FixedPointBase;
 
 	if (source.GetStatus() == Status::Burned && isPhysical)
 	{
-		interimDamage = interimDamage * 2048 / 4096;
+		interimDamage = interimDamage * HalfMultiplier / FixedPointBase;
 	}
 
-	unsigned int other{ 4096 };
+	unsigned int other{ FixedPointBase };
 
 	if ((currentMove.GetMoveEffectEnum() == MoveEffect::Stomp || currentMove.GetMoveEffectEnum() == MoveEffect::BodySlam) && target.HasUsedMinimize())
 	{
-		other = (other * 8192 + 2048) / 4096;
+		other = (other * DoubleMultiplier + HalfMultiplier) / FixedPointBase;
 	}
 
 	if (currentMove.GetMoveEffectEnum() == MoveEffect::Earthquake && target.IsSemiInvulnerableFromDig())
 	{
-		other = (other * 8192 + 2048) / 4096;
+		other = (other * DoubleMultiplier + HalfMultiplier) / FixedPointBase;
 	}
 
 	if (targetPlayer.HasReflect() && isPhysical)
 	{
-		other = (other * 2048 + 2048) / 4096;
+		other = (other * HalfMultiplier + HalfMultiplier) / FixedPointBase;
 	}
 
 	if (targetPlayer.HasLightScreen() && !isPhysical)
 	{
-		other = (other * 2048 + 2048) / 4096;
+		other = (other * HalfMultiplier + HalfMultiplier) / FixedPointBase;
 	}
 
-	unsigned int finalDamage = interimDamage * other / 4096;
+	unsigned int finalDamage = interimDamage * other / FixedPointBase;
 
 	if (effectiveness != 0)
 	{
-		finalDamage = std::max((unsigned int)1, finalDamage);
+		finalDamage = std::max(1u, finalDamage);
 	}
 
 	return finalDamage;

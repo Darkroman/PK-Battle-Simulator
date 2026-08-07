@@ -2,12 +2,9 @@
 
 #include "BattleContext.h"
 #include "../entities/Player.h"
-#include "SwitchExecutor.h"
-#include "../entities/controllers/AIController.h"
 
-WinChecker::WinChecker(BattleContext& context, SwitchExecutor& switchExecutor)
+WinChecker::WinChecker(BattleContext& context)
     : m_context(context)
-	, m_switchExecutor(switchExecutor)
 	{}
 
 bool WinChecker::CheckWinCondition(Player& sourcePlayer, Player& targetPlayer)
@@ -22,54 +19,6 @@ bool WinChecker::CheckWinCondition(Player& sourcePlayer, Player& targetPlayer)
 		sourcePlayer.SetWinCondition(true);
 		return true;
 	}
-	
-	if (&sourcePlayer == m_context.vec_outOfPokemon[0])
-	{
-		targetPlayer.SetWinCondition(true);
-		return true;
-	}
 
 	return false;
-}
-
-bool WinChecker::CheckWinOrSwitch(Player& sourcePlayer, Player& targetPlayer, const BattlePokemon& sourcePokemon, const BattlePokemon& targetPokemon)
-{
-	bool winCondition{ false };
-
-	if (!targetPokemon.IsFainted())
-	{
-		return false;
-	}
-
-	winCondition = CheckWinCondition(sourcePlayer, targetPlayer);
-
-	if (!winCondition)
-	{
-		BattlePokemon* newPokemon = targetPlayer.GetController().PromptForSwitch(targetPlayer, sourcePlayer, targetPokemon, sourcePokemon);
-		targetPlayer.SetPokemonToSwitchTo(newPokemon);
-
-		if (&targetPokemon == m_context.playerOneCurrentPokemon)
-		{
-			m_switchExecutor.ExecuteSwitch(*m_context.playerOne, m_context.playerOneCurrentPokemon);
-			return false;
-		}
-
-		if (&targetPokemon == m_context.playerTwoCurrentPokemon)
-		{
-
-			m_switchExecutor.ExecuteSwitch(*m_context.playerTwo, m_context.playerTwoCurrentPokemon);
-			return false;
-		}
-
-		for (auto player : m_context.vec_aiPlayers)
-		{
-			player->GetAIController().OnActivePokemonChanged(m_context);
-		}
-	}
-	else
-	{
-		return winCondition;
-	}
-	
-	return winCondition;
 }

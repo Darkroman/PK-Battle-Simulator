@@ -2,11 +2,20 @@
 
 #include <array>
 #include <span>
+#include <memory>
 
 #include "IPlayerController.h"
 
+//#include "../PlayerDecisionOutcome.h"
+
 struct pokemonMove;
 class Move;
+struct BattleContext;
+enum class BattleAction;
+class BattlePokemon;
+class Player;
+class RandomEngine;
+struct PlayerDecisionOutcome;
 
 enum class Difficulty { Easy, Medium, Hard };
 
@@ -46,7 +55,10 @@ public:
 	std::unique_ptr<IPlayerController> clone() const override;
 
 	PlayerDecisionOutcome ChooseAction(Player&, const Player&, BattlePokemon&, const BattlePokemon&, RandomEngine&) override;
+	void SkipChooseAction() override;
 	BattlePokemon* PromptForSwitch(Player&, const Player&, const BattlePokemon&, const BattlePokemon&) override;
+	bool HasDecision() override;
+	PlayerDecisionOutcome TakeDecision() override;
 
 	Difficulty GetDifficulty() const;
 
@@ -59,9 +71,9 @@ public:
 	void ResetObservedMoves();
 
 	void OnMoveResolved(const BattleContext&);
-	unsigned int  AICalculatePokemonTypeEffectiveness(const BattlePokemon& source, const BattlePokemon& target) const;
-	unsigned int  AICalculateMoveTypeEffectiveness(const pokemonMove& currentMove, const BattlePokemon& target) const;
-	unsigned int  AICalculateDamage(const pokemonMove&, const Player&, const BattlePokemon&, const BattlePokemon&) const;
+	unsigned int AICalculatePokemonTypeEffectiveness(const BattlePokemon& source, const BattlePokemon& target) const;
+	unsigned int AICalculateMoveTypeEffectiveness(const pokemonMove& currentMove, const BattlePokemon& target) const;
+	unsigned int AICalculateDamage(const pokemonMove&, const Player&, const BattlePokemon&, const BattlePokemon&) const;
 	bool CalculateStatusMoveEffectiveness(const pokemonMove& currentMove, const Player& targetPlayer, const BattlePokemon& source, const BattlePokemon& target) const;
 
 private:

@@ -1,9 +1,16 @@
 #include "AISwitchLogic.h"
 
-#include "../../../battle/RandomEngine.h"
-#include "../move scoring/AIMoveScoring.h"
-#include "../../Player.h"
+#include <array>
+#include <span>
+#include <algorithm>
+#include <tuple>
+
 #include "../AIController.h"
+#include "../move scoring/AIMoveScoring.h"
+#include "../../pokemonMove.h"
+#include "../../BattlePokemon.h"
+#include "../../Player.h"
+#include "../../../battle/RandomEngine.h"
 #include "../../../data/StringToTypes.h"
 
 namespace AISwitchLogic
@@ -189,8 +196,8 @@ namespace AISwitchLogic
 		struct CandidatePokemon
 		{
 			BattlePokemon* pokemon{};
+			size_t typeEffectiveness{};
 			unsigned int highestDamageMove{};
-			unsigned int typeEffectiveness{};
 			bool isFaster{};
 			bool canKO{};
 			bool canSurviveTwoHits{};
@@ -274,7 +281,7 @@ namespace AISwitchLogic
 
 			candidate.canKO = candidate.highestDamageMove >= targetMon.GetCurrentHP();
 
-			if (!validObservedMoves.empty())
+			if (mostLikelyMove)
 			{
 				unsigned int firstAttackVsCandidate = AIMoveScoring::SwitchDamageScoringRoutine(targetPlayer, self, *mostLikelyMove, targetMon, *candidate.pokemon);
 				unsigned int secondAttackVsCandidate{ 0 };
@@ -359,7 +366,6 @@ namespace AISwitchLogic
 		}
 		else
 		{
-			self.SetPokemonToSwitchTo(chosenPokemon);
 			return chosenPokemon;
 		}
 	}
@@ -369,8 +375,8 @@ namespace AISwitchLogic
 		struct CandidatePokemon
 		{
 			BattlePokemon* pokemon{};
+			size_t typeEffectiveness{};
 			unsigned int highestDamageMove{};
-			unsigned int typeEffectiveness{};
 			bool isFaster{};
 			bool canKO{};
 			bool canSurviveOneHit{};
@@ -525,7 +531,6 @@ namespace AISwitchLogic
 			chosenPokemon = it->pokemon;
 		}
 
-		self.SetPokemonToSwitchTo(chosenPokemon);
 		return chosenPokemon;
 	}
 
@@ -583,7 +588,7 @@ namespace AISwitchLogic
 		return MoveEffectiveness(move, pokemon) <= 2048 && move.GetPower() > 0 && move.m_currentPP > 0;
 	}
 
-	unsigned int PokemonTypeEffectiveness(const Player& self, const BattlePokemon& source, const BattlePokemon& target)
+	size_t PokemonTypeEffectiveness(const Player& self, const BattlePokemon& source, const BattlePokemon& target)
 	{
 		return self.GetAIController().AICalculatePokemonTypeEffectiveness(source, target);
 	}

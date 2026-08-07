@@ -1,8 +1,16 @@
 #include <iostream>
 #include <iomanip>
+#include <ios>
+#include <format>
+#include <string_view>
+#include <cstdint>
 
 #include "PokemonTextView.h"
 
+#include "../../common/EnumUtils.h"
+
+#include "../../entities/pokemonMove.h"
+#include "../../entities/BattlePokemon.h"
 #include "../../entities/Player.h"
 #include "../../data/Database.h"
 #include "../../data/Pokemon.h"
@@ -23,7 +31,7 @@ namespace PokemonTextView
         }
         else
         {
-            std::cout << "Nickname: " << pokemon.GetNickname() << '\n';
+            std::cout << "Nickname: " << pokemon.GetNicknameView() << '\n';
         }
 
         std::cout << "Type: "
@@ -68,7 +76,6 @@ namespace PokemonTextView
     void DisplayLearnableMoves(const BattlePokemon& pokemon)
     {
         const Pokemon* basePokemon = pokemon.GetPokemonDatabasePointer();
-        auto& db = Database::GetInstance();
 
         auto movelist = basePokemon->GetMoveList();
 
@@ -79,7 +86,7 @@ namespace PokemonTextView
             ++colCount;
 
             size_t moveIndex = basePokemon->FetchMoveNumber(move);
-            const Move* move = db.GetPointerToMovedexNumber(moveIndex);
+            const Move* move = Database::GetPointerToBaseMoveByIndex(moveIndex);
 
             size_t displayIndex = moveIndex + 1;
 
@@ -221,7 +228,7 @@ namespace PokemonTextView
                 std::string_view status = DisplayPokemonStatus(p);
                 std::cout
                     << count << ". "
-                    << std::left << std::setw(11) << p.GetPokemonNameView()
+                    << std::left << std::setw(11) << p.GetNameView()
                     << " HP("
                     << std::right << std::setw(3) << p.GetCurrentHP() << "/"
                     << std::right << std::setw(3) << p.GetMaxHP() << ") - "
@@ -317,31 +324,31 @@ namespace PokemonTextView
             return "Effective";
         }
 
-        size_t moveType = static_cast<size_t>(currentMove.GetMoveTypeEnum());
-        size_t defensiveTypeOne = static_cast<size_t>(target.GetTypeOneEnum());
-        size_t defensiveTypeTwo = static_cast<size_t>(target.GetTypeTwoEnum());
+        size_t moveType = EnumIndex(currentMove.GetMoveTypeEnum());
+        size_t defensiveTypeOne = EnumIndex(target.GetTypeOneEnum());
+        size_t defensiveTypeTwo = EnumIndex(target.GetTypeTwoEnum());
 
-        uint16_t effect1 = typeChart[moveType][defensiveTypeOne];
-        uint16_t effect2 = (defensiveTypeTwo == 18) ? 4096 : typeChart[moveType][defensiveTypeTwo];
+        unsigned int effect1 = typeChart[moveType][defensiveTypeOne];
+        unsigned int effect2 = (defensiveTypeTwo == 18) ? 4096 : typeChart[moveType][defensiveTypeTwo];
 
-        int product = static_cast<int>(effect1 * effect2);
-        int moveEffectiveness = (product / 4096);
+        unsigned int product = effect1 * effect2;
+        unsigned int moveEffectiveness = product / 4096;
 
         if (moveEffectiveness == 0)
         {
             return "Immune";
         }
-        else if (moveEffectiveness > 0 && moveEffectiveness < 4096)
+        else if (moveEffectiveness < 4096)
         {
             return "Not Effective";
         }
-        else if (moveEffectiveness > 4096)
+        else if (moveEffectiveness == 4096)
         {
-            return "Super Effective";
+            return "Normal";
         }
         else
         {
-            return "Effective";
+            return "Super Effective";
         }
     }
 }

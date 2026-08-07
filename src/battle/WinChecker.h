@@ -1,20 +1,16 @@
 #pragma once
 
 struct BattleContext;
-class SwitchExecutor;
 class Player;
-class BattlePokemon;
 
 class WinChecker
 {
 public:
-    WinChecker(BattleContext& context, SwitchExecutor& switchExecutor);
+    WinChecker(BattleContext& context);
 
     bool CheckWinCondition(Player& sourcePlayer, Player& targetPlayer);
-    bool CheckWinOrSwitch(Player& sourcePlayer, Player& targetPlayer, const BattlePokemon& sourcePokemon, const BattlePokemon& targetPokemon);
 
 private:
     BattleContext& m_context;
-    SwitchExecutor& m_switchExecutor;
 
 };

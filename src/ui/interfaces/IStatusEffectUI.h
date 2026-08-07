@@ -30,13 +30,11 @@ public:
 	virtual void DisplayHurtByBoundMsg(std::string_view, std::string_view, std::string_view) const = 0;
 	virtual void DisplayFreedFromBoundMsg(std::string_view, std::string_view, std::string_view) const = 0;
 
-	// Thrash
-	virtual void DisplayThrashConfusionMsg(std::string_view, std::string_view) const = 0;
+	// Rampage
+	virtual void DisplayRampageConfusionMsg(std::string_view, std::string_view) const = 0;
 
-	// Rage
-	virtual void DisplayRageStartedMsg(std::string_view, std::string_view) const = 0;
-	virtual void DisplayStatRaised1Msg(std::string_view, std::string_view, std::string_view) const = 0;
-	virtual void DisplayStatRaiseFailMsg(std::string_view, std::string_view, std::string_view) const = 0;
+	// Bide
+	virtual void DisplayBideStoringEnergyMsg(std::string_view, std::string_view) const = 0;
 
 	// Disable
 	virtual void DisplayMoveIsDisabledMsg(std::string_view, std::string_view, std::string_view) const = 0;
@@ -48,4 +46,7 @@ public:
 	virtual void DisplayFaintedMsg(std::string_view, std::string_view) const = 0;
 
 	virtual void NewLine() const = 0;
+
+	// Blocking events
+	virtual void BlockForSwitching() const = 0;
 };

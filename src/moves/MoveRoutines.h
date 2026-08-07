@@ -1,7 +1,6 @@
 #pragma once
 
-#include "MoveEffectEnums.h"
-
+enum class MoveEffect : unsigned int;
 struct MoveRoutineDeps;
 
 namespace MoveRoutines

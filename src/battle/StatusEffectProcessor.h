@@ -18,16 +18,12 @@ public:
 	bool ConfusedStatus();
 	bool ParalysisStatus();
 
-	void ThrashStop();
-	void ThrashConfuse();
-	void ThrashReset();
+	void ResetRampageState();
+	void RampageConfuse();
 
-	void BideStop();
-	void BideReset();
+	void ResetBideState();
 
 	void CheckSubstituteCondition(Player*, BattlePokemon*);
-
-	void RageCheck();
 
 	void CheckFaintCondition(Player& sourcePlayer, Player& targetPlayer, BattlePokemon& sourcePokemon, BattlePokemon& targetPokemon);
 

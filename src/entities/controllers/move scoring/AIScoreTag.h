@@ -29,6 +29,7 @@ enum class AIScoreTag
 	ForceSwitch,
 	SelfAttackBoost,
 	SelfDefenseBoost,
+	SelfSpABoost, // unused for now
 	Growth,
 	SelfSpDBoost,
 	SelfSpeedBoost,

@@ -3,8 +3,8 @@
 enum class BattleAction
 {
 	None,
+	Skip,
 	Fight,
-	Struggle,
 	SwitchPokemon,
 	Forfeit
 };

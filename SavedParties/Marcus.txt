@@ -1,0 +1,61 @@
+Player Name: Marcus
+
+Pokemon 1:
+Alakazam
+Level: 100
+EVs: 4 HP  / 0 Atk  / 0 Def  / 252 SpA  / 0 SpD  / 252 Spe
+IVs: 31 HP  / 31 Atk  / 31 Def  / 31 SpA  / 31 SpD  / 31 Spe
+- Psychic
+- Hyper Beam
+- Thunder Wave
+- Recover
+
+Pokemon 2:
+Gengar
+Level: 100
+EVs: 4 HP  / 0 Atk  / 0 Def  / 252 SpA  / 0 SpD  / 252 Spe
+IVs: 31 HP  / 31 Atk  / 31 Def  / 31 SpA  / 31 SpD  / 31 Spe
+- Thunderbolt
+- Psychic
+- Hyper Beam
+- Explosion
+
+Pokemon 3:
+Exeggutor
+Level: 100
+EVs: 252 HP  / 0 Atk  / 0 Def  / 252 SpA  / 4 SpD  / 0 Spe
+IVs: 31 HP  / 31 Atk  / 31 Def  / 31 SpA  / 31 SpD  / 31 Spe
+- Sleep Powder
+- Psychic
+- Explosion
+- Mega Drain
+
+Pokemon 4:
+Zapdos
+Level: 100
+EVs: 4 HP  / 0 Atk  / 0 Def  / 252 SpA  / 0 SpD  / 252 Spe
+IVs: 31 HP  / 31 Atk  / 31 Def  / 31 SpA  / 31 SpD  / 31 Spe
+- Thunderbolt
+- Hyper Beam
+- Drill Peck
+- Thunder Wave
+
+Pokemon 5:
+Starmie
+Level: 100
+EVs: 4 HP  / 0 Atk  / 0 Def  / 252 SpA  / 0 SpD  / 252 Spe
+IVs: 31 HP  / 31 Atk  / 31 Def  / 31 SpA  / 31 SpD  / 31 Spe
+- Surf
+- Ice Beam
+- Psychic
+- Thunderbolt
+
+Pokemon 6:
+Snorlax
+Level: 100
+EVs: 252 HP  / 252 Atk  / 4 Def  / 0 SpA  / 0 SpD  / 0 Spe
+IVs: 31 HP  / 31 Atk  / 31 Def  / 31 SpA  / 31 SpD  / 31 Spe
+- Body Slam
+- Earthquake
+- Reflect
+- Rest

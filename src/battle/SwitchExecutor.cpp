@@ -1,6 +1,7 @@
 #include "SwitchExecutor.h"
 
 #include "BattleContext.h"
+#include "../entities/BattlePokemon.h"
 #include "../entities/Player.h"
 #include "../ui/interfaces/IMoveResultsUI.h"
 #include "../entities/controllers/AIController.h"
@@ -8,6 +9,8 @@
 SwitchExecutor::SwitchExecutor(BattleContext& context, IMoveResultsUI& moveResultsUI) :
 	m_context(context), m_moveResultsUI(moveResultsUI) {}
 
+// BattlePokemon*& pokemon parameter intentional to reassign the passed in pointer.
+// This keeps attackingPokemon pointer synchronized with the current active Pokemon.
 void SwitchExecutor::ExecuteSwitch(Player& player, BattlePokemon*& pokemon)
 {
 	if (!pokemon->IsFainted())
@@ -20,9 +23,8 @@ void SwitchExecutor::ExecuteSwitch(Player& player, BattlePokemon*& pokemon)
 	}
 
 	pokemon->ResetStatsOnSwitch();
-	pokemon = player.GetPokemonToSwitchTo();
 
-	const BattlePokemon* newPokemon{ nullptr };
+	pokemon = player.GetPokemonToSwitchTo();
 
 	if (&player == m_context.playerOne)
 	{
@@ -35,8 +37,6 @@ void SwitchExecutor::ExecuteSwitch(Player& player, BattlePokemon*& pokemon)
 		}
 
 		m_context.playerOneCurrentPokemon = pokemon;
-		newPokemon = m_context.playerOneCurrentPokemon;
-		m_moveResultsUI.PlayerChoosesMsg(player.GetPlayerNameView(), newPokemon->GetPokemonNameView());
 	}
 	else if (&player == m_context.playerTwo)
 	{
@@ -49,8 +49,6 @@ void SwitchExecutor::ExecuteSwitch(Player& player, BattlePokemon*& pokemon)
 		}
 
 		m_context.playerTwoCurrentPokemon = pokemon;
-		newPokemon = m_context.playerTwoCurrentPokemon;
-		m_moveResultsUI.PlayerChoosesMsg(player.GetPlayerNameView(), newPokemon->GetPokemonNameView());
 	}
 
 	for (auto& aiPlayer : m_context.vec_aiPlayers)
@@ -59,4 +57,6 @@ void SwitchExecutor::ExecuteSwitch(Player& player, BattlePokemon*& pokemon)
 	}
 
 	player.SetIsSwitching(false);
+
+	m_moveResultsUI.PlayerChoosesMsg(player.GetPlayerNameView(), pokemon->GetPokemonNameView());
 }

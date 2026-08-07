@@ -2,6 +2,8 @@
 
 #include "interfaces/IBattleAnnouncerUI.h"
 
+struct BattleContext;
+
 class BattleAnnouncerText : public IBattleAnnouncerUI
 {
 public:

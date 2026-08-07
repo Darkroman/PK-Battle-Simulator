@@ -1,11 +1,20 @@
 #include <ranges>
 #include <charconv>
+#include <string>
+#include <string_view>
+#include <utility>
+#include <algorithm>
+#include <span>
 
 #include "BattlePokemon.h"
+#include "pokemonMove.h"
 
 #include "../data/Pokemon.h"
+#include "../data/MoveID.h"
 #include "../data/Move.h"
+#include "../data/StringToTypes.h"
 #include "../data/Database.h"
+#include "../common/PartyEditResults.h"
 #include "../common/InputValidation.h"
 
 constexpr int EV_TOTAL_ALLOWED = 510;
@@ -15,7 +24,28 @@ BattlePokemon::DetransformData::DetransformData() {}
 
 void BattlePokemon::DetransformData::BackupOriginalPokemonData(BattlePokemon* pokemon)
 {
+    for (size_t i = 0; i < m_array_moves.size(); ++i)
+    {
+        m_array_moves[i].SetMovePointer(pokemon->GetMove(i + 1).GetMovePointer());
+        m_array_moves[i].m_currentPP = pokemon->GetMove(i + 1).m_currentPP;
+        m_array_moves[i].m_maxPP = pokemon->GetMove(i + 1).m_maxPP;
+        m_array_moves[i].b_isDisabled = pokemon->GetMove(i + 1).b_isDisabled;
+        m_array_moves[i].b_isMimicked = pokemon->GetMove(i + 1).b_isMimicked;
+    }
+
     mp_pokemon = pokemon->GetPokemonDatabasePointer();
+
+    m_type1e = pokemon->GetTypeOneEnum();
+    m_type2e = pokemon->GetTypeTwoEnum();
+
+    m_attackstage = pokemon->GetAttackStage();
+    m_defensestage = pokemon->GetDefenseStage();
+    m_specialattackstage = pokemon->GetSpecialAttackStage();
+    m_specialdefensestage = pokemon->GetSpecialDefenseStage();
+    m_speedstage = pokemon->GetSpeedStage();
+    m_evasionstage = pokemon->GetEvasionStage();
+    m_accuracystage = pokemon->GetAccuracyStage();
+    m_criticalhitstage = pokemon->GetCriticalHitStage();
 
     m_attack_iv = pokemon->GetAttackIV();
     m_defense_iv = pokemon->GetDefenseIV();
@@ -29,32 +59,9 @@ void BattlePokemon::DetransformData::BackupOriginalPokemonData(BattlePokemon* po
     m_specialdefense_ev = pokemon->GetSpecialDefenseEV();
     m_speed_ev = pokemon->GetSpeedEV();
 
-    m_ev_total = pokemon->GetTotalEVs();
-
-    m_type1 = pokemon->GetTypeOne();
-    m_type1e = pokemon->GetTypeOneEnum();
-    m_type2 = pokemon->GetTypeTwo();
-    m_type2e = pokemon->GetTypeTwoEnum();
-
-    m_attackstage = pokemon->GetAttackStage();
-    m_defensestage = pokemon->GetDefenseStage();
-    m_specialattackstage = pokemon->GetSpecialAttackStage();
-    m_specialdefensestage = pokemon->GetSpecialDefenseStage();
-    m_speedstage = pokemon->GetSpeedStage();
-    m_evasionstage = pokemon->GetEvasionStage();
-    m_accuracystage = pokemon->GetAccuracyStage();
-    m_criticalhitstage = pokemon->GetCriticalHitStage();
-
     m_moveCount = pokemon->GetMoveCount();
 
-    for (size_t i = 0; i < m_array_moves.size(); ++i)
-    {
-        m_array_moves[i].SetMovePointer(pokemon->GetMove(i + 1).GetMovePointer());
-        m_array_moves[i].m_currentPP = pokemon->GetMove(i + 1).m_currentPP;
-        m_array_moves[i].m_maxPP = pokemon->GetMove(i + 1).m_maxPP;
-        m_array_moves[i].b_isDisabled = pokemon->GetMove(i + 1).b_isDisabled;
-        m_array_moves[i].b_isMimicked = pokemon->GetMove(i + 1).b_isMimicked;
-    }
+    m_ev_total = pokemon->GetTotalEVs();
 }
 
 const Pokemon* BattlePokemon::GetPokemonDatabasePointer() const
@@ -67,7 +74,6 @@ SetPokemonOutcome BattlePokemon::SetPokemon(std::string_view pkname)
     SetPokemonOutcome outcome{};
 
     size_t result{};
-    auto& db = Database::GetInstance();
 
     if (IsDigits(pkname))
     {
@@ -97,7 +103,7 @@ SetPokemonOutcome BattlePokemon::SetPokemon(std::string_view pkname)
     }
     else
     {
-        auto pokedexView = db.GetPokedexView();
+        auto pokedexView = Database::GetPokedexView();
         bool found{ false };
 
         for (auto [index, pokemon] : std::views::enumerate(pokedexView))
@@ -120,11 +126,9 @@ SetPokemonOutcome BattlePokemon::SetPokemon(std::string_view pkname)
 
     ResetStatsAndMoves();
 
-    mp_pokemon = db.GetPointerToPokedexNumber(result);
+    mp_pokemon = Database::GetPointerToBasePokemonByIndex(result);
     m_name = mp_pokemon->GetName();
-    m_type1 = mp_pokemon->GetFirstType();
     m_type1e = mp_pokemon->GetFirstTypeEnum();
-    m_type2 = mp_pokemon->GetSecondType();
     m_type2e = mp_pokemon->GetSecondTypeEnum();
     b_hasNickname = false;
 
@@ -135,23 +139,6 @@ SetPokemonOutcome BattlePokemon::SetPokemon(std::string_view pkname)
     outcome.pokemonName = m_name;
     outcome.result = SetPokemonResult::Success;
     return outcome;
-}
-
-void BattlePokemon::SetPokemon(Pokemon* customPkmn)
-{
-    ResetStatsAndMoves();
-
-    mp_pokemon = customPkmn;
-    m_name = mp_pokemon->GetName();
-    m_type1 = mp_pokemon->GetFirstType();
-    m_type1e = mp_pokemon->GetFirstTypeEnum();
-    m_type2 = mp_pokemon->GetSecondType();
-    m_type2e = mp_pokemon->GetSecondTypeEnum();
-    b_hasNickname = false;
-
-    ResetValues();
-
-    UpdateStats();
 }
 
 void BattlePokemon::ReleasePokemon()
@@ -172,7 +159,6 @@ SetMoveOutcome BattlePokemon::SetMove(size_t moveslot, std::string_view movename
     }
 
     size_t result{};
-    auto& db = Database::GetInstance();
 
     if (IsDigits(movename))
     {
@@ -202,7 +188,7 @@ SetMoveOutcome BattlePokemon::SetMove(size_t moveslot, std::string_view movename
     }
     else
     {
-        auto movedexView = db.GetMovedexView();
+        auto movedexView = Database::GetMovedexView();
         bool found{ false };
         
         for (auto [index, move] : std::views::enumerate(movedexView))
@@ -223,7 +209,7 @@ SetMoveOutcome BattlePokemon::SetMove(size_t moveslot, std::string_view movename
         }
     }
 
-    auto movePtr = db.GetPointerToMovedexNumber(result);
+    auto movePtr = Database::GetPointerToBaseMoveByIndex(result);
     if (!mp_pokemon->CheckPokemonMoveList(result))
     {
         outcome.moveName = movePtr->GetName();
@@ -277,11 +263,6 @@ void BattlePokemon::SetNickname(std::string_view input)
 bool BattlePokemon::HasNickname() const
 {
     return b_hasNickname;
-}
-
-std::string_view BattlePokemon::GetNickname() const
-{
-    return m_nickname;
 }
 
 void BattlePokemon::SetLevel(unsigned int input)
@@ -575,12 +556,12 @@ std::string_view BattlePokemon::GetPokemonNameView() const
     return m_name;
 }
 
-const std::string& BattlePokemon::GetNickName() const
+const std::string& BattlePokemon::GetNickname() const
 {
     return m_nickname;
 }
 
-std::string_view BattlePokemon::GetNickNameView() const
+std::string_view BattlePokemon::GetNicknameView() const
 {
     return m_nickname;
 }
@@ -648,12 +629,6 @@ unsigned int BattlePokemon::GetPP(size_t moveslot) const
     return m_array_moves[moveslot].m_currentPP;
 }
 
-unsigned int BattlePokemon::GetMaxPP(size_t moveslot) const
-{
-    --moveslot;
-    return m_array_moves[moveslot].m_maxPP;
-}
-
 bool BattlePokemon::WillPerformStruggle() const
 {
     int inactiveCount{ 0 };
@@ -698,6 +673,12 @@ std::string_view BattlePokemon::GetMoveName(size_t moveslot) const
 {
     --moveslot;
     return m_array_moves[moveslot].GetName();
+}
+
+MoveID BattlePokemon::GetMoveID(size_t moveslot) const
+{
+    --moveslot;
+    return m_array_moves[moveslot].GetMoveID();
 }
 
 pokemonMove* BattlePokemon::GetLastUsedMove() const
@@ -802,7 +783,7 @@ void BattlePokemon::SetFainted(bool fainted)
 
 std::string_view BattlePokemon::GetTypeOne() const
 {
-    return m_type1;
+    return TypeToString(m_type1e);
 }
 
 PokemonType BattlePokemon::GetTypeOneEnum() const
@@ -812,7 +793,7 @@ PokemonType BattlePokemon::GetTypeOneEnum() const
 
 std::string_view BattlePokemon::GetTypeTwo() const
 {
-    return m_type2;
+    return TypeToString(m_type2e);
 }
 
 PokemonType BattlePokemon::GetTypeTwoEnum() const
@@ -820,82 +801,82 @@ PokemonType BattlePokemon::GetTypeTwoEnum() const
     return m_type2e;
 }
 
-size_t BattlePokemon::GetAttackStage() const
+int BattlePokemon::GetAttackStage() const
 {
     return m_attackstage;
 }
 
-size_t BattlePokemon::GetDefenseStage() const
+int BattlePokemon::GetDefenseStage() const
 {
     return m_defensestage;
 }
 
-size_t BattlePokemon::GetSpecialAttackStage() const
+int BattlePokemon::GetSpecialAttackStage() const
 {
     return m_specialattackstage;
 }
 
-size_t BattlePokemon::GetSpecialDefenseStage() const
+int BattlePokemon::GetSpecialDefenseStage() const
 {
     return m_specialdefensestage;
 }
 
-size_t BattlePokemon::GetSpeedStage() const
+int BattlePokemon::GetSpeedStage() const
 {
     return m_speedstage;
 }
 
-size_t BattlePokemon::GetEvasionStage() const
+int BattlePokemon::GetEvasionStage() const
 {
     return m_evasionstage;
 }
 
-size_t BattlePokemon::GetAccuracyStage() const
+int BattlePokemon::GetAccuracyStage() const
 {
     return m_accuracystage;
 }
 
-size_t BattlePokemon::GetCriticalHitStage() const
+int BattlePokemon::GetCriticalHitStage() const
 {
     return m_criticalhitstage;
 }
 
-void BattlePokemon::SetAttackStage(size_t num)
+void BattlePokemon::SetAttackStage(int num)
 {
     m_attackstage = num;
 }
 
-void BattlePokemon::SetDefenseStage(size_t num)
+void BattlePokemon::SetDefenseStage(int num)
 {
     m_defensestage = num;
 }
 
-void BattlePokemon::SetSpecialAttackStage(size_t num)
+void BattlePokemon::SetSpecialAttackStage(int num)
 {
     m_specialattackstage = num;
 }
 
-void BattlePokemon::SetSpecialDefenseStage(size_t num)
+void BattlePokemon::SetSpecialDefenseStage(int num)
 {
     m_specialdefensestage = num;
 }
 
-void BattlePokemon::SetSpeedStage(size_t num)
+void BattlePokemon::SetSpeedStage(int num)
 {
     m_speedstage = num;
 }
 
-void BattlePokemon::SetEvasionStage(size_t num)
+void BattlePokemon::SetEvasionStage(int num)
 {
     m_evasionstage = num;
 }
 
-void BattlePokemon::SetAccuracyStage(size_t num)
+void BattlePokemon::SetAccuracyStage(int num)
 {
     m_accuracystage = num;
 }
 
-void BattlePokemon::SetCriticalHitStage(size_t num)
+void BattlePokemon::SetCriticalHitStage(int num)
 {
     m_criticalhitstage = num;
 }
@@ -970,19 +951,25 @@ void BattlePokemon::SetBound(bool bound)
     b_isBound = bound;
 }
 
-void BattlePokemon::SetBoundMoveName(size_t movenum)
+void BattlePokemon::SetBoundMoveName(MoveID id)
 {
-    if (movenum == 20)
+    switch (id)
     {
-        m_boundMove = "Bind";
-    }
-    else if (movenum == 35)
-    {
-        m_boundMove = "Wrap";
-    }
-    else if (movenum == 83)
-    {
-        m_boundMove = "Fire Spin";
+        case MoveID::Bind:
+            m_boundMove = "Bind";
+            break;
+
+        case MoveID::Wrap:
+            m_boundMove = "Wrap";
+            break;
+
+        case MoveID::FireSpin:
+            m_boundMove = "Fire Spin";
+            break;
+
+        case MoveID::Clamp:
+            m_boundMove = "Clamp";
+            break;
     }
 }
 
@@ -1086,39 +1073,39 @@ void BattlePokemon::ResetSleepCounter()
     m_sleepCounter = 0;
 }
 
-bool BattlePokemon::IsThrashing() const
+bool BattlePokemon::IsRampaging() const
 {
-    return b_isThrashing;
+    return b_isRampaging;
 }
 
-void BattlePokemon::SetThrashing(bool thrashing)
+void BattlePokemon::SetRampaging(bool rampaging)
 {
-    b_isThrashing = thrashing;
+    b_isRampaging = rampaging;
 }
 
-void BattlePokemon::SetThrashTurnCount(unsigned int number)
+void BattlePokemon::SetRampageTurnCount(unsigned int number)
 {
-    m_thrashTurnCount = number;
+    m_rampageTurnCount = number;
 }
 
-unsigned int BattlePokemon::GetThrashTurnCount() const
+unsigned int BattlePokemon::GetRampageTurnCount() const
 {
-    return m_thrashTurnCount;
+    return m_rampageTurnCount;
 }
 
-void BattlePokemon::IncrementThrashCounter()
+void BattlePokemon::IncrementRampageCounter()
 {
-    m_thrashCounter++;
+    m_rampageCounter++;
 }
 
-unsigned int BattlePokemon::GetThrashCounter() const
+unsigned int BattlePokemon::GetRampageCounter() const
 {
-    return m_thrashCounter;
+    return m_rampageCounter;
 }
 
-void BattlePokemon::ResetThrashCounter()
+void BattlePokemon::ResetRampageCounter()
 {
-    m_thrashCounter = 0;
+    m_rampageCounter = 0;
 }
 
 void BattlePokemon::SetDisabledStatus(bool disabled)
@@ -1308,9 +1295,41 @@ bool BattlePokemon::IsTransformed() const
 
 void BattlePokemon::SetTransformation(BattlePokemon* pokemon)
 {
+    constexpr size_t TransformIndex{ 143 };
+
     m_detransformData.BackupOriginalPokemonData(this);
 
+    for (size_t i = 0; i < m_array_moves.size(); ++i)
+    {
+        m_array_moves[i].SetMovePointer(pokemon->GetMove(i + 1).GetMovePointer());
+        m_array_moves[i].m_currentPP = 5;
+        m_array_moves[i].m_maxPP = 5;
+        m_array_moves[i].b_isDisabled = false;
+        m_array_moves[i].b_isMimicked = false;
+    }
+
+    for (size_t i = 0; i < m_detransformData.m_array_moves.size(); ++i)
+    {
+        if (m_detransformData.m_array_moves[i].GetMoveID() == MoveID::Transform)
+        {
+            lastUsedMove = &m_detransformData.m_array_moves[i];
+            break;
+        }
+    }
+
     mp_pokemon = pokemon->mp_pokemon;
+
+    m_type1e = pokemon->GetTypeOneEnum();
+    m_type2e = pokemon->GetTypeTwoEnum();
+
+    m_attackstage = pokemon->GetAttackStage();
+    m_defensestage = pokemon->GetDefenseStage();
+    m_specialattackstage = pokemon->GetSpecialAttackStage();
+    m_specialdefensestage = pokemon->GetSpecialDefenseStage();
+    m_speedstage = pokemon->GetSpeedStage();
+    m_evasionstage = pokemon->GetEvasionStage();
+    m_accuracystage = pokemon->GetAccuracyStage();
+    m_criticalhitstage = pokemon->GetCriticalHitStage();
 
     m_attack_iv = pokemon->GetAttackIV();
     m_defense_iv = pokemon->GetDefenseIV();
@@ -1324,42 +1343,40 @@ void BattlePokemon::SetTransformation(BattlePokemon* pokemon)
     m_specialdefense_ev = pokemon->GetSpecialDefenseEV();
     m_speed_ev = pokemon->GetSpeedEV();
 
-    m_ev_total = pokemon->GetTotalEVs();
-
-    m_type1 = pokemon->GetTypeOne();
-    m_type1e = pokemon->GetTypeOneEnum();
-    m_type2 = pokemon->GetTypeTwo();
-    m_type2e = pokemon->GetTypeTwoEnum();
-
-    m_attackstage = pokemon->GetAttackStage();
-    m_defensestage = pokemon->GetDefenseStage();
-    m_specialattackstage = pokemon->GetSpecialAttackStage();
-    m_specialdefensestage = pokemon->GetSpecialDefenseStage();
-    m_speedstage = pokemon->GetSpeedStage();
-    m_evasionstage = pokemon->GetEvasionStage();
-    m_accuracystage = pokemon->GetAccuracyStage();
-    m_criticalhitstage = pokemon->GetCriticalHitStage();
-
     b_transformBurnPenalty = (GetStatus() == Status::Burned);
     b_transformParalysisPenalty = (GetStatus() == Status::Paralyzed);
 
     m_moveCount = pokemon->GetMoveCount();
 
-    for (size_t i = 0; i < m_array_moves.size(); ++i)
-    {
-        m_array_moves[i].SetMovePointer(pokemon->GetMove(i + 1).GetMovePointer());
-        m_array_moves[i].m_currentPP = 5;
-        m_array_moves[i].m_maxPP = 5;
-        m_array_moves[i].b_isDisabled = false;
-        m_array_moves[i].b_isMimicked = false;
-    }
+    m_ev_total = pokemon->GetTotalEVs();
 
     b_isTransformed = true;
 }
 
 void BattlePokemon::Detransform()
 {
+    for (size_t i = 0; i < m_array_moves.size(); ++i)
+    {
+        m_array_moves[i].SetMovePointer(m_detransformData.m_array_moves[i].GetMovePointer());
+        m_array_moves[i].m_currentPP = m_detransformData.m_array_moves[i].m_currentPP;
+        m_array_moves[i].m_maxPP = m_detransformData.m_array_moves[i].m_maxPP;
+        m_array_moves[i].b_isDisabled = m_detransformData.m_array_moves[i].b_isDisabled;
+        m_array_moves[i].b_isMimicked = m_detransformData.m_array_moves[i].b_isMimicked;
+    }
+
     mp_pokemon = m_detransformData.mp_pokemon;
+
+    m_type1e = m_detransformData.m_type1e;
+    m_type2e = m_detransformData.m_type2e;
+
+    m_attackstage = m_detransformData.m_attackstage;
+    m_defensestage = m_detransformData.m_defensestage;
+    m_specialattackstage = m_detransformData.m_specialattackstage;
+    m_specialdefensestage = m_detransformData.m_specialdefensestage;
+    m_speedstage = m_detransformData.m_speedstage;
+    m_evasionstage = m_detransformData.m_evasionstage;
+    m_accuracystage = m_detransformData.m_accuracystage;
+    m_criticalhitstage = m_detransformData.m_criticalhitstage;
 
     m_attack_iv = m_detransformData.m_attack_iv;
     m_defense_iv = m_detransformData.m_defense_iv;
@@ -1373,35 +1390,12 @@ void BattlePokemon::Detransform()
     m_specialdefense_ev = m_detransformData.m_specialdefense_ev;
     m_speed_ev = m_detransformData.m_speed_ev;
 
-    m_ev_total = m_detransformData.m_ev_total;
-
-    m_type1 = m_detransformData.m_type1;
-    m_type1e = m_detransformData.m_type1e;
-    m_type2 = m_detransformData.m_type2;
-    m_type2e = m_detransformData.m_type2e;
-
-    m_attackstage = m_detransformData.m_attackstage;
-    m_defensestage = m_detransformData.m_defensestage;
-    m_specialattackstage = m_detransformData.m_specialattackstage;
-    m_specialdefensestage = m_detransformData.m_specialdefensestage;
-    m_speedstage = m_detransformData.m_speedstage;
-    m_evasionstage = m_detransformData.m_evasionstage;
-    m_accuracystage = m_detransformData.m_accuracystage;
-    m_criticalhitstage = m_detransformData.m_criticalhitstage;
-
     b_transformBurnPenalty = false;
     b_transformParalysisPenalty = false;
 
     m_moveCount = m_detransformData.m_moveCount;
 
-    for (size_t i = 0; i < m_array_moves.size(); ++i)
-    {
-        m_array_moves[i].SetMovePointer(m_detransformData.m_array_moves[i].GetMovePointer());
-        m_array_moves[i].m_currentPP = m_detransformData.m_array_moves[i].m_currentPP;
-        m_array_moves[i].m_maxPP = m_detransformData.m_array_moves[i].m_maxPP;
-        m_array_moves[i].b_isDisabled = m_detransformData.m_array_moves[i].b_isDisabled;
-        m_array_moves[i].b_isMimicked = m_detransformData.m_array_moves[i].b_isMimicked;
-    }
+    m_ev_total = m_detransformData.m_ev_total;
 
     this->b_isTransformed = false;
 }
@@ -1415,10 +1409,8 @@ void BattlePokemon::SetConversion(pokemonMove* move)
 {
     b_isConverted = true;
 
-    m_beforeConversionType = m_type1;
     m_beforeConversionType_e = m_type1e;
 
-    m_type1 = move->GetMoveType();
     m_type1e = move->GetMoveTypeEnum();
 }
 
@@ -1426,7 +1418,6 @@ void BattlePokemon::Deconvert()
 {
     b_isConverted = false;
 
-    m_type1 = m_beforeConversionType;
     m_type1e = m_beforeConversionType_e;
 }
 
@@ -1457,9 +1448,21 @@ void BattlePokemon::DamageSubstitute(unsigned int damage)
     m_substituteHealth -= damage;
 }
 
-void BattlePokemon::SetMetronome(const Move& move)
+void BattlePokemon::SetMetronomeMove(const Move& move)
 {
     metronomeMove.SetMovePointer(&move);
+    metronomeMove.m_currentPP = 1;
+    metronomeMove.m_maxPP = 1;
+}
+
+pokemonMove* BattlePokemon::GetMetronomeMove()
+{
+    return &metronomeMove;
+}
+
+void BattlePokemon::ResetMetronome()
+{
+    metronomeMove.SetMovePointer(nullptr);
     metronomeMove.m_currentPP = 1;
     metronomeMove.m_maxPP = 1;
 }
@@ -1467,6 +1470,18 @@ void BattlePokemon::SetMetronome(const Move& move)
 void BattlePokemon::SetMirrorMove(const Move& move)
 {
     mirrorMove.SetMovePointer(&move);
+    mirrorMove.m_currentPP = 1;
+    mirrorMove.m_maxPP = 1;
+}
+
+pokemonMove* BattlePokemon::GetMirrorMoveCopiedMove()
+{
+    return &mirrorMove;
+}
+
+void BattlePokemon::ResetMirrorMove()
+{
+    mirrorMove.SetMovePointer(nullptr);
     mirrorMove.m_currentPP = 1;
     mirrorMove.m_maxPP = 1;
 }
@@ -1512,7 +1527,7 @@ void BattlePokemon::ResetStatsOnSwitch()
         {
             if (GetMove(i).b_isMimicked)
             {
-                GetMove(i).SetMovePointer(Database::GetInstance().GetPointerToMovedexNumber(101));
+                GetMove(i).SetMovePointer(Database::GetPointerToBaseMoveByID(MoveID::Mimic));
                 GetMove(i).m_currentPP = GetMimicPP();
                 GetMove(i).m_maxPP = GetMove(i).GetPP();
 
@@ -1619,13 +1634,14 @@ void BattlePokemon::ResetValues()
     b_isCharging = false;
     b_isFlinched = false;
     b_hasUsedMinimize = false;
-    b_isThrashing = false;
+    b_isRampaging = false;
     b_moveIsDisabled = false;
     b_hasFocusEnergy = false;
     b_isBiding = false;
     b_isTransformed = false;
     b_isConverted = false;
     b_hasSubstitute = false;
+    b_isRaging = false;
     m_substituteHealth = 0;
 
     lastUsedMove = nullptr;
@@ -1650,7 +1666,7 @@ void BattlePokemon::ResetValues()
         {
             if (this->GetMove(i).b_isMimicked)
             {
-                this->GetMove(i).SetMovePointer(Database::GetInstance().GetPointerToMovedexNumber(101));
+                this->GetMove(i).SetMovePointer(Database::GetPointerToBaseMoveByID(MoveID::Mimic));
                 this->GetMove(i).m_currentPP = this->GetMimicPP();
                 this->GetMove(i).m_maxPP = this->GetMove(i).GetPP();
 
