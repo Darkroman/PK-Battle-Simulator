@@ -107,19 +107,19 @@ void MoveResultsQueuedConsole::BoundMoveText(std::string_view attackingPlayerNam
 	switch (id)
 	{
 		case MoveID::Bind:
-			m_queue.PushEvent({BattleEvents::Bind, { attackingPlayerName, defendingPlayerName, attackingPokemonName, defendingPokemonName } });
+			m_queue.PushEvent({BattleEvents::Bind, { defendingPlayerName, defendingPokemonName, attackingPlayerName, attackingPokemonName } });
 			break;
 
 		case MoveID::Wrap:
-			m_queue.PushEvent({BattleEvents::Wrap, { attackingPlayerName, defendingPlayerName, attackingPokemonName, defendingPokemonName } });
+			m_queue.PushEvent({BattleEvents::Wrap, { defendingPlayerName, defendingPokemonName, attackingPlayerName, attackingPokemonName } });
 			break;
 
 		case MoveID::FireSpin:
-			m_queue.PushEvent({BattleEvents::FireSpin, { attackingPlayerName, defendingPlayerName, attackingPokemonName, defendingPokemonName } });
+			m_queue.PushEvent({BattleEvents::FireSpin, { defendingPlayerName, defendingPokemonName } });
 			break;
 
 		case MoveID::Clamp:
-			m_queue.PushEvent({BattleEvents::Clamp, { attackingPlayerName, defendingPlayerName, attackingPokemonName, defendingPokemonName } });
+			m_queue.PushEvent({BattleEvents::Clamp, { attackingPlayerName, attackingPokemonName, defendingPlayerName, defendingPokemonName } });
 			break;
 
 		default:
@@ -257,34 +257,34 @@ void MoveResultsQueuedConsole::DisplayDoesntAffectMsg(std::string_view defending
 }
 
 // Stat Stage
-void MoveResultsQueuedConsole::DisplayStatRaised2Msg(std::string_view statName, std::string_view attackingPlayerName, std::string_view attackingPokemonName) const
+void MoveResultsQueuedConsole::DisplayStatRaised2Msg(std::string_view attackingPlayerName, std::string_view attackingPokemonName, std::string_view statName) const
 {
-	m_queue.PushEvent({BattleEvents::StatRaised2, { statName, attackingPlayerName, attackingPokemonName } });
+	m_queue.PushEvent({BattleEvents::StatRaised2, { attackingPlayerName, attackingPokemonName, statName } });
 }
 
-void MoveResultsQueuedConsole::DisplayStatRaised1Msg(std::string_view statName, std::string_view attackingPlayerName, std::string_view attackingPokemonName) const
+void MoveResultsQueuedConsole::DisplayStatRaised1Msg(std::string_view attackingPlayerName, std::string_view attackingPokemonName, std::string_view statName) const
 {
-	m_queue.PushEvent({BattleEvents::StatRaised1, { statName, attackingPlayerName, attackingPokemonName } });
+	m_queue.PushEvent({BattleEvents::StatRaised1, { attackingPlayerName, attackingPokemonName, statName } });
 }
 
-void MoveResultsQueuedConsole::DisplayStatRaiseFailMsg(std::string_view statName, std::string_view attackingPlayerName, std::string_view attackingPokemonName) const
+void MoveResultsQueuedConsole::DisplayStatRaiseFailMsg(std::string_view attackingPlayerName, std::string_view attackingPokemonName, std::string_view statName) const
 {
-	m_queue.PushEvent({BattleEvents::StatRaiseFail, { statName, attackingPlayerName, attackingPokemonName } });
+	m_queue.PushEvent({BattleEvents::StatRaiseFail, { attackingPlayerName, attackingPokemonName, statName } });
 }
 
-void MoveResultsQueuedConsole::DisplayStatLowered2Msg(std::string_view statName, std::string_view defendingPlayerName, std::string_view defendingPokemonName) const
+void MoveResultsQueuedConsole::DisplayStatLowered2Msg(std::string_view defendingPlayerName, std::string_view defendingPokemonName, std::string_view statName) const
 {
-	m_queue.PushEvent({BattleEvents::StatLowered2, { statName, defendingPlayerName, defendingPokemonName } });
+	m_queue.PushEvent({BattleEvents::StatLowered2, { defendingPlayerName, defendingPokemonName, statName } });
 }
 
-void MoveResultsQueuedConsole::DisplayStatLowered1Msg(std::string_view statName, std::string_view defendingPlayerName, std::string_view defendingPokemonName) const
+void MoveResultsQueuedConsole::DisplayStatLowered1Msg(std::string_view defendingPlayerName, std::string_view defendingPokemonName, std::string_view statName) const
 {
-	m_queue.PushEvent({BattleEvents::StatLowered1, { statName, defendingPlayerName, defendingPokemonName } });
+	m_queue.PushEvent({BattleEvents::StatLowered1, { defendingPlayerName, defendingPokemonName, statName } });
 }
 
-void MoveResultsQueuedConsole::DisplayStatLoweredFailMsg(std::string_view statName, std::string_view defendingPlayerName, std::string_view defendingPokemonName) const
+void MoveResultsQueuedConsole::DisplayStatLoweredFailMsg(std::string_view defendingPlayerName, std::string_view defendingPokemonName, std::string_view statName) const
 {
-	m_queue.PushEvent({BattleEvents::StatLoweredFail, { statName, defendingPlayerName, defendingPokemonName } });
+	m_queue.PushEvent({BattleEvents::StatLoweredFail, { defendingPlayerName, defendingPokemonName, statName } });
 }
 
 // Volatile Status

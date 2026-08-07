@@ -280,12 +280,12 @@ void StageUpRoutine(MoveRoutineDeps& deps, int amount, std::string_view stageNam
 
 	if (rise <= 0)
 	{
-		deps.resultsUI.DisplayStatRaiseFailMsg(stageName, playerName, pokemonName);
+		deps.resultsUI.DisplayStatRaiseFailMsg(playerName, pokemonName, stageName);
 		return;
 	}
 
 	setStage(atkPkmn, stage + rise);
-	DisplayStatChange(deps.resultsUI, rise, true, stageName, playerName, pokemonName);
+	DisplayStatChange(deps.resultsUI, rise, true, playerName, pokemonName, stageName);
 }
 
 void StageDownRoutine(MoveRoutineDeps& deps, int amount, std::string_view stageName, GetStageFn getStage, SetStageFn setStage)
@@ -302,13 +302,13 @@ void StageDownRoutine(MoveRoutineDeps& deps, int amount, std::string_view stageN
 
 	if (drop <= 0)
 	{
-		deps.resultsUI.DisplayStatLoweredFailMsg(stageName, playerName, pokemonName);
+		deps.resultsUI.DisplayStatLoweredFailMsg(playerName, pokemonName, stageName);
 		return;
 	}
 
 	setStage(defPkmn, stage - drop);
 
-	DisplayStatChange(deps.resultsUI, drop, false, stageName, playerName, pokemonName);
+	DisplayStatChange(deps.resultsUI, drop, false, playerName, pokemonName, stageName);
 }
 
 void StageDownDamageRoutine(MoveRoutineDeps& deps, int amount, std::string_view stageName, GetStageFn getStage, SetStageFn setStage)
@@ -339,21 +339,21 @@ void StageDownDamageRoutine(MoveRoutineDeps& deps, int amount, std::string_view 
 	{
 		setStage(defPkmn, stage - drop);
 
-		DisplayStatChange(deps.resultsUI, drop, false, stageName, playerName, pokemonName);
+		DisplayStatChange(deps.resultsUI, drop, false, playerName, pokemonName, stageName);
 	}
 }
 
-void DisplayStatChange(IMoveResultsUI& ui, int amount, bool isUp, std::string_view stageName, std::string_view playerName, std::string_view pokemonName)
+void DisplayStatChange(IMoveResultsUI& ui, int amount, bool isUp, std::string_view playerName, std::string_view pokemonName, std::string_view stageName)
 {
 	if (amount == 1)
 	{
-		isUp ? ui.DisplayStatRaised1Msg(stageName, playerName, pokemonName)
-			: ui.DisplayStatLowered1Msg(stageName, playerName, pokemonName);
+		isUp ? ui.DisplayStatRaised1Msg(playerName, pokemonName, stageName)
+			: ui.DisplayStatLowered1Msg(playerName, pokemonName, stageName);
 	}
 	else if (amount == 2)
 	{
-		isUp ? ui.DisplayStatRaised2Msg(stageName, playerName, pokemonName)
-			: ui.DisplayStatLowered2Msg(stageName, playerName, pokemonName);
+		isUp ? ui.DisplayStatRaised2Msg(playerName, pokemonName, stageName)
+			: ui.DisplayStatLowered2Msg(playerName, pokemonName, stageName);
 	}
 }
 
@@ -380,13 +380,13 @@ void ProcessRage(MoveRoutineDeps& deps)
 
 		if (attackStage >= 12)
 		{
-			resultsUI.DisplayStatRaiseFailMsg("attack", ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView());
+			resultsUI.DisplayStatRaiseFailMsg(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), "attack");
 		}
 		else
 		{
 			++attackStage;
 			ctx.defendingPokemon->SetAttackStage(attackStage);
-			resultsUI.DisplayStatRaised1Msg("attack", ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView());
+			resultsUI.DisplayStatRaised1Msg(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), "attack");
 		}
 	}
 

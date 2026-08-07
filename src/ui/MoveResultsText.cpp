@@ -102,8 +102,8 @@ void MoveResultsText::BoundMoveText(std::string_view attackingPlayerName, std::s
 	switch (id)
 	{
 		case MoveID::Bind:
-		m_target.Emit(std::format("{}'s {} was squeezed by {}'s {}!", defendingPlayerName, defendingPokemonName, attackingPlayerName, attackingPokemonName));
-		break;
+			m_target.Emit(std::format("{}'s {} was squeezed by {}'s {}!", defendingPlayerName, defendingPokemonName, attackingPlayerName, attackingPokemonName));
+			break;
 
 		case MoveID::Wrap:
 			m_target.Emit(std::format("{}'s {} was wrapped by {}'s {}!", defendingPlayerName, defendingPokemonName, attackingPlayerName, attackingPokemonName));
@@ -252,32 +252,32 @@ void MoveResultsText::DisplayDoesntAffectMsg(std::string_view defendingPlayerNam
 }
 
 // Stat Stage
-void MoveResultsText::DisplayStatRaised2Msg(std::string_view statName, std::string_view attackingPlayerName, std::string_view attackingPokemonName) const
+void MoveResultsText::DisplayStatRaised2Msg(std::string_view attackingPlayerName, std::string_view attackingPokemonName, std::string_view statName) const
 {
 	m_target.Emit(std::format("{}'s {}'s {} rose sharply!", attackingPlayerName, attackingPokemonName, statName));
 }
 
-void MoveResultsText::DisplayStatRaised1Msg(std::string_view statName, std::string_view attackingPlayerName, std::string_view attackingPokemonName) const
+void MoveResultsText::DisplayStatRaised1Msg(std::string_view attackingPlayerName, std::string_view attackingPokemonName, std::string_view statName) const
 {
 	m_target.Emit(std::format("{}'s {}'s {} rose!", attackingPlayerName, attackingPokemonName, statName));
 }
 
-void MoveResultsText::DisplayStatRaiseFailMsg(std::string_view statName, std::string_view attackingPlayerName, std::string_view attackingPokemonName) const
+void MoveResultsText::DisplayStatRaiseFailMsg(std::string_view attackingPlayerName, std::string_view attackingPokemonName, std::string_view statName) const
 {
 	m_target.Emit(std::format("{}'s {} can't raise its {} any higher!", attackingPlayerName, attackingPokemonName, statName));
 }
 
-void MoveResultsText::DisplayStatLowered2Msg(std::string_view statName, std::string_view defendingPlayerName, std::string_view defendingPokemonName) const
+void MoveResultsText::DisplayStatLowered2Msg(std::string_view defendingPlayerName, std::string_view defendingPokemonName, std::string_view statName) const
 {
 	m_target.Emit(std::format("{}'s {}'s {} fell harshly!", defendingPlayerName, defendingPokemonName, statName));
 }
 
-void MoveResultsText::DisplayStatLowered1Msg(std::string_view statName, std::string_view defendingPlayerName, std::string_view defendingPokemonName) const
+void MoveResultsText::DisplayStatLowered1Msg(std::string_view defendingPlayerName, std::string_view defendingPokemonName, std::string_view statName) const
 {
 	m_target.Emit(std::format("{}'s {}'s {} fell!", defendingPlayerName, defendingPokemonName, statName));
 }
 
-void MoveResultsText::DisplayStatLoweredFailMsg(std::string_view statName, std::string_view defendingPlayerName, std::string_view defendingPokemonName) const
+void MoveResultsText::DisplayStatLoweredFailMsg(std::string_view defendingPlayerName, std::string_view defendingPokemonName, std::string_view statName) const
 {
 	m_target.Emit(std::format("{}'s {}'s {} won't go any lower!", defendingPlayerName, defendingPokemonName, statName));
 }

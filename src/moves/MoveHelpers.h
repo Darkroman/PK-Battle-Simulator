@@ -35,7 +35,7 @@ using SetStageFn = void (*)(BattlePokemon&, int);
 void StageUpRoutine(MoveRoutineDeps& deps, int amount, std::string_view stageName, GetStageFn getStage, SetStageFn setStage);
 void StageDownRoutine(MoveRoutineDeps& deps, int amount, std::string_view stageName, GetStageFn getStage, SetStageFn setStage);
 void StageDownDamageRoutine(MoveRoutineDeps& deps, int amount, std::string_view stageName, GetStageFn getStage, SetStageFn setStage);
-void DisplayStatChange(IMoveResultsUI& ui, int amount, bool isUp, std::string_view stageName, std::string_view playerName, std::string_view pokemonName);
+void DisplayStatChange(IMoveResultsUI& ui, int amount, bool isUp, std::string_view playerName, std::string_view pokemonName, std::string_view stageName);
 
 using ChargeMsgMemFn = void (IMoveResultsUI::*)(std::string_view, std::string_view) const;
 using ChargeHookFn = void (*)(MoveRoutineDeps& deps);
