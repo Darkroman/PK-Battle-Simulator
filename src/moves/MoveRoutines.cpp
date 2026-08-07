@@ -2855,6 +2855,8 @@ namespace MoveRoutines
 
 		ctx.currentMove = metronome;
 
+		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
+
 		ctx.attackingPokemon->ResetMetronome();
 	}
 
@@ -2874,7 +2876,13 @@ namespace MoveRoutines
 
 		pokemonMove* targetLastUsedMove = ctx.defendingPokemon->GetLastUsedMove();
 
-		if (!targetLastUsedMove || !targetLastUsedMove->IsAffectedByMirrorMove())
+		if (targetLastUsedMove == nullptr)
+		{
+			deps.resultsUI.DisplayFailedTextDialog();
+			return;
+		}
+
+		if (!targetLastUsedMove->IsAffectedByMirrorMove())
 		{
 			deps.resultsUI.DisplayFailedTextDialog();
 			return;
@@ -2905,6 +2913,8 @@ namespace MoveRoutines
 		}
 
 		ctx.currentMove = mirrorMove;
+
+		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 
 		ctx.attackingPokemon->ResetMirrorMove();
 	}

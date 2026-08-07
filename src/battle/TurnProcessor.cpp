@@ -114,10 +114,13 @@ TurnSwitchState TurnProcessor::ExecuteTurn()
 
 void TurnProcessor::SwapRoles()
 {
+	const bool currentIsPlayerOne = m_context.currentMove == m_context.playerOneCurrentMove;
+
 	std::swap(m_context.attackingPlayer, m_context.defendingPlayer);
 	std::swap(m_context.attackingPokemon, m_context.defendingPokemon);
-	m_context.currentMove = (m_context.playerOneCurrentMove == m_context.currentMove) ? m_context.playerTwoCurrentMove : m_context.playerOneCurrentMove;
-	m_context.currentMoveEffect = (m_context.playerOneCurrentMoveEffect == m_context.currentMoveEffect) ? m_context.playerTwoCurrentMoveEffect : m_context.playerOneCurrentMoveEffect;
+
+	m_context.currentMove = currentIsPlayerOne ? m_context.playerTwoCurrentMove : m_context.playerOneCurrentMove;
+	m_context.currentMoveEffect = currentIsPlayerOne ? m_context.playerTwoCurrentMoveEffect : m_context.playerOneCurrentMoveEffect;
 }
 
 TurnSwitchState TurnProcessor::CheckPendingSwitch()
