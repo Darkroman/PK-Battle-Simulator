@@ -1310,6 +1310,11 @@ void BattlePokemon::SetTransformation(BattlePokemon* pokemon)
 
     for (size_t i = 0; i < m_detransformData.m_array_moves.size(); ++i)
     {
+        if (!m_detransformData.m_array_moves[i].HasMove())
+        {
+            continue;
+        }
+
         if (m_detransformData.m_array_moves[i].GetMoveID() == MoveID::Transform)
         {
             lastUsedMove = &m_detransformData.m_array_moves[i];
