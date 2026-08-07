@@ -696,7 +696,6 @@ void BattleManager::TestBattleText() const
 	m_moveResultsUI.DisplayEffectivenessTextDialog("Blue", "Venusaur", EffectivenessText::Less);
 	m_moveResultsUI.DisplayEffectivenessTextDialog("Blue", "Venusaur", EffectivenessText::Super);
 	m_moveResultsUI.DisplayEffectivenessTextDialog("Blue", "Venusaur", EffectivenessText::No);
-	m_moveResultsUI.DisplayEffectivenessTextDialog("Blue", "Venusaur", EffectivenessText::OHKO);
 
 	m_moveResultsUI.DisplayAttackMissedTextDialog("Red", "Charizard");
 	m_moveResultsUI.DisplayAttackAvoidedTextDialog("Blue", "Venusaur");
@@ -746,13 +745,13 @@ void BattleManager::TestBattleText() const
 	m_moveResultsUI.DisplayAlreadyAsleepMsg("Blue", "Venusaur");
 	m_moveResultsUI.DisplayDoesntAffectMsg("Blue", "Gengar");
 
-	m_moveResultsUI.DisplayStatRaised2Msg("Attack", "Red", "Charizard");
-	m_moveResultsUI.DisplayStatRaised1Msg("Defense", "Red", "Charizard");
-	m_moveResultsUI.DisplayStatRaiseFailMsg("Speed", "Red", "Charizard");
+	m_moveResultsUI.DisplayStatRaised2Msg("Red", "Charizard", "Attack");
+	m_moveResultsUI.DisplayStatRaised1Msg("Red", "Charizard", "Defense");
+	m_moveResultsUI.DisplayStatRaiseFailMsg("Red", "Charizard", "Speed");
 
-	m_moveResultsUI.DisplayStatLowered2Msg("Attack", "Blue", "Venusaur");
-	m_moveResultsUI.DisplayStatLowered1Msg("Defense", "Blue", "Venusaur");
-	m_moveResultsUI.DisplayStatLoweredFailMsg("Speed", "Blue", "Venusaur");
+	m_moveResultsUI.DisplayStatLowered2Msg("Blue", "Venusaur", "Attack");
+	m_moveResultsUI.DisplayStatLowered1Msg("Blue", "Venusaur", "Defense");
+	m_moveResultsUI.DisplayStatLoweredFailMsg("Blue", "Venusaur", "Speed");
 
 	// Legacy / extra messages
 	m_moveResultsUI.DisplayFocusEnergyMsg("Red", "Charizard");

@@ -1032,6 +1032,8 @@ namespace MoveRoutines
 				deps.statusProcessor.RampageConfuse();
 			}
 
+			deps.statusProcessor.ResetRampageState();
+
 			return;
 		}
 
