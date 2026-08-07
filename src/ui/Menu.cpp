@@ -29,7 +29,7 @@ Menu::Menu(std::vector<std::unique_ptr<Player>>& playerStorage)
 	players[0] = playerStorage[0].get();
 	players[1] = playerStorage[1].get();
 
-#if !defined NDEBUG
+#ifndef NDEBUG
 	SetDefaultPokemon();
 #endif
 }
@@ -657,8 +657,6 @@ bool Menu::SetPlayerPokemonSpeedEV(BattlePokemon& pokemon)
 
 AppState Menu::RunMenu(unsigned int& simIterations)
 {
-	//DatabaseTextView::DisplayMovesWithZeroPower(Database::GetInstance());
-
 	while (true)
 	{
 		std::cout << "---Main Menu:---\n";
@@ -2288,7 +2286,7 @@ bool Menu::ReorderMoves(BattlePokemon& pokemon)
 
 void Menu::SetDefaultPokemon()
 {
-#if !defined NDEBUG
+#ifndef NDEBUG
 
 	if (players[0]->GetPokemonCount() > 0 && players[1]->GetPokemonCount() > 0)
 	{
