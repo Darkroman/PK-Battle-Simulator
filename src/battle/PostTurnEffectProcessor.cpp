@@ -418,10 +418,10 @@ void PostTurnEffectProcessor::CheckDisabledStatus()
 
     if (m_context.attackingPokemon->MoveIsDisabled() && !m_context.attackingPokemon->IsFainted())
     {
-        std::string_view moveName{ "name" };
-
         if (m_context.attackingPokemon->GetDisabledCounter() >= DisableTurnCount)
         {
+            std::string_view moveName{ "move" };
+
             for (auto& move : m_context.attackingPokemon->GetMoveArray())
             {
                 if (move.GetMoveID() == m_context.attackingPokemon->GetDisabledMoveID())
@@ -447,18 +447,15 @@ void PostTurnEffectProcessor::CheckDisabledStatus()
     {
         if (m_context.defendingPokemon->GetDisabledCounter() >= DisableTurnCount)
         {
-            std::string_view moveName{ "name" };
+            std::string_view moveName{ "move" };
 
-            if (m_context.defendingPokemon->GetDisabledCounter() >= DisableTurnCount)
+            for (auto& move : m_context.defendingPokemon->GetMoveArray())
             {
-                for (auto& move : m_context.defendingPokemon->GetMoveArray())
+                if (move.GetMoveID() == m_context.defendingPokemon->GetDisabledMoveID())
                 {
-                    if (move.GetMoveID() == m_context.defendingPokemon->GetDisabledMoveID())
-                    {
-                        move.b_isDisabled = false;
-                        moveName = move.GetName();
-                        break;
-                    }
+                    move.b_isDisabled = false;
+                    moveName = move.GetName();
+                    break;
                 }
             }
 
