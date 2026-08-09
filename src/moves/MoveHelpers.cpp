@@ -396,9 +396,9 @@ void ProcessRage(MoveRoutineDeps& deps)
 		return;
 	}
 
-	if (ctx.defendingPokemon->IsRaging() && 
-		((ctx.lastDamageApplied > 0 && !ctx.defendingPokemon->HasSubstitute()) ||
-		 ctx.currentMove->GetMoveEffectEnum() == MoveEffect::Disable)) // Target took damage or was targeted by Disable while raging
+	if (ctx.defendingPokemon->IsRaging() &&
+		((ctx.lastDamageApplied > 0 && !ctx.flags.hitSubstitute) ||
+		ctx.currentMove->GetMoveEffectEnum() == MoveEffect::Disable)) // Target took damage or was targeted by Disable while raging
 	{
 		unsigned int attackStage = ctx.defendingPokemon->GetAttackStage();
 

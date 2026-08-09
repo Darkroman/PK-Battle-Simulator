@@ -617,6 +617,8 @@ bool BattleManager::RunBattleSimulation()
 
 		if (!m_context.defendingPokemon->IsFainted())
 		{
+			m_context.ResetTurnState();
+
 			m_battleAnnouncerUI.NewLine();
 
 			m_turnProcessor.SwapRoles();
@@ -648,7 +650,9 @@ bool BattleManager::RunBattleSimulation()
 
 		m_postTurnProcessor.ProcessPostKOSwitches();
 
-		m_context.flags.ResetBattleFlags();
+		m_context.damageTaken = 0;
+
+		m_context.ResetTurnState();
 	}
 
 	return true;

@@ -16,8 +16,8 @@ public:
 
     void ExecuteMove();
 
+private:
     void TryPostMoveReactions();
 
-private:
     MoveRoutineDeps m_deps;
 };
