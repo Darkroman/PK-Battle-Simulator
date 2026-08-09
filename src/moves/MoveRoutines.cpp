@@ -1657,11 +1657,8 @@ namespace MoveRoutines
 		deps.statusProcessor.CheckSubstituteCondition(ctx.defendingPlayer, ctx.defendingPokemon);
 		deps.statusProcessor.CheckFaintCondition(*ctx.attackingPlayer, *ctx.defendingPlayer, *ctx.attackingPokemon, *ctx.defendingPokemon);
 
-		if (ctx.damageTaken > 0)
-		{
-			ctx.attackingPokemon->SetRecharging(true);
-			ctx.attackingPlayer->SetCanSwitch(false);
-		}
+		ctx.attackingPokemon->SetRecharging(true);
+		ctx.attackingPlayer->SetCanSwitch(false);
 	}
 
 	void LowKick(MoveRoutineDeps& deps)
