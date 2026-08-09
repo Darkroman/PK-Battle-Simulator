@@ -23,7 +23,7 @@ void FixedDamageRoutine(MoveRoutineDeps&, unsigned int baseDamage);
 
 void FlinchRoutine(MoveRoutineDeps&);
 
-void RecoilRoutine(MoveRoutineDeps& deps, unsigned int recoilDivisor, unsigned int targetHPBegin, unsigned int targetHPEnd);
+void RecoilRoutine(MoveRoutineDeps& deps, unsigned int recoilDivisor);
 
 void TryDamageReactions(MoveRoutineDeps& deps);
 

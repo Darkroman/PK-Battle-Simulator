@@ -991,18 +991,12 @@ namespace MoveRoutines
 			return;
 		}
 
-		bool hitSubstitute = ctx.defendingPokemon->HasSubstitute() && !ctx.currentMove->CanBypassSubstitute();
-
-		int targetHPBegin = hitSubstitute ? ctx.defendingPokemon->GetSubstituteHP() : ctx.defendingPokemon->GetCurrentHP();
-
 		DamageRoutine(deps);
 
 		deps.statusProcessor.CheckSubstituteCondition(ctx.defendingPlayer, ctx.defendingPokemon);
 		deps.statusProcessor.CheckFaintCondition(*ctx.attackingPlayer, *ctx.defendingPlayer, *ctx.attackingPokemon, *ctx.defendingPokemon);
 
-		int targetHPEnd = hitSubstitute ? ctx.defendingPokemon->GetSubstituteHP() : ctx.defendingPokemon->GetCurrentHP();
-
-		RecoilRoutine(deps, 4, targetHPBegin, targetHPEnd);
+		RecoilRoutine(deps, 4);
 	}
 
 	void Rampage(MoveRoutineDeps& deps)
@@ -1107,18 +1101,12 @@ namespace MoveRoutines
 			return;
 		}
 
-		bool hitSubstitute = ctx.defendingPokemon->HasSubstitute() && !ctx.currentMove->CanBypassSubstitute();
-
-		int targetHPBegin = hitSubstitute ? ctx.defendingPokemon->GetSubstituteHP() : ctx.defendingPokemon->GetCurrentHP();
-
 		DamageRoutine(deps);
 
 		deps.statusProcessor.CheckSubstituteCondition(ctx.defendingPlayer, ctx.defendingPokemon);
 		deps.statusProcessor.CheckFaintCondition(*ctx.attackingPlayer, *ctx.defendingPlayer, *ctx.attackingPokemon, *ctx.defendingPokemon);
 
-		int targetHPEnd = hitSubstitute ? ctx.defendingPokemon->GetSubstituteHP() : ctx.defendingPokemon->GetCurrentHP();
-
-		RecoilRoutine(deps, 3, targetHPBegin, targetHPEnd);
+		RecoilRoutine(deps, 3);
 	}
 
 	void DefenseDown(MoveRoutineDeps& deps)

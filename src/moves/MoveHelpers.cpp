@@ -210,11 +210,11 @@ void FlinchRoutine(MoveRoutineDeps& deps)
 	}
 }
 
-void RecoilRoutine(MoveRoutineDeps& deps, unsigned int recoilDivisor, unsigned int targetHPBegin, unsigned int targetHPEnd)
+void RecoilRoutine(MoveRoutineDeps& deps, unsigned int recoilDivisor)
 {
 	auto& ctx = deps.context;
 
-	unsigned int recoilDamage = (targetHPBegin - targetHPEnd) / recoilDivisor;
+	unsigned int recoilDamage = ctx.lastDamageApplied / recoilDivisor;
 
 	unsigned int finalDamage = std::max(1u, recoilDamage);
 
