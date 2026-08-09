@@ -41,17 +41,11 @@ public:
         unsigned int m_accuracystage{ 0 };
         unsigned int m_criticalhitstage{ 0 };
 
-        unsigned int m_attack_iv{ 0 };
-        unsigned int m_defense_iv{ 0 };
-        unsigned int m_specialattack_iv{ 0 };
-        unsigned int m_specialdefense_iv{ 0 };
-        unsigned int m_speed_iv{ 0 };
-
-        unsigned int m_attack_ev{ 0 };
-        unsigned int m_defense_ev{ 0 };
-        unsigned int m_specialattack_ev{ 0 };
-        unsigned int m_specialdefense_ev{ 0 };
-        unsigned int m_speed_ev{ 0 };
+        unsigned int m_attack{ 0 };
+        unsigned int m_defense{ 0 };
+        unsigned int m_specialAttack{ 0 };
+        unsigned int m_specialDefense{ 0 };
+        unsigned int m_speed{ 0 };
 
         bool b_hasFocusEnergy{ false };
 
@@ -106,7 +100,7 @@ public:
 
 private:
     void UpdateStats();
-    void UpdateStatsTransform();
+
 public:
 
     const std::string& GetPokemonName() const;

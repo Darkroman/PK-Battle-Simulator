@@ -47,17 +47,11 @@ void BattlePokemon::DetransformData::BackupOriginalPokemonData(BattlePokemon* po
     m_accuracystage = pokemon->GetAccuracyStage();
     m_criticalhitstage = pokemon->GetCriticalHitStage();
 
-    m_attack_iv = pokemon->GetAttackIV();
-    m_defense_iv = pokemon->GetDefenseIV();
-    m_specialattack_iv = pokemon->GetSpecialAttackIV();
-    m_specialdefense_iv = pokemon->GetSpecialDefenseIV();
-    m_speed_iv = pokemon->GetSpeedIV();
-
-    m_attack_ev = pokemon->GetAttackEV();
-    m_defense_ev = pokemon->GetDefenseEV();
-    m_specialattack_ev = pokemon->GetSpecialAttackEV();
-    m_specialdefense_ev = pokemon->GetSpecialDefenseEV();
-    m_speed_ev = pokemon->GetSpeedEV();
+    m_attack = pokemon->GetAttack();
+    m_defense = pokemon->GetDefense();
+    m_specialAttack = pokemon->GetSpecialAttack();
+    m_specialDefense = pokemon->GetSpecialDefense();
+    m_speed = pokemon->GetSpeed();
 
     b_hasFocusEnergy = pokemon->HasFocusEnergy();
 
@@ -544,17 +538,6 @@ void BattlePokemon::UpdateStats()
     m_specialAttack = (((m_specialattack_iv + 2 * mp_pokemon->GetBaseSpecialAttack() + (m_specialattack_ev / 4)) * m_level / 100) + 5);
     m_specialDefense = (((m_specialdefense_iv + 2 * mp_pokemon->GetBaseSpecialDefense() + (m_specialdefense_ev / 4)) * m_level / 100) + 5);
     m_speed = (((m_speed_iv + 2 * mp_pokemon->GetBaseSpeed() + (m_speed_ev / 4)) * m_level / 100) + 5);
-}
-
-void BattlePokemon::UpdateStatsTransform()
-{
-    const unsigned int statLevel = b_isTransformed ? m_transformeeLevel : m_level;
-
-    m_attack = (((m_attack_iv + 2 * mp_pokemon->GetBaseAttack() + (m_attack_ev / 4)) * statLevel / 100) + 5);
-    m_defense = (((m_defense_iv + 2 * mp_pokemon->GetBaseDefense() + (m_defense_ev / 4)) * statLevel / 100) + 5);
-    m_specialAttack = (((m_specialattack_iv + 2 * mp_pokemon->GetBaseSpecialAttack() + (m_specialattack_ev / 4)) * statLevel / 100) + 5);
-    m_specialDefense = (((m_specialdefense_iv + 2 * mp_pokemon->GetBaseSpecialDefense() + (m_specialdefense_ev / 4)) * statLevel / 100) + 5);
-    m_speed = (((m_speed_iv + 2 * mp_pokemon->GetBaseSpeed() + (m_speed_ev / 4)) * statLevel / 100) + 5);
 }
 
 const std::string& BattlePokemon::GetPokemonName() const
@@ -1340,25 +1323,17 @@ void BattlePokemon::SetTransformation(BattlePokemon* pokemon)
     m_accuracystage = pokemon->GetAccuracyStage();
     m_criticalhitstage = pokemon->GetCriticalHitStage();
 
-    m_attack_iv = pokemon->GetAttackIV();
-    m_defense_iv = pokemon->GetDefenseIV();
-    m_specialattack_iv = pokemon->GetSpecialAttackIV();
-    m_specialdefense_iv = pokemon->GetSpecialDefenseIV();
-    m_speed_iv = pokemon->GetSpeedIV();
-
-    m_attack_ev = pokemon->GetAttackEV();
-    m_defense_ev = pokemon->GetDefenseEV();
-    m_specialattack_ev = pokemon->GetSpecialAttackEV();
-    m_specialdefense_ev = pokemon->GetSpecialDefenseEV();
-    m_speed_ev = pokemon->GetSpeedEV();
+    m_attack = pokemon->GetAttack();
+    m_defense = pokemon->GetDefense();
+    m_specialAttack = pokemon->GetSpecialAttack();
+    m_specialDefense = pokemon->GetSpecialDefense();
+    m_speed = pokemon->GetSpeed();
 
     b_hasFocusEnergy = pokemon->HasFocusEnergy();
 
     m_moveCount = pokemon->GetMoveCount();
 
     b_isTransformed = true;
-
-    UpdateStatsTransform();
 }
 
 void BattlePokemon::Detransform()
@@ -1388,25 +1363,17 @@ void BattlePokemon::Detransform()
     m_accuracystage = m_detransformData.m_accuracystage;
     m_criticalhitstage = m_detransformData.m_criticalhitstage;
 
-    m_attack_iv = m_detransformData.m_attack_iv;
-    m_defense_iv = m_detransformData.m_defense_iv;
-    m_specialattack_iv = m_detransformData.m_specialattack_iv;
-    m_specialdefense_iv = m_detransformData.m_specialdefense_iv;
-    m_speed_iv = m_detransformData.m_speed_iv;
-
-    m_attack_ev = m_detransformData.m_attack_ev;
-    m_defense_ev = m_detransformData.m_defense_ev;
-    m_specialattack_ev = m_detransformData.m_specialattack_ev;
-    m_specialdefense_ev = m_detransformData.m_specialdefense_ev;
-    m_speed_ev = m_detransformData.m_speed_ev;
+    m_attack = m_detransformData.m_attack;
+    m_defense = m_detransformData.m_defense;
+    m_specialAttack = m_detransformData.m_specialAttack;
+    m_specialDefense = m_detransformData.m_specialDefense;
+    m_speed = m_detransformData.m_speed;
 
     b_hasFocusEnergy = m_detransformData.b_hasFocusEnergy;
 
     m_moveCount = m_detransformData.m_moveCount;
 
     this->b_isTransformed = false;
-
-    UpdateStatsTransform();
 }
 
 bool BattlePokemon::IsConverted() const
