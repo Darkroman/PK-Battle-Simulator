@@ -59,9 +59,7 @@ void InflictNVStatus(Status status, int effectChance, MoveRoutineDeps& deps)
 		return;
 	}
 
-	int randomNumber{ deps.rng.GetPercentRoll() };
-
-	if (randomNumber > effectChance)
+	if (effectChance < 100 && deps.rng.GetPercentRoll() > effectChance)
 	{
 		return;
 	}
