@@ -209,6 +209,8 @@ public:
     void SetSemiInvulnerableDig(bool);
     void SetSemiInvulnerableFly(bool);
 
+    void ResetLockInState();
+
     bool IsCharging() const;
     void SetCharging(bool);
 

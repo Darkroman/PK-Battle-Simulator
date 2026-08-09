@@ -1024,6 +1024,20 @@ void BattlePokemon::SetSemiInvulnerableFly(bool fly)
     b_isSemiInvulnerableFly = fly;
 }
 
+void BattlePokemon::ResetLockInState()
+{
+    SetCharging(false);
+
+    SetRecharging(false);
+
+    SetRampaging(false);
+    ResetRampageCounter();
+
+    SetBide(false);
+    ResetBideCounter();
+    ResetBideDamage();
+}
+
 bool BattlePokemon::IsCharging() const
 {
     return b_isCharging;

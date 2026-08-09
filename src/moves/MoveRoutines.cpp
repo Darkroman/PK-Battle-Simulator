@@ -571,12 +571,15 @@ namespace MoveRoutines
 
 		// Reset stats for the Pokémon being forced out
 		ctx.defendingPokemon->ResetStatsOnSwitch();
+		ctx.defendingPokemon->ResetLockInState();
+		ctx.defendingPlayer->SetCanSwitch(true);
 
 		if (ctx.attackingPokemon->IsBound())
 		{
 			ctx.attackingPokemon->SetBound(false);
 			ctx.attackingPokemon->ResetBoundCounter();
 			ctx.attackingPokemon->SetBoundTurnCount(0);
+			ctx.attackingPlayer->SetCanSwitch(true);
 		}
 
 		if (ctx.defendingPlayer == ctx.playerOne)
