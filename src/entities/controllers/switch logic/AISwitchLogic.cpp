@@ -146,40 +146,29 @@ namespace AISwitchLogic
 			}
 			
 			const auto& observedMoves = self.GetAIController().GetObservedMoves();
-			std::array<const pokemonMove*, 4> observedDamagingMoves{};
-			size_t observedCount{};
 
 			bool targetMonHasKOMove{ false };
-
 			for (const auto& observedMove : observedMoves)
 			{
-				if (observedMove != nullptr && observedMove->IsActive() && observedMove->GetCategoryEnum() != Category::Status)
+				if (observedMove == nullptr)
 				{
-					observedDamagingMoves[observedCount] = observedMove;
-					++observedCount;
-
-					unsigned int damageToSelf = AIMoveScoring::SwitchDamageScoringRoutine(targetPlayer, self, *observedMove, targetMon, selfMon);
-
-					if (damageToSelf >= selfMon.GetCurrentHP())
-					{
-						targetMonHasKOMove = true;
-						break;
-					}
+					break;
 				}
-				else
+
+				if (!observedMove->IsActive() || observedMove->GetCategoryEnum() == Category::Status)
 				{
+					continue;
+				}
+
+				unsigned int damageToSelf = AIMoveScoring::SwitchDamageScoringRoutine(targetPlayer, self, *observedMove, targetMon, selfMon);
+
+				if (damageToSelf >= selfMon.GetCurrentHP())
+				{
+					targetMonHasKOMove = true;
 					break;
 				}
 			}
 
-			std::span<const pokemonMove*> validObservedMoves{ observedDamagingMoves.data(), observedCount };
-
-			// If no observed damaging moves found, return early with no switch
-			if (observedCount == 0)
-			{
-				return false;
-			}
-			
 			// If selfMon is slower, and targetMon's highest damaging observed move will KO selfMon, switch
 			if (!isFaster && targetMonHasKOMove)
 			{
@@ -231,15 +220,18 @@ namespace AISwitchLogic
 
 		for (const auto& observedMove : observedMoves)
 		{
-			if (observedMove != nullptr && observedMove->IsActive() && observedMove->GetCategoryEnum() != Category::Status)
-			{
-				observedDamagingMoves[observedCount] = observedMove;
-				++observedCount;
-			}
-			else
+			if (observedMove == nullptr)
 			{
 				break;
 			}
+
+			if (!observedMove->IsActive() || observedMove->GetCategoryEnum() == Category::Status)
+			{
+				continue;
+			}
+
+			observedDamagingMoves[observedCount] = observedMove;
+			++observedCount;
 		}
 
 		std::span<const pokemonMove*> validObservedMoves{ observedDamagingMoves.data(), observedCount };
@@ -409,15 +401,18 @@ namespace AISwitchLogic
 
 		for (const auto& observedMove : observedMoves)
 		{
-			if (observedMove != nullptr && observedMove->IsActive() && observedMove->GetCategoryEnum() != Category::Status)
-			{
-				observedDamagingMoves[observedCount] = observedMove;
-				++observedCount;
-			}
-			else
+			if (observedMove == nullptr)
 			{
 				break;
 			}
+
+			if (!observedMove->IsActive() || observedMove->GetCategoryEnum() == Category::Status)
+			{
+				continue;
+			}
+
+			observedDamagingMoves[observedCount] = observedMove;
+			++observedCount;
 		}
 
 		std::span<const pokemonMove*> validObservedMoves{ observedDamagingMoves.data(), observedCount };
