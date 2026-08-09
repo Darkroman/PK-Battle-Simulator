@@ -595,14 +595,14 @@ namespace MoveRoutines
 
 		if (HandleCharging(deps, &IMoveResultsUI::DisplayFlyChargeMsg, hooks))
 		{
+			ctx.currentMove->DeductPP();
+
+			ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
+
 			return;
 		}
 
 		deps.resultsUI.UsedTextDialog(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView(), ctx.currentMove->GetName());
-
-		ctx.currentMove->DeductPP();
-
-		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 
 		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
 		{
