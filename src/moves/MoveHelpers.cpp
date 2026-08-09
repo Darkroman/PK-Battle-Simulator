@@ -138,8 +138,8 @@ void IncreasedCriticalHitRoutine(MoveRoutineDeps& deps)
 {
 	auto& ctx = deps.context;
 
-	unsigned int oldCritStage = ctx.attackingPokemon->GetCriticalHitStage();
-	unsigned int newCritStage = oldCritStage + 1;
+	int oldCritStage = ctx.attackingPokemon->GetCriticalHitStage();
+	int newCritStage = oldCritStage + 1;
 
 	ctx.attackingPokemon->SetCriticalHitStage(newCritStage);
 
