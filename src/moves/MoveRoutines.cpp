@@ -3316,23 +3316,21 @@ namespace MoveRoutines
 
 		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 
-		if (ctx.attackingPokemon->GetStatus() != Status::Sleeping &&
-			ctx.attackingPokemon->GetCurrentHP() < ctx.attackingPokemon->GetMaxHP())
-		{
-			deps.resultsUI.DisplayRestMsg(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView());
-
-			ctx.attackingPokemon->ChangeStatus(Status::Sleeping);
-
-			ctx.attackingPokemon->SetSleepTurnCount(2);
-			ctx.attackingPokemon->ResetSleepCounter();
-
-			unsigned int healAmount = ctx.attackingPokemon->GetMaxHP() - ctx.attackingPokemon->GetCurrentHP();
-			ctx.attackingPokemon->HealCurrentHP(healAmount);
-		}
-		else if (ctx.attackingPokemon->GetCurrentHP() >= ctx.attackingPokemon->GetMaxHP())
+		if (ctx.attackingPokemon->GetCurrentHP() >= ctx.attackingPokemon->GetMaxHP())
 		{
 			deps.resultsUI.DisplayHPFullMsg(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView());
+			return;
 		}
+
+		deps.resultsUI.DisplayRestMsg(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView());
+
+		ctx.attackingPokemon->ChangeStatus(Status::Sleeping);
+
+		ctx.attackingPokemon->SetSleepTurnCount(2);
+		ctx.attackingPokemon->ResetSleepCounter();
+
+		unsigned int healAmount = ctx.attackingPokemon->GetMaxHP() - ctx.attackingPokemon->GetCurrentHP();
+		ctx.attackingPokemon->HealCurrentHP(healAmount);
 	}
 
 	void Conversion(MoveRoutineDeps& deps)
