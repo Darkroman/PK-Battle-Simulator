@@ -804,22 +804,33 @@ namespace MoveRoutines
 
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
-		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
+		bool isImmune =	ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No;
+
+		if (isImmune)
 		{
+			ctx.flags.hit = false;
 			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.flags.currentEffectiveness));
-			return;
+		}
+		else
+		{
+			ctx.flags.hit = deps.calculations.CalculateHitChance(*ctx.currentMove, *ctx.attackingPokemon, *ctx.defendingPokemon);
 		}
 
-		ctx.flags.hit = deps.calculations.CalculateHitChance(*ctx.currentMove, *ctx.attackingPokemon, *ctx.defendingPokemon);
-
-		if (!ctx.flags.hit)
+		if (isImmune || !ctx.flags.hit)
 		{
-			deps.resultsUI.DisplayAttackMissedTextDialog(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView());
+			if (!isImmune)
+			{
+				deps.resultsUI.DisplayAttackMissedTextDialog(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView());
+			}
 
-			int crashDamage = ctx.attackingPokemon->GetMaxHP() / 2;
+			unsigned int crashDamage = std::max(1u, ctx.attackingPokemon->GetMaxHP() / 2);
+
 			ctx.attackingPokemon->DamageCurrentHP(crashDamage);
 
 			deps.resultsUI.DisplayJumpKickCrashMsg(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView());
+
+			deps.statusProcessor.CheckFaintCondition(*ctx.defendingPlayer, *ctx.attackingPlayer, *ctx.defendingPokemon, *ctx.attackingPokemon);
+
 			return;
 		}
 
@@ -1030,22 +1041,27 @@ namespace MoveRoutines
 
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
-		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
+		bool isImmune = ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No;
+
+		if (isImmune)
 		{
+			ctx.flags.hit = false;
 			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.flags.currentEffectiveness));
 		}
-
-		if (ctx.flags.currentEffectiveness != BattleStateFlags::Effectiveness::No)
+		else
 		{
 			ctx.flags.hit = deps.calculations.CalculateHitChance(*ctx.currentMove, *ctx.attackingPokemon, *ctx.defendingPokemon);
 		}
 
-		if (!ctx.flags.hit && ctx.flags.currentEffectiveness != BattleStateFlags::Effectiveness::No)
+		if (isImmune || !ctx.flags.hit)
 		{
-			deps.resultsUI.DisplayAttackMissedTextDialog(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView());
+			if (!isImmune)
+			{
+				deps.resultsUI.DisplayAttackMissedTextDialog(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView());
+			}
 		}
 
-		if (ctx.flags.hit && ctx.flags.currentEffectiveness != BattleStateFlags::Effectiveness::No)
+		if (!isImmune && ctx.flags.hit)
 		{
 			DamageRoutine(deps);
 
@@ -1054,7 +1070,7 @@ namespace MoveRoutines
 		}
 
 		bool reachedEnd = ctx.attackingPokemon->GetRampageCounter() >= ctx.attackingPokemon->GetRampageTurnCount();
-		bool moveFailed = !ctx.flags.hit || ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No;
+		bool moveFailed = !ctx.flags.hit || isImmune;
 
 		if (moveFailed || reachedEnd)
 		{
