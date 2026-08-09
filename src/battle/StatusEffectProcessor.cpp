@@ -5,6 +5,7 @@
 
 #include "BattleContext.h"
 #include "RandomEngine.h"
+#include "StageRatios.h"
 #include "../ui/interfaces/IStatusEffectUI.h"
 #include "../entities/BattlePokemon.h"
 #include "../entities/Player.h"
@@ -179,14 +180,20 @@ bool StatusEffectProcessor::ConfusedStatus()
 		}
 		else
 		{
-			m_statusEffectUI.DisplayHurtItselfConfuseMsg();
-
-			// Confused damage does not take into account Pokemon's stat boosts, burn status, stab, nor critical, and is a typeless physical move
+			// Confusion damage is a typeless 40-power physical attack.
+			// It uses the user's Attack and Defense stages, but does not
+			// receive STAB, critical hits, or the burn damage penalty.
 			unsigned int level{ m_context.attackingPokemon->GetLevel() };
 			constexpr unsigned int confusePower{ 40 };
 
-			unsigned int sourceAttack{ m_context.attackingPokemon->GetAttack() };
-			unsigned int targetDefense{ m_context.attackingPokemon->GetDefense() };
+			int attackStage = m_context.attackingPokemon->GetAttackStage();
+			int defenseStage = m_context.attackingPokemon->GetDefenseStage();
+
+			auto [atkNumerator, atkDenominator] = GetStageRatio(attackStage);
+			auto [defNumerator, defDenominator] = GetStageRatio(defenseStage);
+
+			unsigned int sourceAttack =	m_context.attackingPokemon->GetAttack() * atkNumerator / atkDenominator;
+			unsigned int targetDefense = m_context.attackingPokemon->GetDefense() *	defNumerator / defDenominator;
 
 			unsigned int baseDamage = (((((2 * level / 5) + 2) * confusePower * sourceAttack) / targetDefense) / 50) + 2;
 
@@ -194,6 +201,8 @@ bool StatusEffectProcessor::ConfusedStatus()
 			unsigned int finalDamage = baseDamage * damageMod / 100;
 
 			m_context.attackingPokemon->DamageCurrentHP(finalDamage);
+
+			m_statusEffectUI.DisplayHurtItselfConfuseMsg();
 
 			CheckFaintCondition(*m_context.defendingPlayer, *m_context.attackingPlayer, *m_context.defendingPokemon, *m_context.attackingPokemon);
 
