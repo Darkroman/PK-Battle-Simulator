@@ -1414,7 +1414,17 @@ namespace MoveRoutines
 		}
 
 		ctx.defendingPokemon->SetDisabledStatus(true);
+		ctx.defendingPokemon->SetDisabledMoveID(lastUsed->GetMoveID());
 		ctx.defendingPokemon->ResetDisabledCounter();
+
+		for (auto& move : ctx.defendingPokemon->GetMoveArray())
+		{
+			if (move.GetMoveID() == lastUsed->GetMoveID())
+			{
+				move.b_isDisabled = true;
+				break;
+			}
+		}
 
 		deps.resultsUI.DisplayMoveDisabledMsg(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ctx.defendingPokemon->GetLastUsedMove()->GetName());
 

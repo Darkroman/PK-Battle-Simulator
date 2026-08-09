@@ -229,7 +229,8 @@ public:
     unsigned int GetDisabledCounter() const;
     void ResetDisabledCounter();
     bool MoveIsDisabled() const;
-    pokemonMove* GetDisabledMove() const;
+    void SetDisabledMoveID(MoveID);
+    MoveID GetDisabledMoveID() const;
 
     bool HasPendingPostTurnEffect() const;
 
@@ -357,7 +358,6 @@ private:
 
     unsigned int m_badlyPoisonCounter{ 0 };
 
-    pokemonMove* disabledMove{ nullptr };
     unsigned int m_disabledCounter{ 0 };
 
     unsigned int m_boundCounter{ 0 };
@@ -383,6 +383,8 @@ private:
 
     PokemonType m_beforeConversionType1_e{};
     PokemonType m_beforeConversionType2_e{};
+
+    MoveID m_disabledMoveID{};
 
     bool b_hasNickname{ false };
 

@@ -1097,21 +1097,17 @@ void BattlePokemon::ResetRampageCounter()
 
 void BattlePokemon::SetDisabledStatus(bool disabled)
 {
-    if (disabled == true)
-    {
-        if (lastUsedMove != nullptr)
-        {
-            b_moveIsDisabled = disabled;
-            lastUsedMove->b_isDisabled = true;
-            disabledMove = lastUsedMove;
-        }
-    }
-    else
-    {
-        b_moveIsDisabled = false;
-        disabledMove->b_isDisabled = false;
-        disabledMove = nullptr;
-    }
+    b_moveIsDisabled = disabled;
+}
+
+void BattlePokemon::SetDisabledMoveID(MoveID id)
+{
+    m_disabledMoveID = id;
+}
+
+MoveID BattlePokemon::GetDisabledMoveID() const
+{
+    return m_disabledMoveID;
 }
 
 void BattlePokemon::IncrementDisabledCounter()
@@ -1132,11 +1128,6 @@ void BattlePokemon::ResetDisabledCounter()
 bool BattlePokemon::MoveIsDisabled() const
 {
     return b_moveIsDisabled;
-}
-
-pokemonMove* BattlePokemon::GetDisabledMove() const
-{
-    return disabledMove;
 }
 
 bool BattlePokemon::HasPendingPostTurnEffect() const
@@ -1293,17 +1284,15 @@ void BattlePokemon::SetTransformation(BattlePokemon* pokemon)
         m_array_moves[i].b_isMimicked = false;
     }
 
-    for (size_t i = 0; i < m_detransformData.m_array_moves.size(); ++i)
+    if (b_moveIsDisabled)
     {
-        if (!m_detransformData.m_array_moves[i].HasMove())
+        for (auto& move : GetMoveArray())
         {
-            continue;
-        }
-
-        if (m_detransformData.m_array_moves[i].GetMoveID() == MoveID::Transform)
-        {
-            lastUsedMove = &m_detransformData.m_array_moves[i];
-            break;
+            if (move.GetMoveID() == m_disabledMoveID)
+            {
+                move.b_isDisabled = true;
+                break;
+            }
         }
     }
 
@@ -1345,6 +1334,18 @@ void BattlePokemon::Detransform()
         m_array_moves[i].m_maxPP = m_detransformData.m_array_moves[i].m_maxPP;
         m_array_moves[i].b_isDisabled = m_detransformData.m_array_moves[i].b_isDisabled;
         m_array_moves[i].b_isMimicked = m_detransformData.m_array_moves[i].b_isMimicked;
+    }
+
+    if (b_moveIsDisabled)
+    {
+        for (auto& move : GetMoveArray())
+        {
+            if (move.GetMoveID() == m_disabledMoveID)
+            {
+                move.b_isDisabled = true;
+                break;
+            }
+        }
     }
 
     m_transformeeLevel = 0;
@@ -1519,13 +1520,15 @@ void BattlePokemon::ResetStatsOnSwitch()
 
     if (MoveIsDisabled())
     {
+        SetDisabledStatus(false);
+        SetDisabledMoveID(MoveID::None);
+        ResetDisabledCounter();
+
         for (size_t i = 1; i < 5; ++i)
         {
             if (GetMove(i).b_isDisabled)
             {
                 GetMove(i).b_isDisabled = false;
-                SetDisabledStatus(false);
-                ResetDisabledCounter();
                 break;
             }
         }
@@ -1542,13 +1545,13 @@ void BattlePokemon::ResetStatsAndMoves()
 
     m_level = 50;
 
-    //m_maxHP = 0;
+    m_maxHP = 0;
     m_currentHP = 0;
-    //m_attack = 0;
-    //m_defense = 0;
-    //m_specialattack = 0;
-    //m_specialdefense = 0;
-    //m_speed = 0;
+    m_attack = 0;
+    m_defense = 0;
+    m_specialAttack = 0;
+    m_specialDefense = 0;
+    m_speed = 0;
 
     m_hp_iv = 31;
     m_attack_iv = 31;
@@ -1624,7 +1627,6 @@ void BattlePokemon::ResetValues()
     m_substituteHealth = 0;
 
     lastUsedMove = nullptr;
-    disabledMove = nullptr;
 
     m_boundMove = "";
 
