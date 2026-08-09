@@ -373,8 +373,6 @@ private:
     unsigned int m_bideCounter{ 0 };
     unsigned int m_bideTurnCount{ 0 };
 
-    unsigned int m_transformeeLevel{ 0 };
-
     unsigned int m_moveCount{ 0 };
 
     int m_mimicPP{ 0 };

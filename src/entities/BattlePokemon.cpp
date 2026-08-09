@@ -1310,8 +1310,6 @@ void BattlePokemon::SetTransformation(BattlePokemon* pokemon)
         }
     }
 
-    m_transformeeLevel = pokemon->GetLevel();
-
     mp_pokemon = pokemon->mp_pokemon;
 
     m_type1e = pokemon->GetTypeOneEnum();
@@ -1361,8 +1359,6 @@ void BattlePokemon::Detransform()
             }
         }
     }
-
-    m_transformeeLevel = 0;
 
     mp_pokemon = m_detransformData.mp_pokemon;
 
@@ -1647,6 +1643,7 @@ void BattlePokemon::ResetValues()
     currentStatus = Status::Normal;
 
     m_disabledMoveID = MoveID::None;
+    ResetDisabledCounter();
 
     for (auto& i : m_array_moves)
     {
