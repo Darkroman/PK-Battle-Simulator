@@ -3358,21 +3358,29 @@ namespace MoveRoutines
 
 		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 
-		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
+		PokemonType firstAvailableMoveSlotType{};
+
+		for (const auto& move : ctx.attackingPokemon->GetMoveArray())
 		{
-			return;
+			if (move.GetMovePointer() == nullptr)
+			{
+				continue;
+			}
+			
+			firstAvailableMoveSlotType = move.GetMoveTypeEnum();
+			break;
+			
 		}
 
-		if (ctx.attackingPokemon->GetTypeOneEnum() == ctx.currentMove->GetMoveTypeEnum() ||
-			ctx.attackingPokemon->GetTypeTwoEnum() == ctx.currentMove->GetMoveTypeEnum() ||
-			ctx.attackingPokemon->IsConverted() ||
-			ctx.defendingPokemon->HasSubstitute())
+		if ((ctx.attackingPokemon->GetTypeOneEnum() == firstAvailableMoveSlotType &&
+			ctx.attackingPokemon->GetTypeTwoEnum() == PokemonType::None) ||
+			ctx.attackingPokemon->IsConverted())
 		{
 			deps.resultsUI.DisplayFailedTextDialog();
 		}
 		else
 		{
-			ctx.attackingPokemon->SetConversion(ctx.currentMove);
+			ctx.attackingPokemon->SetConversion(firstAvailableMoveSlotType);
 
 			deps.resultsUI.DisplayConversionMsg(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView(), ctx.attackingPokemon->GetTypeOne());
 		}

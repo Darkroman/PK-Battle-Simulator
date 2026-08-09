@@ -278,7 +278,7 @@ public:
     void Detransform();
 
     bool IsConverted() const;
-    void SetConversion(pokemonMove*);
+    void SetConversion(PokemonType);
     void Deconvert();
 
     bool HasSubstitute() const;
@@ -377,7 +377,8 @@ private:
 
     unsigned int m_ev_total{ 0 };
 
-    PokemonType m_beforeConversionType_e{};
+    PokemonType m_beforeConversionType1_e{};
+    PokemonType m_beforeConversionType2_e{};
 
     bool b_hasNickname{ false };
 

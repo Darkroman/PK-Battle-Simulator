@@ -1404,20 +1404,23 @@ bool BattlePokemon::IsConverted() const
     return b_isConverted;
 }
 
-void BattlePokemon::SetConversion(pokemonMove* move)
+void BattlePokemon::SetConversion(PokemonType moveType)
 {
     b_isConverted = true;
 
-    m_beforeConversionType_e = m_type1e;
+    m_beforeConversionType1_e = m_type1e;
+    m_beforeConversionType2_e = m_type2e;
 
-    m_type1e = move->GetMoveTypeEnum();
+    m_type1e = moveType;
+    m_type2e = PokemonType::None;
 }
 
 void BattlePokemon::Deconvert()
 {
     b_isConverted = false;
 
-    m_type1e = m_beforeConversionType_e;
+    m_type1e = m_beforeConversionType1_e;
+    m_type2e = m_beforeConversionType2_e;
 }
 
 bool BattlePokemon::HasSubstitute() const
