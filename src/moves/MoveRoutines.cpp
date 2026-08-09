@@ -1717,12 +1717,10 @@ namespace MoveRoutines
 			return;
 		}
 
-		int counterDamage = ctx.damageTaken * 2;
+		unsigned int counterDamage = ctx.damageTaken * 2;
+		bool lastWasPhysical = ctx.damageTakenCategory == Category::Physical;
 
-		const auto* lastMove = ctx.defendingPokemon->GetLastUsedMove();
-		const bool lastWasPhysical = lastMove && lastMove->GetCategoryEnum() == Category::Physical;
-
-		bool fail = ctx.attackingPlayer->IsFirst() || counterDamage == 0 || !lastWasPhysical || ctx.flags.hitSubstitute;
+		bool fail = ctx.attackingPlayer->IsFirst() || counterDamage == 0 || !lastWasPhysical;
 
 		if (fail)
 		{

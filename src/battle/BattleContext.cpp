@@ -61,6 +61,7 @@ void BattleContext::ResetBattleState()
     battleTurn = 0;
 
     damageTaken = 0;
+    damageTakenCategory = Category::None;
 
     pixelsLost = 0;
     prevPixels = 400;

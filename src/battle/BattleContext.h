@@ -66,7 +66,9 @@ struct BattleContext
     int battleTurn{ 0 };
 
     unsigned int lastDamageApplied{};
+
     unsigned int damageTaken{};
+    Category damageTakenCategory{ Category::None };
 
     unsigned int pixelsLost{};
     unsigned int prevPixels{ 400 };

@@ -339,6 +339,7 @@ void BattleCalculations::ApplyDamage(const pokemonMove& currentMove, BattlePokem
 	{
 		target.DamageCurrentHP(damage);
 		m_context.damageTaken = damage;
+		m_context.damageTakenCategory = currentMove.GetCategoryEnum();
 		unsigned int newPixel = target.GetCurrentHP() * HP_BAR_WIDTH / target.GetMaxHP();
 		m_context.pixelsLost = currentPixel - newPixel;
 		m_context.damageInPixels = m_context.prevPixels - newPixel;

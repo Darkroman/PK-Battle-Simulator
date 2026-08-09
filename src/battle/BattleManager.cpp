@@ -14,6 +14,7 @@
 #include "../ui/interfaces/IOutputTarget.h"
 #include "../ui/EffectivenessText.h"
 #include "../ui/BattleUIEventQueue.h"
+#include "../data/StringToTypes.h"
 #include "../entities/PlayerDecisionOutcome.h"
 #include "../entities/BattlePokemon.h"
 #include "../entities/Player.h"
@@ -568,6 +569,7 @@ void BattleManager::ResolveSwitchDecisions(bool playerOneNeedsSwitch, bool playe
 BattleState BattleManager::Cleanup()
 {
 	m_context.damageTaken = 0;
+	m_context.damageTakenCategory = Category::None;
 
 	m_context.ResetTurnState();
 
@@ -651,6 +653,7 @@ bool BattleManager::RunBattleSimulation()
 		m_postTurnProcessor.ProcessPostKOSwitches();
 
 		m_context.damageTaken = 0;
+		m_context.damageTakenCategory = Category::None;
 
 		m_context.ResetTurnState();
 	}
