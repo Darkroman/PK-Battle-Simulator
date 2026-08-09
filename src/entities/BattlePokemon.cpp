@@ -59,6 +59,8 @@ void BattlePokemon::DetransformData::BackupOriginalPokemonData(BattlePokemon* po
     m_specialdefense_ev = pokemon->GetSpecialDefenseEV();
     m_speed_ev = pokemon->GetSpeedEV();
 
+    b_hasFocusEnergy = pokemon->HasFocusEnergy();
+
     m_moveCount = pokemon->GetMoveCount();
 
     m_ev_total = pokemon->GetTotalEVs();
@@ -1356,6 +1358,8 @@ void BattlePokemon::SetTransformation(BattlePokemon* pokemon)
     m_specialdefense_ev = pokemon->GetSpecialDefenseEV();
     m_speed_ev = pokemon->GetSpeedEV();
 
+    b_hasFocusEnergy = pokemon->HasFocusEnergy();
+    
     b_transformBurnPenalty = (GetStatus() == Status::Burned);
     b_transformParalysisPenalty = (GetStatus() == Status::Paralyzed);
 
@@ -1402,6 +1406,8 @@ void BattlePokemon::Detransform()
     m_specialattack_ev = m_detransformData.m_specialattack_ev;
     m_specialdefense_ev = m_detransformData.m_specialdefense_ev;
     m_speed_ev = m_detransformData.m_speed_ev;
+
+    b_hasFocusEnergy = m_detransformData.b_hasFocusEnergy;
 
     b_transformBurnPenalty = false;
     b_transformParalysisPenalty = false;

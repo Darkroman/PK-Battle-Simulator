@@ -134,28 +134,18 @@ void DamageRoutine(MoveRoutineDeps& deps)
 	TryDamageReactions(deps);
 }
 
-void OHKODamageRoutine(MoveRoutineDeps& deps)
+void IncreasedCriticalHitRoutine(MoveRoutineDeps& deps)
 {
 	auto& ctx = deps.context;
-	auto& calc = deps.calculations;
-	auto& resultsUI = deps.resultsUI;
 
-	bool hitSubstitute = ctx.defendingPokemon->HasSubstitute() && !ctx.currentMove->CanBypassSubstitute();
+	unsigned int oldCritStage = ctx.attackingPokemon->GetCriticalHitStage();
+	unsigned int newCritStage = oldCritStage + 1;
 
-	unsigned int damage = hitSubstitute	? ctx.defendingPokemon->GetSubstituteHP() : ctx.defendingPokemon->GetCurrentHP();
+	ctx.attackingPokemon->SetCriticalHitStage(newCritStage);
 
-	calc.ApplyDamage(*ctx.currentMove, *ctx.defendingPokemon, damage);
+	DamageRoutine(deps);
 
-	if (ctx.flags.hitSubstitute)
-	{
-		resultsUI.DisplaySubstituteDamageTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ctx.defendingPokemon->GetSubstituteHP(), ctx.defendingPokemon->HasSubstitute(), ctx.flags.hitSubstitute);
-	}
-	else
-	{
-		resultsUI.DisplayOHKOTextDialog();
-
-		TryDamageReactions(deps);
-	}
+	ctx.attackingPokemon->SetCriticalHitStage(oldCritStage);
 }
 
 void MultiStrikeRoutine(MoveRoutineDeps& deps, int turnCount)
@@ -198,6 +188,30 @@ void MultiStrikeRoutine(MoveRoutineDeps& deps, int turnCount)
 	}
 
 	deps.resultsUI.DisplayDirectDamageInflictedMsg(totalDamage);
+}
+
+void OHKODamageRoutine(MoveRoutineDeps& deps)
+{
+	auto& ctx = deps.context;
+	auto& calc = deps.calculations;
+	auto& resultsUI = deps.resultsUI;
+
+	bool hitSubstitute = ctx.defendingPokemon->HasSubstitute() && !ctx.currentMove->CanBypassSubstitute();
+
+	unsigned int damage = hitSubstitute ? ctx.defendingPokemon->GetSubstituteHP() : ctx.defendingPokemon->GetCurrentHP();
+
+	calc.ApplyDamage(*ctx.currentMove, *ctx.defendingPokemon, damage);
+
+	if (ctx.flags.hitSubstitute)
+	{
+		resultsUI.DisplaySubstituteDamageTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ctx.defendingPokemon->GetSubstituteHP(), ctx.defendingPokemon->HasSubstitute(), ctx.flags.hitSubstitute);
+	}
+	else
+	{
+		resultsUI.DisplayOHKOTextDialog();
+
+		TryDamageReactions(deps);
+	}
 }
 
 void FixedDamageRoutine(MoveRoutineDeps& deps, unsigned int fixedDamage)

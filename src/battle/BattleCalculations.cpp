@@ -82,13 +82,17 @@ void BattleCalculations::SetFirst(Player& first, Player& second)
 bool BattleCalculations::CalculateCriticalHit(BattleContext& ctx, const BattlePokemon& source)
 {
 	int stage = source.GetCriticalHitStage();
-	if (stage > 3) stage = 3;
 
-	int threshold = m_arr_CriticalHitStageThresholds[stage];
-	
-	int roll{ m_rng.GetCritRoll() };
-
-	ctx.flags.isCriticalHit = (roll < threshold);
+	if (stage >= 3)
+	{
+		ctx.flags.isCriticalHit = true;
+	}
+	else
+	{
+		int threshold = m_arr_CriticalHitStageThresholds[stage];
+		int roll{ m_rng.GetCritRoll() };
+		ctx.flags.isCriticalHit = (roll < threshold);
+	}
 
 	return ctx.flags.isCriticalHit;
 }

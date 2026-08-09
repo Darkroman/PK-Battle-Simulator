@@ -206,14 +206,7 @@ namespace MoveRoutines
 			return;
 		}
 
-		unsigned int oldCritStage = ctx.attackingPokemon->GetCriticalHitStage();
-		unsigned int newCritStage = oldCritStage + 1;
-
-		ctx.attackingPokemon->SetCriticalHitStage(newCritStage);
-
-		DamageRoutine(deps);
-
-		ctx.attackingPokemon->SetCriticalHitStage(oldCritStage);
+		IncreasedCriticalHitRoutine(deps);
 
 		deps.statusProcessor.CheckSubstituteCondition(ctx.defendingPlayer, ctx.defendingPokemon);
 		deps.statusProcessor.CheckFaintCondition(*ctx.attackingPlayer, *ctx.defendingPlayer, *ctx.attackingPokemon, *ctx.defendingPokemon);
@@ -458,14 +451,7 @@ namespace MoveRoutines
 			return;
 		}
 
-		unsigned int oldCritStage = ctx.attackingPokemon->GetCriticalHitStage();
-		unsigned int newCritStage = oldCritStage + 1;
-
-		ctx.attackingPokemon->SetCriticalHitStage(newCritStage);
-
-		DamageRoutine(deps);
-
-		ctx.attackingPokemon->SetCriticalHitStage(oldCritStage);
+		IncreasedCriticalHitRoutine(deps);
 
 		deps.statusProcessor.CheckSubstituteCondition(ctx.defendingPlayer, ctx.defendingPokemon);
 		deps.statusProcessor.CheckFaintCondition(*ctx.attackingPlayer, *ctx.defendingPlayer, *ctx.attackingPokemon, *ctx.defendingPokemon);
@@ -2757,8 +2743,10 @@ namespace MoveRoutines
 		}
 		else
 		{
+			int newCritStage = ctx.attackingPokemon->GetCriticalHitStage() + 2;
+
 			ctx.attackingPokemon->SetFocusEnergy(true);
-			ctx.attackingPokemon->SetCriticalHitStage(2);
+			ctx.attackingPokemon->SetCriticalHitStage(newCritStage);
 			deps.resultsUI.DisplayFocusEnergyMsg(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView());
 		}
 	}
@@ -3221,14 +3209,7 @@ namespace MoveRoutines
 			return;
 		}
 
-		unsigned int oldCritStage = ctx.attackingPokemon->GetCriticalHitStage();
-		unsigned int newCritStage = oldCritStage + 1;
-
-		ctx.attackingPokemon->SetCriticalHitStage(newCritStage);
-
-		DamageRoutine(deps);
-
-		ctx.attackingPokemon->SetCriticalHitStage(oldCritStage);
+		IncreasedCriticalHitRoutine(deps);
 
 		deps.statusProcessor.CheckSubstituteCondition(ctx.defendingPlayer, ctx.defendingPokemon);
 		deps.statusProcessor.CheckFaintCondition(*ctx.attackingPlayer, *ctx.defendingPlayer, *ctx.attackingPokemon, *ctx.defendingPokemon);

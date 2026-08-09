@@ -53,6 +53,8 @@ public:
         unsigned int m_specialdefense_ev{ 0 };
         unsigned int m_speed_ev{ 0 };
 
+        bool b_hasFocusEnergy{ false };
+
         unsigned int m_moveCount{ 0 };
 
         unsigned int m_ev_total{ 0 };
