@@ -56,8 +56,6 @@ public:
         bool b_hasFocusEnergy{ false };
 
         unsigned int m_moveCount{ 0 };
-
-        unsigned int m_ev_total{ 0 };
     };
 
 public:
@@ -107,9 +105,8 @@ public:
     unsigned int GetSpeedIV() const;
 
 private:
-
     void UpdateStats();
-
+    void UpdateStatsTransform();
 public:
 
     const std::string& GetPokemonName() const;
@@ -337,7 +334,14 @@ private:
     int m_evasionstage{ 6 };
     int m_accuracystage{ 6 };
     int m_criticalhitstage{ 0 };
-
+    
+    unsigned int m_maxHP{};
+    unsigned int m_attack{};
+    unsigned int m_defense{};
+    unsigned int m_specialAttack{};
+    unsigned int m_specialDefense{};
+    unsigned int m_speed{};
+    
     unsigned int m_hp_iv{ 31 };
     unsigned int m_attack_iv{ 31 };
     unsigned int m_defense_iv{ 31 };
@@ -374,6 +378,8 @@ private:
     unsigned int m_bideDamageTaken{ 0 };
     unsigned int m_bideCounter{ 0 };
     unsigned int m_bideTurnCount{ 0 };
+
+    unsigned int m_transformeeLevel{ 0 };
 
     unsigned int m_moveCount{ 0 };
 
@@ -420,8 +426,6 @@ private:
     bool b_usedMimic{ false };
 
     bool b_isTransformed{ false };
-    bool b_transformBurnPenalty{ false };
-    bool b_transformParalysisPenalty{ false };
 
     DetransformData m_detransformData;
 };

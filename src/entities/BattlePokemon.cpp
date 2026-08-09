@@ -62,8 +62,6 @@ void BattlePokemon::DetransformData::BackupOriginalPokemonData(BattlePokemon* po
     b_hasFocusEnergy = pokemon->HasFocusEnergy();
 
     m_moveCount = pokemon->GetMoveCount();
-
-    m_ev_total = pokemon->GetTotalEVs();
 }
 
 const Pokemon* BattlePokemon::GetPokemonDatabasePointer() const
@@ -539,13 +537,24 @@ bool BattlePokemon::ExceedsMaxAllowedEVs(unsigned int ev_total_temp)
 
 void BattlePokemon::UpdateStats()
 {
-    //m_maxHP = ((m_hp_iv + 2 * mp_pokemon->GetBaseHP() + (m_hp_ev / 4)) * m_level / 100) + 10 + m_level;
+    m_maxHP = ((m_hp_iv + 2 * mp_pokemon->GetBaseHP() + (m_hp_ev / 4)) * m_level / 100) + 10 + m_level;
     m_currentHP = GetMaxHP();
-    //m_attack = (((m_attack_iv + 2 * mp_pokemon->GetBaseAttack() + (m_attack_ev / 4)) * m_level / 100) + 5);
-    //m_defense = (((m_defense_iv + 2 * mp_pokemon->GetBaseDefense() + (m_defense_ev / 4)) * m_level / 100) + 5);
-    //m_specialattack = (((m_specialattack_iv + 2 * mp_pokemon->GetBaseSpecialAttack() + (m_specialattack_ev / 4)) * m_level / 100) + 5);
-    //m_specialdefense = (((m_specialdefense_iv + 2 * mp_pokemon->GetBaseSpecialDefense() + (m_specialdefense_ev / 4)) * m_level / 100) + 5);
-    //m_speed = (((m_speed_iv + 2 * mp_pokemon->GetBaseSpeed() + (m_speed_ev / 4)) * m_level / 100) + 5);
+    m_attack = (((m_attack_iv + 2 * mp_pokemon->GetBaseAttack() + (m_attack_ev / 4)) * m_level / 100) + 5);
+    m_defense = (((m_defense_iv + 2 * mp_pokemon->GetBaseDefense() + (m_defense_ev / 4)) * m_level / 100) + 5);
+    m_specialAttack = (((m_specialattack_iv + 2 * mp_pokemon->GetBaseSpecialAttack() + (m_specialattack_ev / 4)) * m_level / 100) + 5);
+    m_specialDefense = (((m_specialdefense_iv + 2 * mp_pokemon->GetBaseSpecialDefense() + (m_specialdefense_ev / 4)) * m_level / 100) + 5);
+    m_speed = (((m_speed_iv + 2 * mp_pokemon->GetBaseSpeed() + (m_speed_ev / 4)) * m_level / 100) + 5);
+}
+
+void BattlePokemon::UpdateStatsTransform()
+{
+    const unsigned int statLevel = b_isTransformed ? m_transformeeLevel : m_level;
+
+    m_attack = (((m_attack_iv + 2 * mp_pokemon->GetBaseAttack() + (m_attack_ev / 4)) * statLevel / 100) + 5);
+    m_defense = (((m_defense_iv + 2 * mp_pokemon->GetBaseDefense() + (m_defense_ev / 4)) * statLevel / 100) + 5);
+    m_specialAttack = (((m_specialattack_iv + 2 * mp_pokemon->GetBaseSpecialAttack() + (m_specialattack_ev / 4)) * statLevel / 100) + 5);
+    m_specialDefense = (((m_specialdefense_iv + 2 * mp_pokemon->GetBaseSpecialDefense() + (m_specialdefense_ev / 4)) * statLevel / 100) + 5);
+    m_speed = (((m_speed_iv + 2 * mp_pokemon->GetBaseSpeed() + (m_speed_ev / 4)) * statLevel / 100) + 5);
 }
 
 const std::string& BattlePokemon::GetPokemonName() const
@@ -701,49 +710,32 @@ unsigned int BattlePokemon::GetCurrentHP() const
 
 unsigned int BattlePokemon::GetMaxHP() const
 {
-    if (b_isTransformed == true)
-    {
-        return ((m_hp_iv + 2 * m_detransformData.mp_pokemon->GetBaseHP() + (m_hp_ev / 4)) * m_level / 100) + 10 + m_level;
-    }
-    else
-    {
-        return ((m_hp_iv + 2 * mp_pokemon->GetBaseHP() + (m_hp_ev / 4)) * m_level / 100) + 10 + m_level;
-    }
+    return m_maxHP;
 }
 
 unsigned int BattlePokemon::GetAttack() const
 {
-    if (b_isTransformed && b_transformBurnPenalty && currentStatus != Status::Burned)
-    {
-        return (((m_attack_iv + 2 * mp_pokemon->GetBaseAttack() + (m_attack_ev / 4)) * m_level / 100) + 5) / 2;
-    }
-
-    return (((m_attack_iv + 2 * mp_pokemon->GetBaseAttack() + (m_attack_ev / 4)) * m_level / 100) + 5);
+    return m_attack;
 }
 
 unsigned int BattlePokemon::GetDefense() const
 {
-    return  (((m_defense_iv + 2 * mp_pokemon->GetBaseDefense() + (m_defense_ev / 4)) * m_level / 100) + 5);
+    return m_defense;
 }
 
 unsigned int BattlePokemon::GetSpecialAttack() const
 {
-    return (((m_specialattack_iv + 2 * mp_pokemon->GetBaseSpecialAttack() + (m_specialattack_ev / 4)) * m_level / 100) + 5);
+    return m_specialAttack;
 }
 
 unsigned int BattlePokemon::GetSpecialDefense() const
 {
-    return (((m_specialdefense_iv + 2 * mp_pokemon->GetBaseSpecialDefense() + (m_specialdefense_ev / 4)) * m_level / 100) + 5);
+    return m_specialDefense;
 }
 
 unsigned int BattlePokemon::GetSpeed() const
 {
-    if (b_isTransformed && b_transformParalysisPenalty && currentStatus != Status::Paralyzed)
-    {
-        return (((m_speed_iv + 2 * mp_pokemon->GetBaseSpeed() + (m_speed_ev / 4)) * m_level / 100) + 5) / 2;
-    }
-
-    return (((m_speed_iv + 2 * mp_pokemon->GetBaseSpeed() + (m_speed_ev / 4)) * m_level / 100) + 5);
+    return m_speed;
 }
 
 void BattlePokemon::DamageCurrentHP(unsigned int damage)
@@ -1332,6 +1324,8 @@ void BattlePokemon::SetTransformation(BattlePokemon* pokemon)
         }
     }
 
+    m_transformeeLevel = pokemon->GetLevel();
+
     mp_pokemon = pokemon->mp_pokemon;
 
     m_type1e = pokemon->GetTypeOneEnum();
@@ -1359,15 +1353,12 @@ void BattlePokemon::SetTransformation(BattlePokemon* pokemon)
     m_speed_ev = pokemon->GetSpeedEV();
 
     b_hasFocusEnergy = pokemon->HasFocusEnergy();
-    
-    b_transformBurnPenalty = (GetStatus() == Status::Burned);
-    b_transformParalysisPenalty = (GetStatus() == Status::Paralyzed);
 
     m_moveCount = pokemon->GetMoveCount();
 
-    m_ev_total = pokemon->GetTotalEVs();
-
     b_isTransformed = true;
+
+    UpdateStatsTransform();
 }
 
 void BattlePokemon::Detransform()
@@ -1380,6 +1371,8 @@ void BattlePokemon::Detransform()
         m_array_moves[i].b_isDisabled = m_detransformData.m_array_moves[i].b_isDisabled;
         m_array_moves[i].b_isMimicked = m_detransformData.m_array_moves[i].b_isMimicked;
     }
+
+    m_transformeeLevel = 0;
 
     mp_pokemon = m_detransformData.mp_pokemon;
 
@@ -1409,14 +1402,11 @@ void BattlePokemon::Detransform()
 
     b_hasFocusEnergy = m_detransformData.b_hasFocusEnergy;
 
-    b_transformBurnPenalty = false;
-    b_transformParalysisPenalty = false;
-
     m_moveCount = m_detransformData.m_moveCount;
 
-    m_ev_total = m_detransformData.m_ev_total;
-
     this->b_isTransformed = false;
+
+    UpdateStatsTransform();
 }
 
 bool BattlePokemon::IsConverted() const
