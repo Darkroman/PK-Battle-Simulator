@@ -29,7 +29,7 @@ void FlinchRoutine(MoveRoutineDeps&);
 
 void RecoilRoutine(MoveRoutineDeps& deps, unsigned int recoilDivisor);
 
-void TryDamageReactions(MoveRoutineDeps& deps);
+void ExecuteOnHitReactions(MoveRoutineDeps& deps);
 
 void ProcessRage(MoveRoutineDeps& deps);
 

@@ -1418,6 +1418,7 @@ namespace MoveRoutines
 
 		deps.resultsUI.DisplayMoveDisabledMsg(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ctx.defendingPokemon->GetLastUsedMove()->GetName());
 
+		ExecuteOnHitReactions(deps);
 	}
 
 	void SpecialDefenseDownHit(MoveRoutineDeps& deps)
@@ -3472,7 +3473,7 @@ namespace MoveRoutines
 		deps.calculations.ApplyDamage(*ctx.currentMove, *ctx.defendingPokemon, finalDamage);
 		deps.resultsUI.DisplaySubstituteDamageTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ctx.defendingPokemon->GetSubstituteHP(), ctx.defendingPokemon->HasSubstitute(), ctx.flags.hitSubstitute);
 
-		TryDamageReactions(deps);
+		ExecuteOnHitReactions(deps);
 
 		deps.statusProcessor.CheckSubstituteCondition(ctx.defendingPlayer, ctx.defendingPokemon);
 		deps.statusProcessor.CheckFaintCondition(*ctx.attackingPlayer, *ctx.defendingPlayer, *ctx.attackingPokemon, *ctx.defendingPokemon);

@@ -131,7 +131,7 @@ void DamageRoutine(MoveRoutineDeps& deps)
 	resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.flags.currentEffectiveness));
 	resultsUI.DisplaySubstituteDamageTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ctx.defendingPokemon->GetSubstituteHP(), ctx.defendingPokemon->HasSubstitute(), ctx.flags.hitSubstitute);
 
-	TryDamageReactions(deps);
+	ExecuteOnHitReactions(deps);
 }
 
 void IncreasedCriticalHitRoutine(MoveRoutineDeps& deps)
@@ -165,7 +165,7 @@ void MultiStrikeRoutine(MoveRoutineDeps& deps, int turnCount)
 		deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.flags.currentEffectiveness));
 		deps.resultsUI.DisplaySubstituteDamageTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ctx.defendingPokemon->GetSubstituteHP(), ctx.defendingPokemon->HasSubstitute(), ctx.flags.hitSubstitute);
 
-		TryDamageReactions(deps);
+		ExecuteOnHitReactions(deps);
 
 		deps.statusProcessor.CheckSubstituteCondition(ctx.defendingPlayer, ctx.defendingPokemon);
 
@@ -210,7 +210,7 @@ void OHKODamageRoutine(MoveRoutineDeps& deps)
 	{
 		resultsUI.DisplayOHKOTextDialog();
 
-		TryDamageReactions(deps);
+		ExecuteOnHitReactions(deps);
 	}
 }
 
@@ -228,7 +228,7 @@ void FixedDamageRoutine(MoveRoutineDeps& deps, unsigned int fixedDamage)
 	deps.resultsUI.DisplayDirectDamageInflictedMsg(fixedDamage);
 	deps.resultsUI.DisplaySubstituteDamageTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ctx.defendingPokemon->GetSubstituteHP(), ctx.defendingPokemon->HasSubstitute(), ctx.flags.hitSubstitute);
 
-	TryDamageReactions(deps);
+	ExecuteOnHitReactions(deps);
 }
 
 void FlinchRoutine(MoveRoutineDeps& deps)
@@ -393,7 +393,7 @@ void DisplayStatChange(IMoveResultsUI& ui, int amount, bool isUp, std::string_vi
 	}
 }
 
-void TryDamageReactions(MoveRoutineDeps& deps)
+void ExecuteOnHitReactions(MoveRoutineDeps& deps)
 {
 	ProcessRage(deps);
 }
