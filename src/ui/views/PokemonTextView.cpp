@@ -562,8 +562,21 @@ namespace PokemonTextView
 
         if (currentMove.GetMoveEffectEnum() == MoveEffect::Conversion)
         {
-            if (selfMon.GetTypeOneEnum() == currentMove.GetMoveTypeEnum() ||
-                selfMon.GetTypeTwoEnum() == currentMove.GetMoveTypeEnum() ||
+            PokemonType firstAvailableMoveSlotType{};
+
+            for (const auto& move : selfMon.GetMoveArray())
+            {
+                if (move.GetMovePointer() == nullptr)
+                {
+                    continue;
+                }
+
+                firstAvailableMoveSlotType = move.GetMoveTypeEnum();
+                break;
+            }
+
+            if ((selfMon.GetTypeOneEnum() == firstAvailableMoveSlotType &&
+                selfMon.GetTypeTwoEnum() == currentMove.GetMoveTypeEnum()) ||
                 selfMon.IsConverted())
             {
                 return "Ineffective";

@@ -21,8 +21,11 @@ void BattleStateFlags::ResetBattleFlags()
 
 void BattleContext::ResetTurnState()
 {
+    lastDamageApplied = 0;
     pixelsLost = 0;
+
     initialPowerMultiplier = 10;
+
     effectiveness = 4096;
 
     flags.ResetBattleFlags();

@@ -336,14 +336,10 @@ void BattleCalculations::ApplyDamage(const pokemonMove& currentMove, BattlePokem
 {
 	const unsigned int HP_BAR_WIDTH = m_context.HP_BAR_WIDTH;
 
-	if (damage == 0)
-	{
-		return;
-	}
-
 	bool hitSubstitute = target.HasSubstitute() && !currentMove.CanBypassSubstitute();
 	m_context.flags.hitSubstitute = hitSubstitute;
 	damage = (hitSubstitute ? std::min(damage, target.GetSubstituteHP()) : std::min(damage, target.GetCurrentHP()));
+	m_context.lastDamageApplied = damage;
 
 	unsigned int currentPixel = target.GetCurrentHP() * HP_BAR_WIDTH / target.GetMaxHP();
 	m_context.prevPixels = currentPixel;

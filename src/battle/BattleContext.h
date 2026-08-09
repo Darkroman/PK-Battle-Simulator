@@ -59,6 +59,7 @@ struct BattleContext
 
     int battleTurn{ 0 };
 
+    unsigned int lastDamageApplied{};
     unsigned int damageTaken{};
 
     unsigned int pixelsLost{};

@@ -1823,7 +1823,7 @@ namespace MoveRoutines
 
 		DamageRoutine(deps);
 
-		unsigned int leechedHealth{ ctx.damageTaken / 2 };
+		unsigned int leechedHealth{ ctx.lastDamageApplied / 2 };
 
 		unsigned int finalLeech = std::min(std::max(1u, leechedHealth), ctx.attackingPokemon->GetMaxHP() - ctx.attackingPokemon->GetCurrentHP());
 
@@ -3369,7 +3369,6 @@ namespace MoveRoutines
 			
 			firstAvailableMoveSlotType = move.GetMoveTypeEnum();
 			break;
-			
 		}
 
 		if ((ctx.attackingPokemon->GetTypeOneEnum() == firstAvailableMoveSlotType &&
