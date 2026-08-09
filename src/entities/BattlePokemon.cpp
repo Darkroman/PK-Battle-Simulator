@@ -635,17 +635,13 @@ bool BattlePokemon::WillPerformStruggle() const
 
     for (const auto& move : m_array_moves)
     {
-        if (!move.IsActive())
+        if (move.IsActive())
         {
-            ++inactiveCount;
+            return false;
         }
     }
 
-    if (inactiveCount >= m_array_moves.size())
-    {
-        return true;
-    }
-    return false;
+    return true;
 }
 
 bool BattlePokemon::HasPokemon() const

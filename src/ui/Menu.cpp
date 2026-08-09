@@ -2300,16 +2300,16 @@ void Menu::SetDefaultPokemon()
 
 	if (players[0]->GetBelt(1).GetCurrentHP() != 0)
 	{
-		players[0]->GetBelt(1).SetMove(1, "Metronome");
-		players[0]->GetBelt(1).SetMove(2, "Tackle");
+		players[0]->GetBelt(1).SetMove(1, "Recover");
+		//players[0]->GetBelt(1).SetMove(2, "Tackle");
 		//players[0]->GetBelt(1).SetMove(3, "Quick Attack");
 		//players[0]->GetBelt(1).SetMove(4, "Bite");
 		//players[0]->GetBelt(2).SetMove(1, "Surf");
 		//players[0]->GetBelt(2).SetMove(2, "Mega Drain");
 		//players[0]->GetBelt(2).SetMove(3, "Quick Attack");
 		//players[0]->GetBelt(2).SetMove(4, "Bite");
-		players[1]->GetBelt(1).SetMove(1, "Mirror Move");
-		players[1]->GetBelt(1).SetMove(2, "Tackle");
+		players[1]->GetBelt(1).SetMove(1, "Recover");
+		//players[1]->GetBelt(1).SetMove(2, "Tackle");
 		//players[1]->GetBelt(1).SetMove(3, "Quick Attack");
 		//players[1]->GetBelt(1).SetMove(4, "Bite");
 		//players[1]->GetBelt(2).SetMove(1, "Surf");
@@ -2318,7 +2318,7 @@ void Menu::SetDefaultPokemon()
 		//players[1]->GetBelt(2).SetMove(4, "Bite");
 
 		players[0]->GetBelt(1).IncrementMoveCount();
-		players[0]->GetBelt(1).IncrementMoveCount();
+		//players[0]->GetBelt(1).IncrementMoveCount();
 		//players[0]->GetBelt(1).IncrementMoveCount();
 		//players[0]->GetBelt(1).IncrementMoveCount();
 		//players[0]->GetBelt(2).IncrementMoveCount();
@@ -2326,7 +2326,7 @@ void Menu::SetDefaultPokemon()
 		//players[0]->GetBelt(2).IncrementMoveCount();
 		//players[0]->GetBelt(2).IncrementMoveCount();
 		players[1]->GetBelt(1).IncrementMoveCount();
-		players[1]->GetBelt(1).IncrementMoveCount();
+		//players[1]->GetBelt(1).IncrementMoveCount();
 		//players[1]->GetBelt(1).IncrementMoveCount();
 		//players[1]->GetBelt(1).IncrementMoveCount();
 		//players[1]->GetBelt(2).IncrementMoveCount();
@@ -2345,7 +2345,7 @@ void Menu::SetDefaultPokemon()
 		//players[0]->GetBelt(1).SetAttackIV(31);
 		//players[0]->GetBelt(1).SetDefenseIV(31);
 		//players[0]->GetBelt(1).SetSpecialDefenseIV(31);
-		players[0]->GetBelt(1).SetSpeedIV(30);
+		players[0]->GetBelt(1).SetSpeedIV(31);
 
 		//players[1]->GetBelt(1).SetHPEV(252);
 		//players[1]->GetBelt(1).SetAttackEV(252);

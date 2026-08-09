@@ -58,17 +58,6 @@ PlayerDecisionOutcome AIController::ChooseAction(Player& player, const Player& t
 
 	m_decisionOutcome.chosenMove = FightAction(player, targetPlayer, selfMon, targetMon, rng);
 
-	/*
-	if (m_decisionOutcome.chosenMove == &GetStruggle())
-	{
-		m_decisionOutcome.action = BattleAction::Struggle;
-	}
-	else
-	{
-		m_decisionOutcome.action = BattleAction::Fight;
-	}
-	*/
-
 	m_decisionOutcome.action = BattleAction::Fight;
 
 	return m_decisionOutcome;
