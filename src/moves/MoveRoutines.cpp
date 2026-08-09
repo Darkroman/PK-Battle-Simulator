@@ -1405,7 +1405,7 @@ namespace MoveRoutines
 		auto* lastUsed = ctx.defendingPokemon->GetLastUsedMove();
 
 		if (lastUsed ==	nullptr ||
-			!ctx.defendingPokemon->MoveIsDisabled() ||
+			ctx.defendingPokemon->MoveIsDisabled() ||
 			lastUsed->m_currentPP <= 0 ||
 			lastUsed->GetMoveEffectEnum() == MoveEffect::Struggle)
 		{
