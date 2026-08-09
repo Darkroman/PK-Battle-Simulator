@@ -1,6 +1,6 @@
 #pragma once
 
-enum class PokemonID : unsigned int
+enum class PokemonID
 {
 	None = 0,
 	Bulbasaur = 1,

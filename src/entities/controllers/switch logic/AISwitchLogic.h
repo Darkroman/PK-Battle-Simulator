@@ -23,7 +23,7 @@ namespace AISwitchLogic
 
 	bool IsMoveNotVeryEffective(const Player&, const pokemonMove&, const BattlePokemon&);
 
-	bool isStatusMoveEffective(const Player&, const pokemonMove&, const BattlePokemon&);
+	bool IsStatusMoveEffective(const Player&, const Player&, const pokemonMove&, const BattlePokemon&, const BattlePokemon&);
 
 	unsigned int PokemonTypeEffectiveness(const Player& self, const BattlePokemon& source, const BattlePokemon& target);
 }

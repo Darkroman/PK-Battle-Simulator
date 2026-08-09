@@ -5,20 +5,24 @@
 #include "RandomEngine.h"
 
 RandomEngine::RandomEngine()
-	: seed(static_cast<unsigned int>(std::chrono::system_clock::now().time_since_epoch().count())),
+	:
+	seed(12345),
+	//seed(static_cast<unsigned int>(std::chrono::system_clock::now().time_since_epoch().count())),
 	generator(seed)
 {
 
 }
 
 RandomEngine::RandomEngine(int t)
-	: seed(static_cast<unsigned int>(std::chrono::system_clock::now().time_since_epoch().count() + t)),
+	:
+	seed(12345),
+	//seed(static_cast<unsigned int>(std::chrono::system_clock::now().time_since_epoch().count())),
 	generator(seed)
 {
 
 }
 
-void RandomEngine::Call()
+void RandomEngine::Call() const
 {
 	std::cout << "RNG called.\n";
 }
@@ -30,7 +34,7 @@ std::mt19937& RandomEngine::GetGenerator()
 	return generator;
 }
 
-void RandomEngine::GetCallAmount()
+void RandomEngine::GetCallAmount() const
 {
 	std::cout << "RNG Calls: " << rng_calls << '\n';
 }

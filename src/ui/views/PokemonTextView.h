@@ -16,11 +16,11 @@ namespace PokemonTextView
     void DisplayLearnableMoves(const BattlePokemon&);
     void DisplayLearnedMoves(const BattlePokemon&);
     void DisplayLearnedMovesExpanded(const BattlePokemon&);
-    void DisplayMovesInBattle(const BattlePokemon&, const BattlePokemon&);
+    void DisplayMovesInBattle(const Player&, const Player&, const BattlePokemon&, const BattlePokemon&);
 
     void DisplayPlayerPokemon(const Player&);
     std::string_view DisplayPokemonStatus(const BattlePokemon&);
 
-    std::string_view CalculateStatusMoveEffectiveness(const BattlePokemon&, const pokemonMove&);
+    std::string_view CalculateStatusMoveEffectiveness(const Player&, const Player&, const BattlePokemon&, const BattlePokemon&, const pokemonMove&);
     std::string_view CalculateDamageMoveEffectiveness(const BattlePokemon&, const pokemonMove&);
 }

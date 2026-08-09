@@ -1,9 +1,9 @@
+#include <algorithm>
 #include <iostream>
 #include <iomanip>
 #include <ios>
 #include <format>
 #include <string_view>
-#include <cstdint>
 
 #include "PokemonTextView.h"
 
@@ -168,7 +168,7 @@ namespace PokemonTextView
                     << std::left << "- Type: " << std::setw(9) << move.GetMoveType()
                     << std::left << "- Category: " << std::setw(9) << move.GetCategory()
                     << '\n';
-                
+
             }
             else
             {
@@ -177,7 +177,7 @@ namespace PokemonTextView
         }
     }
 
-    void DisplayMovesInBattle(const BattlePokemon& pokemon, const BattlePokemon& target)
+    void DisplayMovesInBattle(const Player& player, const Player& targetPlayer, const BattlePokemon& pokemon, const BattlePokemon& target)
     {
         for (size_t moveSlot = 1; moveSlot < 5; ++moveSlot)
         {
@@ -201,7 +201,7 @@ namespace PokemonTextView
                         << std::right << std::setw(2) << move.m_maxPP << ") "
                         << std::left << "- Type: " << std::setw(9) << move.GetMoveType()
                         << std::left << "- Category: " << std::setw(9) << move.GetCategory()
-                        << std::left << "- Effectiveness: " << std::setw(15) << (isStatus ? CalculateStatusMoveEffectiveness(target, move) : CalculateDamageMoveEffectiveness(target, move))
+                        << std::left << "- Effectiveness: " << std::setw(15) << (isStatus ? CalculateStatusMoveEffectiveness(player, targetPlayer, pokemon, target, move) : CalculateDamageMoveEffectiveness(target, move))
                         << '\n';
                 }
             }
@@ -249,29 +249,29 @@ namespace PokemonTextView
 
         switch (currentStatus)
         {
-            case Status::Burned:
-                return "BRN";
-                break;
+        case Status::Burned:
+            return "BRN";
+            break;
 
-            case Status::Frozen:
-                return "FRZ";
-                break;
+        case Status::Frozen:
+            return "FRZ";
+            break;
 
-            case Status::Paralyzed:
-                return "PAR";
-                break;
+        case Status::Paralyzed:
+            return "PAR";
+            break;
 
-            case Status::Poisoned:
-                return "PSN";
-                break;
+        case Status::Poisoned:
+            return "PSN";
+            break;
 
-            case Status::Badly_Poisoned:
-                return "BPSN";
-                break;
+        case Status::Badly_Poisoned:
+            return "BPSN";
+            break;
 
-            case Status::Sleeping:
-                return "SLP";
-                break;
+        case Status::Sleeping:
+            return "SLP";
+            break;
         }
 
         if (pokemon.IsFainted())
@@ -286,35 +286,291 @@ namespace PokemonTextView
         {
             return "NOR";
         }
-        
+
     }
 
-    std::string_view CalculateStatusMoveEffectiveness(const BattlePokemon& target, const pokemonMove& currentMove)
+    std::string_view CalculateStatusMoveEffectiveness(const Player& self, const Player& targetPlayer, const BattlePokemon& selfMon, const BattlePokemon& targetMon, const pokemonMove& currentMove)
     {
+        constexpr int MaxStage = 12;
+        constexpr int MinStage = 0;
+
+        int selfAttackStage = selfMon.GetAttackStage();
+        int selfDefenseStage = selfMon.GetDefenseStage();
+        int selfSpecialAttackStage = selfMon.GetSpecialAttackStage();
+        int selfSpecialDefenseStage = selfMon.GetSpecialDefenseStage();
+        int selfSpeedStage = selfMon.GetSpeedStage();
+        int selfEvasionStage = selfMon.GetEvasionStage();
+
+        if ((currentMove.GetMoveEffectEnum() == MoveEffect::AttackUp2 ||
+            currentMove.GetMoveEffectEnum() == MoveEffect::AttackUp) &&
+            selfAttackStage >= MaxStage)
+        {
+            return "Ineffective";
+        }
+
+        if ((currentMove.GetMoveEffectEnum() == MoveEffect::DefenseUp2 ||
+            currentMove.GetMoveEffectEnum() == MoveEffect::DefenseUp) &&
+            selfDefenseStage >= MaxStage)
+        {
+            return "Ineffective";
+        }
+
+        if (currentMove.GetMoveEffectEnum() == MoveEffect::Growth &&
+            selfAttackStage >= MaxStage && selfSpecialAttackStage >= MaxStage)
+        {
+            return "Ineffective";
+        }
+
+        if (currentMove.GetMoveEffectEnum() == MoveEffect::SpecialDefenseUp2 &&
+            selfSpecialDefenseStage >= MaxStage)
+        {
+            return "Ineffective";
+        }
+
+        if ((currentMove.GetMoveEffectEnum() == MoveEffect::EvasionUp ||
+            currentMove.GetMoveEffectEnum() == MoveEffect::Minimize) &&
+            selfEvasionStage >= MaxStage)
+        {
+            return "Ineffective";
+        }
+
+        if (currentMove.GetMoveEffectEnum() == MoveEffect::SpeedUp2 &&
+            selfSpeedStage >= MaxStage)
+        {
+            return "Ineffective";
+        }
+
+        if (currentMove.GetMoveEffectEnum() == MoveEffect::Splash)
+        {
+            return "Ineffective";
+        }
+
+        if (currentMove.GetMoveEffectEnum() == MoveEffect::Mist && self.HasMist())
+        {
+            return "Ineffective";
+        }
+
+        if (currentMove.GetMoveEffectEnum() == MoveEffect::Teleport && self.GetPokemonLeft() <= 1)
+        {
+            return "Ineffective";
+        }
+
+        if ((currentMove.GetMoveEffectEnum() == MoveEffect::HealHalfHP || currentMove.GetMoveEffectEnum() == MoveEffect::Rest) && selfMon.GetCurrentHP() == selfMon.GetMaxHP())
+        {
+            return "Ineffective";
+        }
+
+        if (currentMove.GetMoveEffectEnum() == MoveEffect::LightScreen && self.HasLightScreen())
+        {
+            return "Ineffective";
+        }
+
+        if (currentMove.GetMoveEffectEnum() == MoveEffect::Reflect && self.HasReflect())
+        {
+            return "Ineffective";
+        }
+
+        if (currentMove.GetMoveEffectEnum() == MoveEffect::FocusEnergy && selfMon.HasFocusEnergy())
+        {
+            return "Ineffective";
+        }
+
+        /*
+        if (currentMove.GetMoveEffectEnum() == MoveEffect::MirrorMove) // Leaving out last used move nullptr check on purpose because of turn order can vary
+        {
+            return "Ineffective";
+        }
+        */
+
+        if (currentMove.GetMoveEffectEnum() == MoveEffect::Rest && selfMon.GetStatus() == Status::Sleeping)
+        {
+            return "Ineffective";
+        }
+
+        unsigned int substituteCost = selfMon.GetMaxHP() / 4;
+        if (currentMove.GetMoveEffectEnum() == MoveEffect::Substitute && (selfMon.HasSubstitute() ||
+             selfMon.GetCurrentHP() <= substituteCost))
+        {
+            return "Ineffective";
+        }
+
+        bool isStatStageLoweringMove =
+            currentMove.GetMoveEffectEnum() == MoveEffect::AccuracyDown ||
+            currentMove.GetMoveEffectEnum() == MoveEffect::AttackDown ||
+            currentMove.GetMoveEffectEnum() == MoveEffect::DefenseDown2 ||
+            currentMove.GetMoveEffectEnum() == MoveEffect::DefenseDown ||
+            currentMove.GetMoveEffectEnum() == MoveEffect::SpeedDown2;
+
+        bool hasMist = targetPlayer.HasMist();
+
+        bool cannotBypassSubstitute = targetMon.HasSubstitute() && !currentMove.CanBypassSubstitute();
+
+        if (isStatStageLoweringMove && (hasMist || cannotBypassSubstitute))
+        {
+            return "Ineffective";
+        }
+
+        int targetAccuracyStage = targetMon.GetAccuracyStage();
+        int targetAttackStage = targetMon.GetAttackStage();
+        int targetDefenseStage = targetMon.GetDefenseStage();
+        int targetSpeedStage = targetMon.GetSpeedStage();
+
+        if (currentMove.GetMoveEffectEnum() == MoveEffect::AccuracyDown && targetAccuracyStage <= MinStage)
+        {
+            return "Ineffective";
+        }
+
+        if (currentMove.GetMoveEffectEnum() == MoveEffect::AttackDown && targetAttackStage <= MinStage)
+        {
+            return "Ineffective";
+        }
+
+        if ((currentMove.GetMoveEffectEnum() == MoveEffect::DefenseDown2 || currentMove.GetMoveEffectEnum() == MoveEffect::DefenseDown) && targetDefenseStage <= MinStage)
+        {
+            return "Ineffective";
+        }
+
+        if (currentMove.GetMoveEffectEnum() == MoveEffect::SpeedDown2 && targetSpeedStage <= MinStage)
+        {
+            return "Ineffective";
+        }
+
+        bool isForceSwitchMove = currentMove.GetMoveEffectEnum() == MoveEffect::ForceSwitch;
+
+        /* None that exist in gen 1 
+        if (isForceSwitchMove && cannotBypassSubstitute)
+        {
+            return "Ineffective";
+        }
+        */
+
+        if (isForceSwitchMove && targetPlayer.GetPokemonLeft() <= 1)
+        {
+            return "Ineffective";
+        }
+
+        bool inflictsVolatileStatus =
+            currentMove.GetMoveEffectEnum() == MoveEffect::Confuse ||
+            currentMove.GetMoveEffectEnum() == MoveEffect::Disable ||
+            currentMove.GetMoveEffectEnum() == MoveEffect::LeechSeed;
+
+        if (currentMove.GetMoveEffectEnum() == MoveEffect::Confuse && targetMon.IsConfused())
+        {
+            return "Ineffective";
+        }
+
+        if (currentMove.GetMoveEffectEnum() == MoveEffect::Disable && targetMon.MoveIsDisabled())
+        {
+            return "Ineffective";
+        }
+
+        bool inflictsNonVolatileStatus =
+            currentMove.GetMoveEffectEnum() == MoveEffect::SleepMove ||
+            currentMove.GetMoveEffectEnum() == MoveEffect::SleepPowder ||
+            currentMove.GetMoveEffectEnum() == MoveEffect::Paralyze ||
+            currentMove.GetMoveEffectEnum() == MoveEffect::StunSpore ||
+            currentMove.GetMoveEffectEnum() == MoveEffect::PoisonGas ||
+            currentMove.GetMoveEffectEnum() == MoveEffect::PoisonPowder ||
+            currentMove.GetMoveEffectEnum() == MoveEffect::Toxic;
+
+        if (inflictsNonVolatileStatus && (targetMon.GetStatus() != Status::Normal))
+        {
+            return "Ineffective";
+        }
+
+        if (inflictsNonVolatileStatus && targetMon.GetStatus() == Status::Normal && cannotBypassSubstitute)
+        {
+            return "Ineffective";
+        }
+
         bool isGrassImmune = (currentMove.GetMoveEffectEnum() == MoveEffect::PoisonPowder
             || currentMove.GetMoveEffectEnum() == MoveEffect::StunSpore
             || currentMove.GetMoveEffectEnum() == MoveEffect::SleepPowder
             || currentMove.GetMoveEffectEnum() == MoveEffect::LeechSeed)
-            && (target.GetTypeOneEnum() == PokemonType::Grass || target.GetTypeTwoEnum() == PokemonType::Grass);
+            && (targetMon.GetTypeOneEnum() == PokemonType::Grass || targetMon.GetTypeTwoEnum() == PokemonType::Grass);
 
-        bool isElectricImmune = (currentMove.GetMoveEffectEnum() == MoveEffect::Paralyze || currentMove.GetMoveEffectEnum() == MoveEffect::StunSpore)
-            && (target.GetTypeOneEnum() == PokemonType::Electric || target.GetTypeTwoEnum() == PokemonType::Electric);
+        bool isParalyzeImmune = (currentMove.GetMoveEffectEnum() == MoveEffect::Paralyze || currentMove.GetMoveEffectEnum() == MoveEffect::StunSpore)
+            && (targetMon.GetTypeOneEnum() == PokemonType::Electric || targetMon.GetTypeTwoEnum() == PokemonType::Electric);
 
         bool isThunderWaveImmune = (currentMove.GetMoveTypeEnum() == PokemonType::Electric
-            && (target.GetTypeOneEnum() == PokemonType::Ground || target.GetTypeTwoEnum() == PokemonType::Ground));
+            && (targetMon.GetTypeOneEnum() == PokemonType::Ground || targetMon.GetTypeTwoEnum() == PokemonType::Ground));
 
         bool isPoisonImmune = (currentMove.GetMoveTypeEnum() == PokemonType::Poison)
-            && ((target.GetTypeOneEnum() == PokemonType::Poison || target.GetTypeTwoEnum() == PokemonType::Poison)
-            || (target.GetTypeOneEnum() == PokemonType::Steel || target.GetTypeTwoEnum() == PokemonType::Steel));
+            && ((targetMon.GetTypeOneEnum() == PokemonType::Poison || targetMon.GetTypeTwoEnum() == PokemonType::Poison)
+                || (targetMon.GetTypeOneEnum() == PokemonType::Steel || targetMon.GetTypeTwoEnum() == PokemonType::Steel));
 
-        if (isGrassImmune || isElectricImmune || isThunderWaveImmune || isPoisonImmune)
+        if (currentMove.GetMoveEffectEnum() == MoveEffect::LeechSeed && (targetMon.IsSeeded() || isGrassImmune))
         {
-            return "Immune";
+            return "Ineffective";
         }
-        else
+
+        if (inflictsVolatileStatus && cannotBypassSubstitute)
         {
-            return "Effective";
+            return "Ineffective";
         }
+
+        if (isGrassImmune || isParalyzeImmune || isThunderWaveImmune || isPoisonImmune)
+        {
+            return "Ineffective";
+        }
+
+        if (currentMove.GetMoveEffectEnum() == MoveEffect::Mimic) // move bypasses substitute
+        {
+            const pokemonMove* targetLastUsedMove = targetMon.GetLastUsedMove();
+
+            if (targetLastUsedMove == nullptr)
+            {
+                return "Ineffective";
+            }
+
+            bool alreadyHasMove{};
+
+            for (const auto& move : selfMon.GetMoveArray())
+            {
+                if (!move.HasMove())
+                {
+                    continue;
+                }
+
+                if (targetLastUsedMove->GetMoveID() == move.GetMoveID())
+                {
+                    alreadyHasMove = true;
+                    break;
+                }
+            }
+
+            bool fail =
+                alreadyHasMove ||
+                targetLastUsedMove->GetMoveID() == MoveID::Transform ||
+                targetLastUsedMove->GetMoveID() == MoveID::Struggle ||
+                targetLastUsedMove->GetMoveID() == MoveID::Metronome ||
+                selfMon.IsTransformed();
+
+            if (fail)
+            {
+                return "Ineffective";
+            }
+        }
+
+        if (currentMove.GetMoveEffectEnum() == MoveEffect::Transform) // move does not bypass substitute
+        {
+            if (selfMon.IsTransformed() || targetMon.IsTransformed() || targetMon.HasSubstitute())
+            {
+                return "Ineffective";
+            }
+        }
+
+        if (currentMove.GetMoveEffectEnum() == MoveEffect::Conversion)
+        {
+            if (selfMon.GetTypeOneEnum() == currentMove.GetMoveTypeEnum() ||
+                selfMon.GetTypeTwoEnum() == currentMove.GetMoveTypeEnum() ||
+                selfMon.IsConverted())
+            {
+                return "Ineffective";
+            }
+        }
+
+        return "Effective";
     }
 
     std::string_view CalculateDamageMoveEffectiveness(const BattlePokemon& target, const pokemonMove& currentMove)
@@ -324,9 +580,9 @@ namespace PokemonTextView
             return "Effective";
         }
 
-        size_t moveType = EnumIndex(currentMove.GetMoveTypeEnum());
-        size_t defensiveTypeOne = EnumIndex(target.GetTypeOneEnum());
-        size_t defensiveTypeTwo = EnumIndex(target.GetTypeTwoEnum());
+        unsigned int moveType = EnumIndex(currentMove.GetMoveTypeEnum());
+        unsigned int defensiveTypeOne = EnumIndex(target.GetTypeOneEnum());
+        unsigned int defensiveTypeTwo = EnumIndex(target.GetTypeTwoEnum());
 
         unsigned int effect1 = typeChart[moveType][defensiveTypeOne];
         unsigned int effect2 = (defensiveTypeTwo == 18) ? 4096 : typeChart[moveType][defensiveTypeTwo];
@@ -344,7 +600,7 @@ namespace PokemonTextView
         }
         else if (moveEffectiveness == 4096)
         {
-            return "Normal";
+            return "Effective";
         }
         else
         {

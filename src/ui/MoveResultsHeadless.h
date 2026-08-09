@@ -4,7 +4,7 @@
 
 #include "interfaces/IMoveResultsUI.h"
 
-enum class MoveID : unsigned int;
+enum class MoveID;
 enum class EffectivenessText;
 
 class MoveResultsHeadless : public IMoveResultsUI

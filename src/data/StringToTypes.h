@@ -6,7 +6,7 @@
 
 #include "../common/EnumUtils.h"
 
-enum class Category : unsigned int // Used in Moves
+enum class Category // Used in Moves
 {
     Physical = 0,
     Special,
@@ -25,7 +25,7 @@ constexpr std::string_view CategoryToString(Category category)
     return kCategoryNames[EnumIndex(category)];
 }
 
-enum class PokemonType : unsigned int // Used in Moves, Pokemon, and BattlePokemon
+enum class PokemonType // Used in Moves, Pokemon, and BattlePokemon
 {
     Normal = 0,
     Fire,

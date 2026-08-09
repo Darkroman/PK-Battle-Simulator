@@ -7,10 +7,10 @@
 
 #include <string_view>
 
-enum class MoveID : unsigned int;
-enum class PokemonType : unsigned int;
-enum class Category : unsigned int;
-enum class MoveEffect : unsigned int;
+enum class MoveID;
+enum class PokemonType;
+enum class Category;
+enum class MoveEffect;
 
 class Move
 {

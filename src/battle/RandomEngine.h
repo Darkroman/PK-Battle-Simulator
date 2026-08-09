@@ -37,8 +37,8 @@ public:
 	unsigned int GetRampageTurnRoll();
 	unsigned int GetPsywaveDamageRoll();
 	unsigned int GetTriAttackStatusRoll();
-	void Call();
-	void GetCallAmount();
+	void Call() const;
+	void GetCallAmount() const;
 
 	bool RandomLT(unsigned int value);
 

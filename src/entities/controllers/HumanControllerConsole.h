@@ -27,7 +27,7 @@ public:
 	PlayerDecisionOutcome TakeDecision() override;
 
 private:
-	pokemonMove* FightAction(const Player&, BattlePokemon&, const BattlePokemon&);
+	pokemonMove* FightAction(const Player&, const Player&, BattlePokemon&, const BattlePokemon&);
 	BattlePokemon* SwitchAction(Player&, const BattlePokemon&);
 	BattleAction ForfeitAction(const Player&);
 };

@@ -25,17 +25,9 @@ bool pokemonMove::HasMove() const
 
 bool pokemonMove::IsActive() const
 {
-    if (mp_move != nullptr)
-    {
-        if (m_currentPP <= 0 || b_isDisabled)
-        {
-            return false;
-        }
-
-        return true;
-    }
-
-    return false;
+    return mp_move != nullptr &&
+        m_currentPP > 0 &&
+        !b_isDisabled;
 }
 
 void pokemonMove::SetMovePointer(const Move* move)

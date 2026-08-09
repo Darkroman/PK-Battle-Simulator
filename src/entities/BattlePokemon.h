@@ -5,8 +5,8 @@
 #include <string_view>
 #include <span>
 
-enum class PokemonType : unsigned int;
-enum class MoveID : unsigned int;
+enum class PokemonType;
+enum class MoveID;
 class Pokemon;
 class Move;
 

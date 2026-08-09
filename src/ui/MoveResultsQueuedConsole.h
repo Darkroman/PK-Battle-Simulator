@@ -6,7 +6,7 @@
 
 class BattleUIEventQueue;
 enum class EffectivenessText;
-enum class MoveID : unsigned int;
+enum class MoveID;
 
 class MoveResultsQueuedConsole : public IMoveResultsUI
 {

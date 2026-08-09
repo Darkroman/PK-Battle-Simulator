@@ -53,17 +53,17 @@ namespace AISwitchLogic
 
 		for (const auto& move : selfMon.GetMoveArray())
 		{
-			if (move.IsActive())
+			if (move.IsActive() && move.GetCategoryEnum() != Category::Status) 
 			{
 				unsigned int damage = AIMoveScoring::SwitchDamageScoringRoutine(self, targetPlayer, move, selfMon, targetMon);
-				
+
 				if (damage > highestDamage)
 				{
 					highestDamage = damage;
 					highestDamagingMove = &move;
 				}
 
-				if (highestDamagingMove && highestDamage >= targetMon.GetCurrentHP())
+				if (highestDamage >= targetMon.GetCurrentHP())
 				{
 					canKO = true;
 				}
@@ -106,10 +106,12 @@ namespace AISwitchLogic
 			return false;
 		}
 
-		auto targetMonLastUsedMove = targetMon.GetLastUsedMove();
+		const pokemonMove* targetMonLastUsedMove = targetMon.GetLastUsedMove();
+		bool lastUsedMoveAvailable = targetMonLastUsedMove != nullptr;
+
 		bool lastMoveCanKO{};
 
-		if (targetMonLastUsedMove)
+		if (lastUsedMoveAvailable)
 		{
 			unsigned int damage = AIMoveScoring::SwitchDamageScoringRoutine(targetPlayer, self, *targetMonLastUsedMove, targetMon, selfMon);
 
@@ -120,7 +122,7 @@ namespace AISwitchLogic
 		}
 
 		// if selfMon is slower and last used move by targetMon can KO, switch
-		if (targetMonLastUsedMove && !isFaster && lastMoveCanKO)
+		if (lastUsedMoveAvailable && !isFaster && lastMoveCanKO)
 		{
 			return true;
 		}
@@ -151,24 +153,21 @@ namespace AISwitchLogic
 
 			for (const auto& observedMove : observedMoves)
 			{
-				if (observedMove != nullptr)
+				if (observedMove != nullptr && observedMove->IsActive() && observedMove->GetCategoryEnum() != Category::Status)
 				{
-					if (observedMove->GetCategoryEnum() != Category::Status && observedMove->IsActive())
+					observedDamagingMoves[observedCount] = observedMove;
+					++observedCount;
+
+					unsigned int damageToSelf = AIMoveScoring::SwitchDamageScoringRoutine(targetPlayer, self, *observedMove, targetMon, selfMon);
+
+					if (damageToSelf >= selfMon.GetCurrentHP())
 					{
-						observedDamagingMoves[observedCount] = observedMove;
-						++observedCount;
+						targetMonHasKOMove = true;
+						break;
 					}
 				}
 				else
 				{
-					break;
-				}
-
-				unsigned int damageToSelf = AIMoveScoring::SwitchDamageScoringRoutine(targetPlayer, self, *observedMove, targetMon, selfMon);
-
-				if (damageToSelf >= selfMon.GetCurrentHP())
-				{
-					targetMonHasKOMove = true;
 					break;
 				}
 			}
@@ -176,7 +175,7 @@ namespace AISwitchLogic
 			std::span<const pokemonMove*> validObservedMoves{ observedDamagingMoves.data(), observedCount };
 
 			// If no observed damaging moves found, return early with no switch
-			if (validObservedMoves.empty())
+			if (observedCount == 0)
 			{
 				return false;
 			}
@@ -196,7 +195,7 @@ namespace AISwitchLogic
 		struct CandidatePokemon
 		{
 			BattlePokemon* pokemon{};
-			size_t typeEffectiveness{};
+			unsigned int typeEffectiveness{};
 			unsigned int highestDamageMove{};
 			bool isFaster{};
 			bool canKO{};
@@ -218,6 +217,12 @@ namespace AISwitchLogic
 			}
 		}
 
+		// If no candidates found, return without switching.
+		if (count == 0)
+		{
+			return nullptr;
+		}
+
 		std::span<CandidatePokemon> candidatePkmn{ candidatePkmnPool.data(), count };
 
 		const auto& observedMoves = self.GetAIController().GetObservedMoves();
@@ -226,14 +231,14 @@ namespace AISwitchLogic
 
 		for (const auto& observedMove : observedMoves)
 		{
-			if (observedMove == nullptr || !observedMove->IsActive())
-			{
-				break;
-			}
-			else if (observedMove->GetCategoryEnum() != Category::Status)
+			if (observedMove != nullptr && observedMove->IsActive() && observedMove->GetCategoryEnum() != Category::Status)
 			{
 				observedDamagingMoves[observedCount] = observedMove;
 				++observedCount;
+			}
+			else
+			{
+				break;
 			}
 		}
 
@@ -281,7 +286,7 @@ namespace AISwitchLogic
 
 			candidate.canKO = candidate.highestDamageMove >= targetMon.GetCurrentHP();
 
-			if (mostLikelyMove)
+			if (mostLikelyMove != nullptr)
 			{
 				unsigned int firstAttackVsCandidate = AIMoveScoring::SwitchDamageScoringRoutine(targetPlayer, self, *mostLikelyMove, targetMon, *candidate.pokemon);
 				unsigned int secondAttackVsCandidate{ 0 };
@@ -375,7 +380,7 @@ namespace AISwitchLogic
 		struct CandidatePokemon
 		{
 			BattlePokemon* pokemon{};
-			size_t typeEffectiveness{};
+			unsigned int typeEffectiveness{};
 			unsigned int highestDamageMove{};
 			bool isFaster{};
 			bool canKO{};
@@ -404,14 +409,14 @@ namespace AISwitchLogic
 
 		for (const auto& observedMove : observedMoves)
 		{
-			if (observedMove == nullptr || !observedMove->IsActive())
-			{
-				break;
-			}
-			else if (observedMove->GetCategoryEnum() != Category::Status)
+			if (observedMove != nullptr && observedMove->IsActive() && observedMove->GetCategoryEnum() != Category::Status)
 			{
 				observedDamagingMoves[observedCount] = observedMove;
 				++observedCount;
+			}
+			else
+			{
+				break;
 			}
 		}
 
@@ -579,13 +584,9 @@ namespace AISwitchLogic
 		return MoveEffectiveness(move, pokemon) <= 2048 && move.GetPower() > 0 && move.m_currentPP > 0;
 	}
 
-	bool IsStatusMoveEffective(const Player& self, const pokemonMove& move, const BattlePokemon& pokemon)
+	bool IsStatusMoveEffective(const Player& self, const Player& targetPlayer, const pokemonMove& move, const BattlePokemon& selfMon, const BattlePokemon& targetMon)
 	{
-		auto MoveEffectiveness = [&](const pokemonMove& move, const BattlePokemon& targetMon) {
-			return self.GetAIController().AICalculateMoveTypeEffectiveness(move, targetMon);
-			};
-
-		return MoveEffectiveness(move, pokemon) <= 2048 && move.GetPower() > 0 && move.m_currentPP > 0;
+		return self.GetAIController().CalculateStatusMoveEffectiveness(move, self, targetPlayer, selfMon, targetMon) && move.m_currentPP > 0;
 	}
 
 	unsigned int PokemonTypeEffectiveness(const Player& self, const BattlePokemon& source, const BattlePokemon& target)

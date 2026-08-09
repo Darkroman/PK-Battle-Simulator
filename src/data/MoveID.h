@@ -1,6 +1,6 @@
 #pragma once
 
-enum class MoveID : unsigned int
+enum class MoveID
 {
 	None = 0,
 	Pound = 1,

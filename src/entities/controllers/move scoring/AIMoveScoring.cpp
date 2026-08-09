@@ -28,7 +28,7 @@ namespace AIMoveScoring
 		auto moveArray = selfMon.GetMoveArray();
 
 		size_t index{};
-		for (size_t i = 0; i < 4; ++i)
+		for (int i{}; i < 4; ++i)
 		{
 			if (!moveArray[i].IsActive())
 			{
@@ -87,7 +87,8 @@ namespace AIMoveScoring
 			}
 		}
 
-		return topScores[rng.RandomRange(0, count - 1)]->move;
+		if (count == 0) { ++count; }
+		return topScores[rng.RandomRange(0ull, count - 1ull)]->move;
 	}
 
 	ScoringResults RunScoringRoutine(ScoringResults& results, const Player& self, const Player& targetPlayer, const pokemonMove& move, const BattlePokemon& selfMon, const BattlePokemon& targetMon)

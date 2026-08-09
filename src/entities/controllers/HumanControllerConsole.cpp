@@ -53,7 +53,7 @@ PlayerDecisionOutcome HumanControllerConsole::ChooseAction(Player& player, const
         {
 
         case 1:
-            m_decisionOutcome.chosenMove = FightAction(player, currentPokemon, targetMon);
+            m_decisionOutcome.chosenMove = FightAction(player, targetPlayer, currentPokemon, targetMon);
 
             if (!m_decisionOutcome.chosenMove)
             {
@@ -129,7 +129,7 @@ PlayerDecisionOutcome HumanControllerConsole::TakeDecision()
     return std::exchange(m_decisionOutcome, {});
 }
 
-pokemonMove* HumanControllerConsole::FightAction(const Player& player, BattlePokemon& currentPokemon, const BattlePokemon& targetMon)
+pokemonMove* HumanControllerConsole::FightAction(const Player& player, const Player& targetPlayer, BattlePokemon& currentPokemon, const BattlePokemon& targetMon)
 {
     if (currentPokemon.WillPerformStruggle())
     {
@@ -143,7 +143,7 @@ pokemonMove* HumanControllerConsole::FightAction(const Player& player, BattlePok
     while (true)
     {
         std::cout << currentPokemon.GetNameView() << "'s current moves\n";
-        PokemonTextView::DisplayMovesInBattle(currentPokemon, targetMon);
+        PokemonTextView::DisplayMovesInBattle(player, targetPlayer, currentPokemon, targetMon);
 
         std::string input;
         std::cout << "Option (0 to cancel): ";

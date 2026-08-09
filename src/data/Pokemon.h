@@ -3,8 +3,8 @@
 #include <span>
 #include <string_view>
 
-enum class PokemonID : unsigned int;
-enum class PokemonType : unsigned int;
+enum class PokemonID;
+enum class PokemonType;
 
 class Pokemon
 {

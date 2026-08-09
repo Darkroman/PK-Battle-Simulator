@@ -4,7 +4,7 @@
 
 #include "../EffectivenessText.h"
 
-enum class MoveID : unsigned int;
+enum class MoveID;
 
 class IMoveResultsUI
 {

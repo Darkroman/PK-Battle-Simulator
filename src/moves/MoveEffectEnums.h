@@ -1,6 +1,6 @@
 #pragma once
 
-enum class MoveEffect : unsigned int
+enum class MoveEffect
 {
 	Noop = 0,
 	NormalHit,

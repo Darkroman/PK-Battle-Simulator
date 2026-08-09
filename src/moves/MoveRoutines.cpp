@@ -1782,7 +1782,7 @@ namespace MoveRoutines
 			return;
 		}
 
-		const int baseDamage = ctx.defendingPokemon->GetLevel();
+		const int baseDamage = ctx.attackingPokemon->GetLevel();
 
 		FixedDamageRoutine(deps, baseDamage);
 
@@ -2471,7 +2471,7 @@ namespace MoveRoutines
 			return;
 		}
 
-		const int baseDamage = ctx.defendingPokemon->GetLevel();
+		const int baseDamage = ctx.attackingPokemon->GetLevel();
 
 		FixedDamageRoutine(deps, baseDamage);
 
@@ -2496,20 +2496,34 @@ namespace MoveRoutines
 
 		pokemonMove* targetLastUsedMove = ctx.defendingPokemon->GetLastUsedMove();
 
+		if (targetLastUsedMove == nullptr)
+		{
+			deps.resultsUI.DisplayFailedTextDialog();
+			return;
+		}
+
 		bool alreadyHasMove{};
 		for (const auto& move : ctx.attackingPokemon->GetMoveArray())
 		{
+			if (!move.IsActive())
+			{
+				continue;
+			}
+
 			if (targetLastUsedMove->GetMoveID() == move.GetMoveID())
 			{
 				alreadyHasMove = true;
+				break;
 			}
 		}
 
-		bool fail = ctx.defendingPokemon->GetLastUsedMove() == nullptr || alreadyHasMove ||
+		bool fail =
+			alreadyHasMove ||
 			targetLastUsedMove->GetMoveID() == MoveID::Transform ||
 			targetLastUsedMove->GetMoveID() == MoveID::Struggle ||
 			targetLastUsedMove->GetMoveID() == MoveID::Metronome ||
 			ctx.attackingPokemon->IsTransformed();
+		
 
 		if (fail)
 		{
@@ -3351,7 +3365,8 @@ namespace MoveRoutines
 
 		if (ctx.attackingPokemon->GetTypeOneEnum() == ctx.currentMove->GetMoveTypeEnum() ||
 			ctx.attackingPokemon->GetTypeTwoEnum() == ctx.currentMove->GetMoveTypeEnum() ||
-			ctx.attackingPokemon->IsConverted())
+			ctx.attackingPokemon->IsConverted() ||
+			ctx.defendingPokemon->HasSubstitute())
 		{
 			deps.resultsUI.DisplayFailedTextDialog();
 		}
