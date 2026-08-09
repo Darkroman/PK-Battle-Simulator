@@ -3486,9 +3486,7 @@ namespace MoveRoutines
 			return;
 		}
 
-		bool hasSubstitute = ctx.defendingPokemon->HasSubstitute() && !ctx.currentMove->CanBypassSubstitute();
-
-		unsigned int hpSource = hasSubstitute ? ctx.defendingPokemon->GetSubstituteHP() : ctx.defendingPokemon->GetCurrentHP();
+		unsigned int hpSource = ctx.defendingPokemon->GetCurrentHP();
 
 		unsigned int finalDamage = std::max(1u, hpSource / 2);
 
