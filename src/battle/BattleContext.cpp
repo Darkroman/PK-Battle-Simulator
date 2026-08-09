@@ -46,7 +46,7 @@ void BattleContext::ResetBattleState()
     playerTwoCurrentMove = nullptr;
 
     playerOneCurrentMoveType = PokemonType::None;
-    playerOneCurrentMoveType = PokemonType::None;
+    playerTwoCurrentMoveType = PokemonType::None;
 
     playerOneCurrentMoveEffect = MoveEffect::Noop;
     playerTwoCurrentMoveEffect = MoveEffect::Noop;

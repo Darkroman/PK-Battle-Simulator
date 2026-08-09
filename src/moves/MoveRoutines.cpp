@@ -2651,6 +2651,8 @@ namespace MoveRoutines
 
 		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 
+		ctx.attackingPokemon->SetUsedMinimize(true);
+
 		StageUpRoutine(deps, 2, "evasion", [](BattlePokemon& p) { return p.GetEvasionStage(); }, [](BattlePokemon& p, int val) { p.SetEvasionStage(val); });
 	}
 
