@@ -172,19 +172,18 @@ bool BattleCalculations::CalculateHitChance(const pokemonMove& currentMove, cons
 
 	int accuracyMod{};
 
-	if (currentMove.GetMoveEffectEnum() != MoveEffect::OHKO)
+	if (currentMove.GetMoveEffectEnum() == MoveEffect::OHKO)
 	{
-		accuracyMod = (moveAccuracy * numerator) / denominator;
+		if (source.GetLevel() < target.GetLevel())
+		{
+			return false;
+		}
 
+		accuracyMod = 30 + source.GetLevel() - target.GetLevel();
 	}
 	else
 	{
-		accuracyMod = (source.GetLevel() - target.GetLevel()) + 30; // for OHKO moves
-
-		if (accuracyMod < 0)
-		{
-			accuracyMod = 0;
-		}
+		accuracyMod = (moveAccuracy * numerator) / denominator;
 	}
 
 	if (accuracyMod >= 100)
@@ -192,12 +191,9 @@ bool BattleCalculations::CalculateHitChance(const pokemonMove& currentMove, cons
 		return true;
 	}
 
-	else
-	{
-		int rollOutcome{ m_rng.GetAccuracyRoll() };
+	int rollOutcome{ m_rng.GetAccuracyRoll() };
 
-		return rollOutcome < accuracyMod;
-	}
+	return rollOutcome < accuracyMod;
 }
 
 unsigned int BattleCalculations::CalculateDamage(BattleContext& ctx, const Player& targetPlayer, const pokemonMove& currentMove, const BattlePokemon& source, BattlePokemon& target)
