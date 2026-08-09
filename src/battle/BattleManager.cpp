@@ -446,9 +446,9 @@ BattleState BattleManager::CheckMidTurnPendingSwitch()
 
 BattleState BattleManager::SwapRoles()
 {
-	m_turnProcessor.SwapRoles();
-
 	m_context.ResetTurnState();
+
+	m_turnProcessor.SwapRoles();
 
 	curActor = CurrentRoundActor::Second;
 

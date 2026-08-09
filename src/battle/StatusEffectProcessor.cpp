@@ -271,6 +271,7 @@ void StatusEffectProcessor::CheckFaintCondition(Player& sourcePlayer, Player& ta
 	if (target.GetCurrentHP() <= 0 && !target.IsFainted())
 	{
 		target.SetFainted(true);
+		target.ChangeStatus(Status::Normal);
 		m_statusEffectUI.DisplayFaintedMsg(targetPlayer.GetPlayerNameView(), target.GetNameView());
 		targetPlayer.IncrementFaintedCount();
 
