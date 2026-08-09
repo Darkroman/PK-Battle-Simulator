@@ -17,6 +17,8 @@ bool DefendingPokemonIsFainted(BattleContext&, IMoveResultsUI&);
 
 void DamageRoutine(MoveRoutineDeps&);
 
+void OHKODamageRoutine(MoveRoutineDeps&);
+
 void MultiStrikeRoutine(MoveRoutineDeps&, int turnCount);
 
 void FixedDamageRoutine(MoveRoutineDeps&, unsigned int baseDamage);

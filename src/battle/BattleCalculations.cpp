@@ -198,23 +198,6 @@ bool BattleCalculations::CalculateHitChance(const pokemonMove& currentMove, cons
 
 unsigned int BattleCalculations::CalculateDamage(BattleContext& ctx, const Player& targetPlayer, const pokemonMove& currentMove, const BattlePokemon& source, BattlePokemon& target)
 {
-	unsigned int effectiveness = ctx.effectiveness;
-
-	if (effectiveness == 0)
-	{
-		return 0;
-	}
-
-	unsigned int baseDamage{ 0 };
-
-	if ((currentMove.GetMoveEffectEnum() == MoveEffect::OHKO) && effectiveness != 0)
-	{
-		baseDamage = target.GetCurrentHP();
-		target.DamageCurrentHP(baseDamage);
-		ctx.damageTaken = baseDamage;
-		return baseDamage;
-	}
-
 	bool isCritical{ CalculateCriticalHit(ctx, source) };
 
 	// START: Calculate total attack and defense values of attacker and defender
@@ -249,14 +232,16 @@ unsigned int BattleCalculations::CalculateDamage(BattleContext& ctx, const Playe
 		currentMovePower = CalculateLowKickPower(target);
 	}
 
-	unsigned int powerModifier = ctx.initialPowerMultiplier;
+	unsigned int powerModifier{ ctx.initialPowerMultiplier };
 
 	if (powerModifier > 10)
 	{
 		currentMovePower = currentMovePower * powerModifier / 10;
 	}
 
-	unsigned int level = source.GetLevel();
+	unsigned int level{ source.GetLevel() };
+
+	unsigned int baseDamage{ 0 };
 
 	// Damage formula: (((((2 * level / 5) + 2) * currentMovePower * sourceAttack) / targetDefense) / 50) + 2
 	// Truncates int after every division
@@ -285,6 +270,8 @@ unsigned int BattleCalculations::CalculateDamage(BattleContext& ctx, const Playe
 	{
 		interimDamage = interimDamage * OneAndHalfMultiplier / FixedPointBase;
 	}
+
+	unsigned int effectiveness{ ctx.effectiveness };
 
 	interimDamage = interimDamage * effectiveness / FixedPointBase;
 

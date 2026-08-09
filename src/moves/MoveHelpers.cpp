@@ -136,6 +136,30 @@ void DamageRoutine(MoveRoutineDeps& deps)
 	TryDamageReactions(deps);
 }
 
+void OHKODamageRoutine(MoveRoutineDeps& deps)
+{
+	auto& ctx = deps.context;
+	auto& calc = deps.calculations;
+	auto& resultsUI = deps.resultsUI;
+
+	bool hitSubstitute = ctx.defendingPokemon->HasSubstitute() && !ctx.currentMove->CanBypassSubstitute();
+
+	unsigned int damage = hitSubstitute	? ctx.defendingPokemon->GetSubstituteHP() : ctx.defendingPokemon->GetCurrentHP();
+
+	calc.ApplyDamage(*ctx.currentMove, *ctx.defendingPokemon, damage);
+
+	if (ctx.flags.hitSubstitute)
+	{
+		resultsUI.DisplaySubstituteDamageTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ctx.defendingPokemon->GetSubstituteHP(), ctx.defendingPokemon->HasSubstitute(), ctx.flags.hitSubstitute);
+	}
+	else
+	{
+		resultsUI.DisplayOHKOTextDialog();
+
+		TryDamageReactions(deps);
+	}
+}
+
 void MultiStrikeRoutine(MoveRoutineDeps& deps, int turnCount)
 {
 	auto& ctx = deps.context;

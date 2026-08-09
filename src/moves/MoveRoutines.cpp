@@ -416,10 +416,7 @@ namespace MoveRoutines
 			return;
 		}
 
-		// OHKO specific logic done in CalculateDamage()
-		DamageRoutine(deps);
-
-		deps.resultsUI.DisplayOHKOTextDialog();
+		OHKODamageRoutine(deps);
 
 		deps.statusProcessor.CheckSubstituteCondition(ctx.defendingPlayer, ctx.defendingPokemon);
 		deps.statusProcessor.CheckFaintCondition(*ctx.attackingPlayer, *ctx.defendingPlayer, *ctx.attackingPokemon, *ctx.defendingPokemon);
