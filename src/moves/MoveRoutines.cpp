@@ -2855,13 +2855,16 @@ namespace MoveRoutines
 		
 		if (ctx.attackingPlayer == ctx.playerOne)
 		{
+			ctx.playerOneCurrentMoveType = selectedMove.GetMoveTypeEnum();
 			ctx.playerOneCurrentMoveEffect = selectedMove.GetMoveEffectEnum();
 		}
 		else
 		{
+			ctx.playerTwoCurrentMoveType = selectedMove.GetMoveTypeEnum();
 			ctx.playerTwoCurrentMoveEffect = selectedMove.GetMoveEffectEnum();
 		}
 
+		ctx.currentMoveType = (ctx.attackingPlayer == ctx.playerOne) ? ctx.playerOneCurrentMoveType : ctx.playerTwoCurrentMoveType;
 		ctx.currentMoveEffect = (ctx.attackingPlayer == ctx.playerOne) ? ctx.playerOneCurrentMoveEffect : ctx.playerTwoCurrentMoveEffect;
 
 		{
@@ -2913,14 +2916,16 @@ namespace MoveRoutines
 
 		if (ctx.attackingPlayer == ctx.playerOne)
 		{
+			ctx.playerOneCurrentMoveType = selectedMove.GetMoveTypeEnum();
 			ctx.playerOneCurrentMoveEffect = selectedMove.GetMoveEffectEnum();
 		}
 		else
 		{
+			ctx.playerTwoCurrentMoveType = selectedMove.GetMoveTypeEnum();
 			ctx.playerTwoCurrentMoveEffect = selectedMove.GetMoveEffectEnum();
 		}
 
-
+		ctx.currentMoveType = (ctx.attackingPlayer == ctx.playerOne) ? ctx.playerOneCurrentMoveType : ctx.playerTwoCurrentMoveType;
 		ctx.currentMoveEffect = (ctx.attackingPlayer == ctx.playerOne) ? ctx.playerOneCurrentMoveEffect : ctx.playerTwoCurrentMoveEffect;
 
 		{

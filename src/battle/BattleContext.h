@@ -3,6 +3,8 @@
 #include <vector>
 #include <memory>
 
+#include "../data/StringToTypes.h"
+
 class Player;
 class BattlePokemon;
 struct pokemonMove;
@@ -43,6 +45,9 @@ struct BattleContext
     pokemonMove* playerOneCurrentMove{ nullptr };
     pokemonMove* playerTwoCurrentMove{ nullptr };
 
+    PokemonType playerOneCurrentMoveType{ PokemonType::None };
+    PokemonType playerTwoCurrentMoveType{ PokemonType::None };
+
     MoveEffect playerOneCurrentMoveEffect{};
     MoveEffect playerTwoCurrentMoveEffect{};
 
@@ -53,6 +58,7 @@ struct BattleContext
     BattlePokemon* defendingPokemon{ nullptr };
 
     pokemonMove* currentMove{ nullptr };
+    PokemonType currentMoveType{ PokemonType::None };
     MoveEffect currentMoveEffect{};
 
     const int HP_BAR_WIDTH{ 400 };

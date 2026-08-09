@@ -32,7 +32,7 @@ BattleManager::BattleManager(BattleContext& context, RandomEngine& rng, IBattleA
 	, m_switchExecutor(context, moveResultsUI)
 	, m_winChecker(context)
 	, m_statusEffectProcessor(context, rng, statusEffectUI)
-	, m_moveExecutor(context, m_calculations, m_statusEffectProcessor, moveResultsUI, rng)
+	, m_moveExecutor(context, m_calculations, m_statusEffectProcessor, moveResultsUI, statusEffectUI, rng)
 	, m_turnProcessor(context, m_calculations, m_statusEffectProcessor, m_winChecker, m_switchExecutor, m_moveExecutor)
 	, m_postTurnProcessor(context, m_calculations, statusEffectUI, m_statusEffectProcessor, m_winChecker, m_switchExecutor)
 {
@@ -251,6 +251,7 @@ BattleState BattleManager::ApplyPlayerDecisions()
 	{
 	case BattleAction::Fight:
 		m_context.playerOneCurrentMove = playerOneDecision.chosenMove;
+		m_context.playerOneCurrentMoveType = playerOneDecision.chosenMove->GetMoveTypeEnum();
 		m_context.playerOneCurrentMoveEffect = playerOneDecision.chosenMove->GetMoveEffectEnum();
 		break;
 		
@@ -270,6 +271,7 @@ BattleState BattleManager::ApplyPlayerDecisions()
 	{
 	case BattleAction::Fight:
 		m_context.playerTwoCurrentMove = playerTwoDecision.chosenMove;
+		m_context.playerTwoCurrentMoveType = playerTwoDecision.chosenMove->GetMoveTypeEnum();
 		m_context.playerTwoCurrentMoveEffect = playerTwoDecision.chosenMove->GetMoveEffectEnum();
 		break;
 
@@ -304,6 +306,7 @@ void BattleManager::ApplyPlayerOneAction()
 	{
 	case BattleAction::Fight:
 		m_context.playerOneCurrentMove = decision.chosenMove;
+		m_context.playerOneCurrentMoveType = decision.chosenMove->GetMoveTypeEnum();
 		m_context.playerOneCurrentMoveEffect = decision.chosenMove->GetMoveEffectEnum();
 		break;
 
@@ -336,6 +339,7 @@ void BattleManager::ApplyPlayerTwoAction()
 	{
 	case BattleAction::Fight:
 		m_context.playerTwoCurrentMove = decision.chosenMove;
+		m_context.playerTwoCurrentMoveType = decision.chosenMove->GetMoveTypeEnum();
 		m_context.playerTwoCurrentMoveEffect = decision.chosenMove->GetMoveEffectEnum();
 		break;
 

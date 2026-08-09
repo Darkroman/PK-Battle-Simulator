@@ -2,6 +2,7 @@
 #include <memory>
 
 #include "BattleContext.h"
+#include "../data/StringToTypes.h"
 #include "../moves/MoveEffectEnums.h"
 
 BattleContext::BattleContext(std::vector<std::unique_ptr<Player>>& vec_players)
@@ -54,6 +55,7 @@ void BattleContext::ResetBattleState()
     defendingPokemon = nullptr;
 
     currentMove = nullptr;
+    currentMoveType = PokemonType::None;
     currentMoveEffect = MoveEffect::Noop;
 
     battleTurn = 0;
