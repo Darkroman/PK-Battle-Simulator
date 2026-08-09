@@ -527,7 +527,7 @@ namespace PokemonTextView
 
             for (const auto& move : selfMon.GetMoveArray())
             {
-                if (!move.HasMove())
+                if (move.GetMovePointer() == nullptr)
                 {
                     continue;
                 }

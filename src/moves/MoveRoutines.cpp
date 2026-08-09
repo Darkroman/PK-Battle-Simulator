@@ -1414,10 +1414,10 @@ namespace MoveRoutines
 
 		auto* lastUsed = ctx.defendingPokemon->GetLastUsedMove();
 
-		if (!lastUsed ||
-			ctx.defendingPokemon->MoveIsDisabled() ||
-			ctx.defendingPokemon->GetLastUsedMove()->m_currentPP <= 0 ||
-			ctx.defendingPokemon->GetLastUsedMove()->GetMoveEffectEnum() == MoveEffect::Struggle)
+		if (lastUsed ==	nullptr ||
+			!ctx.defendingPokemon->MoveIsDisabled() ||
+			lastUsed->m_currentPP <= 0 ||
+			lastUsed->GetMoveEffectEnum() == MoveEffect::Struggle)
 		{
 			deps.resultsUI.DisplayFailedTextDialog();
 			return;
@@ -2505,7 +2505,7 @@ namespace MoveRoutines
 		bool alreadyHasMove{};
 		for (const auto& move : ctx.attackingPokemon->GetMoveArray())
 		{
-			if (!move.IsActive())
+			if (move.GetMovePointer() == nullptr)
 			{
 				continue;
 			}
