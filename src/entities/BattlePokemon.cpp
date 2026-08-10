@@ -1567,6 +1567,8 @@ void BattlePokemon::ResetValues()
     m_accuracystage = 6;
     m_criticalhitstage = 0;
 
+    m_bideDamageTaken = 0;
+
     b_isFainted = false;
 
     b_isConfused = false;

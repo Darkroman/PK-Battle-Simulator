@@ -2652,6 +2652,7 @@ namespace MoveRoutines
 
 			ctx.attackingPokemon->SetLockedTurnCount(2);
 			ctx.attackingPokemon->ResetLockedCounter();
+			ctx.attackingPokemon->ResetBideDamage();
 
 			deps.resultsUI.DisplayBideStoringEnergyMsg(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView());
 
