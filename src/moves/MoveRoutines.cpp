@@ -3515,13 +3515,20 @@ namespace MoveRoutines
 
 		unsigned int hpCost = substituteHP;
 
-		deps.resultsUI.DisplayPutInSubstituteMsg(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView());
 		ctx.attackingPokemon->SetSubstitute(true);
 		ctx.attackingPokemon->SetSubstituteHP(hpCost);
 		ctx.attackingPokemon->DamageCurrentHP(hpCost);
-		ctx.attackingPokemon->SetBound(false);
-		ctx.attackingPokemon->ResetBoundCounter();
-		ctx.attackingPokemon->SetBoundTurnCount(0);
+		
+		if (ctx.attackingPokemon->IsBound())
+		{
+			ctx.attackingPokemon->SetBound(false);
+			ctx.attackingPokemon->ResetBoundCounter();
+			ctx.attackingPokemon->SetBoundTurnCount(0);
+
+			ctx.attackingPlayer->SetCanSwitch(true);
+		}
+
+		deps.resultsUI.DisplayPutInSubstituteMsg(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView());
 	}
 
 	void Struggle(MoveRoutineDeps& deps)
