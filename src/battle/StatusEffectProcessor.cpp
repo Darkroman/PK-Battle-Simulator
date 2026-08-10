@@ -30,14 +30,9 @@ bool StatusEffectProcessor::CheckPerformativeStatus()
 		return false;
 	}
 
-	if (m_context.attackingPokemon->IsRampaging())
+	if (m_context.attackingPokemon->IsRampaging() || m_context.attackingPokemon->IsBiding())
 	{
-		m_context.attackingPokemon->IncrementRampageCounter();
-	}
-
-	if (m_context.attackingPokemon->IsBiding())
-	{
-		m_context.attackingPokemon->IncrementBideCounter();
+		m_context.attackingPokemon->IncrementLockedCounter();
 	}
 
 	switch (m_context.attackingPokemon->GetStatus())
@@ -86,7 +81,7 @@ bool StatusEffectProcessor::CheckPerformativeStatus()
 
 	if (m_context.attackingPokemon->IsRampaging() && !canPerform)
 	{
-		if (m_context.attackingPokemon->GetRampageCounter() >= m_context.attackingPokemon->GetRampageTurnCount() && !m_context.attackingPokemon->IsConfused())
+		if (m_context.attackingPokemon->GetLockedCounter() >= m_context.attackingPokemon->GetLockedTurnCount() && !m_context.attackingPokemon->IsConfused())
 		{
 			RampageConfuse();
 		}
@@ -101,7 +96,7 @@ bool StatusEffectProcessor::CheckPerformativeStatus()
 			ResetBideState();
 		}
 
-		else if (canPerform && !(m_context.attackingPokemon->GetBideCounter() >= m_context.attackingPokemon->GetBideTurnCount()))
+		else if (canPerform && !(m_context.attackingPokemon->GetLockedCounter() >= m_context.attackingPokemon->GetLockedTurnCount()))
 		{
 			m_statusEffectUI.DisplayBideStoringEnergyMsg(m_context.attackingPlayer->GetPlayerNameView(), m_context.attackingPokemon->GetNameView());
 
@@ -232,8 +227,8 @@ bool StatusEffectProcessor::ParalysisStatus()
 void StatusEffectProcessor::ResetRampageState()
 {
 	m_context.attackingPokemon->SetRampaging(false);
-	m_context.attackingPokemon->ResetRampageCounter();
-	m_context.attackingPokemon->SetRampageTurnCount(0);
+	m_context.attackingPokemon->ResetLockedCounter();
+	m_context.attackingPokemon->SetLockedTurnCount(0);
 	m_context.attackingPlayer->SetCanSwitch(true);
 }
 
@@ -251,8 +246,8 @@ void StatusEffectProcessor::RampageConfuse()
 void StatusEffectProcessor::ResetBideState()
 {
 	m_context.attackingPokemon->SetBide(false);
-	m_context.attackingPokemon->ResetBideCounter();
-	m_context.attackingPokemon->SetBideTurnCount(0);
+	m_context.attackingPokemon->ResetLockedCounter();
+	m_context.attackingPokemon->SetLockedTurnCount(0);
 	m_context.attackingPokemon->ResetBideDamage();
 	m_context.attackingPlayer->SetCanSwitch(true);
 }

@@ -1001,18 +1001,21 @@ void BattlePokemon::SetSemiInvulnerableFly(bool fly)
     b_isSemiInvulnerableFly = fly;
 }
 
-void BattlePokemon::ResetLockInState()
+void BattlePokemon::ResetLockedState()
 {
+    SetSemiInvulnerableDig(false);
+    SetSemiInvulnerableFly(false);
+
     SetCharging(false);
 
     SetRecharging(false);
 
     SetRampaging(false);
-    ResetRampageCounter();
 
     SetBide(false);
-    ResetBideCounter();
     ResetBideDamage();
+
+    ResetLockedCounter();
 }
 
 bool BattlePokemon::IsCharging() const
@@ -1070,29 +1073,54 @@ void BattlePokemon::SetRampaging(bool rampaging)
     b_isRampaging = rampaging;
 }
 
-void BattlePokemon::SetRampageTurnCount(unsigned int number)
+bool BattlePokemon::IsBiding() const
 {
-    m_rampageTurnCount = number;
+    return b_isBiding;
 }
 
-unsigned int BattlePokemon::GetRampageTurnCount() const
+void BattlePokemon::SetBide(bool bide)
 {
-    return m_rampageTurnCount;
+    b_isBiding = bide;
 }
 
-void BattlePokemon::IncrementRampageCounter()
+unsigned int BattlePokemon::GetBideDamage() const
 {
-    m_rampageCounter++;
+    return m_bideDamageTaken;
 }
 
-unsigned int BattlePokemon::GetRampageCounter() const
+void BattlePokemon::AddBideDamage(unsigned int bideDamage)
 {
-    return m_rampageCounter;
+    m_bideDamageTaken += bideDamage;
 }
 
-void BattlePokemon::ResetRampageCounter()
+void BattlePokemon::ResetBideDamage()
 {
-    m_rampageCounter = 0;
+    m_bideDamageTaken = 0;
+}
+
+void BattlePokemon::SetLockedTurnCount(unsigned int number)
+{
+    m_lockedTurnCount = number;
+}
+
+unsigned int BattlePokemon::GetLockedTurnCount() const
+{
+    return m_lockedTurnCount;
+}
+
+void BattlePokemon::IncrementLockedCounter()
+{
+    m_lockedCounter++;
+}
+
+unsigned int BattlePokemon::GetLockedCounter() const
+{
+    return m_lockedCounter;
+}
+
+void BattlePokemon::ResetLockedCounter()
+{
+    m_lockedCounter = 0;
 }
 
 void BattlePokemon::SetDisabledStatus(bool disabled)
@@ -1214,56 +1242,6 @@ bool BattlePokemon::HasFocusEnergy() const
 void BattlePokemon::SetFocusEnergy(bool focus)
 {
     b_hasFocusEnergy = focus;
-}
-
-bool BattlePokemon::IsBiding() const
-{
-    return b_isBiding;
-}
-
-void BattlePokemon::SetBide(bool bide)
-{
-    b_isBiding = bide;
-}
-
-void BattlePokemon::SetBideTurnCount(unsigned int turnCount)
-{
-    m_bideTurnCount = turnCount;
-}
-
-unsigned int BattlePokemon::GetBideTurnCount() const
-{
-    return m_bideTurnCount;
-}
-
-void BattlePokemon::IncrementBideCounter()
-{
-    m_bideCounter++;
-}
-
-unsigned int BattlePokemon::GetBideCounter() const
-{
-    return m_bideCounter;
-}
-
-void BattlePokemon::ResetBideCounter()
-{
-    m_bideCounter = 0;
-}
-
-unsigned int BattlePokemon::GetBideDamage() const
-{
-    return m_bideDamageTaken;
-}
-
-void BattlePokemon::AddBideDamage(unsigned int bideDamage)
-{
-    m_bideDamageTaken += bideDamage;
-}
-
-void BattlePokemon::ResetBideDamage()
-{
-    m_bideDamageTaken = 0;
 }
 
 bool BattlePokemon::IsTransformed() const

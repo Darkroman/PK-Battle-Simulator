@@ -83,9 +83,10 @@ TurnSwitchState TurnProcessor::ExecuteTurn()
 	{
 		if (!m_statusProcessor.CheckPerformativeStatus())
 		{
-
 			return TurnSwitchState::ContinueRound;
 		}
+
+		m_context.attackingPokemon->SetLastUsedMove(m_context.currentMove);
 
 		m_moveExecutor.ExecuteMove();
 	}
@@ -120,7 +121,6 @@ void TurnProcessor::SwapRoles()
 	std::swap(m_context.attackingPokemon, m_context.defendingPokemon);
 
 	m_context.currentMove = currentIsPlayerOne ? m_context.playerTwoCurrentMove : m_context.playerOneCurrentMove;
-	m_context.currentMoveType = currentIsPlayerOne ? m_context.playerTwoCurrentMoveType : m_context.playerOneCurrentMoveType;
 }
 
 TurnSwitchState TurnProcessor::CheckPendingSwitch()

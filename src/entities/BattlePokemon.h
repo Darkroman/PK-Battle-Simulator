@@ -202,7 +202,7 @@ public:
     void SetSemiInvulnerableDig(bool);
     void SetSemiInvulnerableFly(bool);
 
-    void ResetLockInState();
+    void ResetLockedState();
 
     bool IsCharging() const;
     void SetCharging(bool);
@@ -218,11 +218,18 @@ public:
 
     bool IsRampaging() const;
     void SetRampaging(bool);
-    void SetRampageTurnCount(unsigned int);
-    unsigned int GetRampageTurnCount() const;
-    void IncrementRampageCounter();
-    unsigned int GetRampageCounter() const;
-    void ResetRampageCounter();
+
+    bool IsBiding() const;
+    void SetBide(bool);
+    unsigned int GetBideDamage() const;
+    void AddBideDamage(unsigned int);
+    void ResetBideDamage();
+
+    void SetLockedTurnCount(unsigned int);
+    unsigned int GetLockedTurnCount() const;
+    void IncrementLockedCounter();
+    unsigned int GetLockedCounter() const;
+    void ResetLockedCounter();
 
     void SetDisabledStatus(bool);
     void IncrementDisabledCounter();
@@ -257,17 +264,6 @@ public:
 
     Status GetStatus() const;
     void ChangeStatus(Status);
-
-    bool IsBiding() const;
-    void SetBide(bool);
-    void SetBideTurnCount(unsigned int);
-    unsigned int GetBideTurnCount() const;
-    void IncrementBideCounter();
-    unsigned int GetBideCounter() const;
-    void ResetBideCounter();
-    unsigned int GetBideDamage() const;
-    void AddBideDamage(unsigned int);
-    void ResetBideDamage();
 
     bool IsTransformed() const;
     void SetTransformation(BattlePokemon*);
@@ -360,12 +356,10 @@ private:
     unsigned int m_confusedCounter{ 0 };
     unsigned int m_confusedTurnCount{ 0 };
 
-    unsigned int m_rampageCounter{ 0 };
-    unsigned int m_rampageTurnCount{ 0 };
+    unsigned int m_lockedCounter{ 0 };
+    unsigned int m_lockedTurnCount{ 0 };
 
     unsigned int m_bideDamageTaken{ 0 };
-    unsigned int m_bideCounter{ 0 };
-    unsigned int m_bideTurnCount{ 0 };
 
     unsigned int m_moveCount{ 0 };
 
@@ -401,11 +395,11 @@ private:
 
     bool b_isConfused{ false };
 
-    bool b_isRampaging{ false };
-
     bool b_hasFocusEnergy{ false };
 
     bool b_isRaging{ false };
+
+    bool b_isRampaging{ false };
 
     bool b_isBiding{ false };
 

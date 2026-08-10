@@ -22,6 +22,7 @@ void BattleStateFlags::ResetBattleFlags()
 
 void BattleContext::ResetTurnState()
 {
+    lastDamagingMove = nullptr;
     lastDamageApplied = 0;
     pixelsLost = 0;
 
@@ -45,9 +46,6 @@ void BattleContext::ResetBattleState()
     playerOneCurrentMove = nullptr;
     playerTwoCurrentMove = nullptr;
 
-    playerOneCurrentMoveType = PokemonType::None;
-    playerTwoCurrentMoveType = PokemonType::None;
-
     attackingPlayer = nullptr;
     defendingPlayer = nullptr;
 
@@ -55,7 +53,7 @@ void BattleContext::ResetBattleState()
     defendingPokemon = nullptr;
 
     currentMove = nullptr;
-    currentMoveType = PokemonType::None;
+    lastDamagingMove = nullptr;
 
     battleTurn = 0;
 

@@ -135,7 +135,7 @@ namespace MoveRoutines
 
 		//ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 
-		//deps.resultsUI.DisplayNoopMsg();
+		deps.resultsUI.DisplayNoopMsg();
 	}
 
 	void NormalHit(MoveRoutineDeps& deps)
@@ -145,8 +145,6 @@ namespace MoveRoutines
 		deps.resultsUI.UsedTextDialog(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView(), ctx.currentMove->GetName());
 
 		ctx.currentMove->DeductPP();
-
-		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 
 		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
 		{
@@ -183,8 +181,6 @@ namespace MoveRoutines
 
 		ctx.currentMove->DeductPP();
 
-		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
-
 		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
 		{
 			return;
@@ -219,8 +215,6 @@ namespace MoveRoutines
 		ctx.currentMove->DeductPP();
 
 		deps.resultsUI.UsedTextDialog(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView(), ctx.currentMove->GetName());
-
-		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 
 		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
 		{ 
@@ -269,8 +263,6 @@ namespace MoveRoutines
 
 		ctx.currentMove->DeductPP();
 
-		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
-
 		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
 		{
 			return;
@@ -307,8 +299,6 @@ namespace MoveRoutines
 		deps.resultsUI.UsedTextDialog(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView(), ctx.currentMove->GetName());
 
 		ctx.currentMove->DeductPP();
-
-		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 
 		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
 		{
@@ -347,8 +337,6 @@ namespace MoveRoutines
 
 		ctx.currentMove->DeductPP();
 
-		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
-
 		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
 		{
 			return;
@@ -385,8 +373,6 @@ namespace MoveRoutines
 		deps.resultsUI.UsedTextDialog(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView(), ctx.currentMove->GetName());
 
 		ctx.currentMove->DeductPP();
-
-		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 
 		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
 		{
@@ -465,8 +451,6 @@ namespace MoveRoutines
 
 		ctx.currentMove->DeductPP();
 
-		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
-
 		StageUpRoutine(deps, 2, "attack", [](BattlePokemon& p) { return p.GetAttackStage(); }, [](BattlePokemon& p, int val) { p.SetAttackStage(val); });
 	}
 
@@ -477,8 +461,6 @@ namespace MoveRoutines
 		deps.resultsUI.UsedTextDialog(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView(), ctx.currentMove->GetName());
 
 		ctx.currentMove->DeductPP();
-
-		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 
 		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
 		{
@@ -518,8 +500,6 @@ namespace MoveRoutines
 
 		ctx.currentMove->DeductPP();
 
-		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
-
 		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
 		{
 			return;
@@ -557,7 +537,7 @@ namespace MoveRoutines
 
 		// Reset stats for the Pokémon being forced out
 		ctx.defendingPokemon->ResetStatsOnSwitch();
-		ctx.defendingPokemon->ResetLockInState();
+		ctx.defendingPokemon->ResetLockedState();
 		ctx.defendingPlayer->SetCanSwitch(true);
 
 		if (ctx.attackingPokemon->IsBound())
@@ -597,12 +577,12 @@ namespace MoveRoutines
 		{
 			ctx.currentMove->DeductPP();
 
-			ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
-
 			return;
 		}
 
 		deps.resultsUI.UsedTextDialog(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView(), ctx.currentMove->GetName());
+
+		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 
 		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
 		{
@@ -638,8 +618,6 @@ namespace MoveRoutines
 		deps.resultsUI.UsedTextDialog(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView(), ctx.currentMove->GetName());
 
 		ctx.currentMove->DeductPP();
-
-		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 
 		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
 		{
@@ -695,8 +673,6 @@ namespace MoveRoutines
 
 		ctx.currentMove->DeductPP();
 
-		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
-
 		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
 		{
 			return;
@@ -746,8 +722,6 @@ namespace MoveRoutines
 
 		ctx.currentMove->DeductPP();
 
-		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
-
 		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
 		{
 			return;
@@ -783,8 +757,6 @@ namespace MoveRoutines
 		deps.resultsUI.UsedTextDialog(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView(), ctx.currentMove->GetName());
 
 		ctx.currentMove->DeductPP();
-
-		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 
 		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
 		{
@@ -837,8 +809,6 @@ namespace MoveRoutines
 
 		ctx.currentMove->DeductPP();
 
-		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
-
 		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
 		{
 			return;
@@ -876,8 +846,6 @@ namespace MoveRoutines
 
 		ctx.currentMove->DeductPP();
 
-		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
-
 		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
 		{
 			return;
@@ -913,8 +881,6 @@ namespace MoveRoutines
 		deps.resultsUI.UsedTextDialog(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView(), ctx.currentMove->GetName());
 
 		ctx.currentMove->DeductPP();
-
-		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 
 		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
 		{
@@ -965,8 +931,6 @@ namespace MoveRoutines
 
 		ctx.currentMove->DeductPP();
 
-		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
-
 		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
 		{
 			return;
@@ -1008,8 +972,8 @@ namespace MoveRoutines
 			ctx.attackingPlayer->SetCanSwitch(false);
 
 			unsigned int randomMod{ deps.rng.GetRampageTurnRoll() };
-			ctx.attackingPokemon->SetRampageTurnCount(randomMod);
-			ctx.attackingPokemon->ResetRampageCounter();
+			ctx.attackingPokemon->SetLockedTurnCount(randomMod);
+			ctx.attackingPokemon->ResetLockedCounter();
 		}
 
 		deps.resultsUI.UsedTextDialog(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView(), ctx.currentMove->GetName());
@@ -1018,7 +982,7 @@ namespace MoveRoutines
 
 		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
 		{
-			if (ctx.attackingPokemon->GetRampageCounter() >= ctx.attackingPokemon->GetRampageTurnCount() && !ctx.attackingPokemon->IsConfused())
+			if (ctx.attackingPokemon->GetLockedCounter() >= ctx.attackingPokemon->GetLockedTurnCount() && !ctx.attackingPokemon->IsConfused())
 			{
 				deps.statusProcessor.RampageConfuse();
 			}
@@ -1058,7 +1022,7 @@ namespace MoveRoutines
 			deps.statusProcessor.CheckFaintCondition(*ctx.attackingPlayer, *ctx.defendingPlayer, *ctx.attackingPokemon, *ctx.defendingPokemon);
 		}
 
-		bool reachedEnd = ctx.attackingPokemon->GetRampageCounter() >= ctx.attackingPokemon->GetRampageTurnCount();
+		bool reachedEnd = ctx.attackingPokemon->GetLockedCounter() >= ctx.attackingPokemon->GetLockedTurnCount();
 		bool moveFailed = !ctx.flags.hit || isImmune;
 
 		if (moveFailed || reachedEnd)
@@ -1081,8 +1045,6 @@ namespace MoveRoutines
 		deps.resultsUI.UsedTextDialog(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView(), ctx.currentMove->GetName());
 
 		ctx.currentMove->DeductPP();
-
-		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 
 		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
 		{
@@ -1119,8 +1081,6 @@ namespace MoveRoutines
 
 		ctx.currentMove->DeductPP();
 
-		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
-
 		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
 		{
 			return;
@@ -1156,8 +1116,6 @@ namespace MoveRoutines
 		deps.resultsUI.UsedTextDialog(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView(), ctx.currentMove->GetName());
 
 		ctx.currentMove->DeductPP();
-
-		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 
 		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
 		{
@@ -1196,8 +1154,6 @@ namespace MoveRoutines
 
 		ctx.currentMove->DeductPP();
 
-		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
-
 		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
 		{
 			return;
@@ -1233,8 +1189,6 @@ namespace MoveRoutines
 		deps.resultsUI.UsedTextDialog(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView(), ctx.currentMove->GetName());
 
 		ctx.currentMove->DeductPP();
-
-		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 
 		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
 		{
@@ -1272,8 +1226,6 @@ namespace MoveRoutines
 
 		ctx.currentMove->DeductPP();
 
-		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
-
 		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
 		{
 			return;
@@ -1309,8 +1261,6 @@ namespace MoveRoutines
 		deps.resultsUI.UsedTextDialog(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView(), ctx.currentMove->GetName());
 
 		ctx.currentMove->DeductPP();
-
-		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 
 		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
 		{
@@ -1348,8 +1298,6 @@ namespace MoveRoutines
 
 		ctx.currentMove->DeductPP();
 
-		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
-
 		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
 		{
 			return;
@@ -1386,8 +1334,6 @@ namespace MoveRoutines
 		deps.resultsUI.UsedTextDialog(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView(), ctx.currentMove->GetName());
 
 		ctx.currentMove->DeductPP();
-
-		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 
 		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
 		{
@@ -1439,8 +1385,6 @@ namespace MoveRoutines
 
 		ctx.currentMove->DeductPP();
 
-		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
-
 		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
 		{
 			return;
@@ -1478,8 +1422,6 @@ namespace MoveRoutines
 
 		ctx.currentMove->DeductPP();
 
-		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
-
 		if (!ctx.attackingPlayer->HasMist())
 		{
 			deps.resultsUI.DisplayMistMsg(ctx.attackingPlayer->GetPlayerNameView());
@@ -1498,8 +1440,6 @@ namespace MoveRoutines
 		deps.resultsUI.UsedTextDialog(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView(), ctx.currentMove->GetName());
 
 		ctx.currentMove->DeductPP();
-
-		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 
 		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
 		{
@@ -1551,8 +1491,6 @@ namespace MoveRoutines
 
 		ctx.currentMove->DeductPP();
 
-		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
-
 		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
 		{
 			return;
@@ -1590,8 +1528,6 @@ namespace MoveRoutines
 
 		ctx.currentMove->DeductPP();
 
-		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
-
 		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
 		{
 			return;
@@ -1628,8 +1564,6 @@ namespace MoveRoutines
 		deps.resultsUI.UsedTextDialog(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView(), ctx.currentMove->GetName());
 
 		ctx.currentMove->DeductPP();
-
-		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 
 		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
 		{
@@ -1669,8 +1603,6 @@ namespace MoveRoutines
 
 		ctx.currentMove->DeductPP();
 
-		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
-
 		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
 		{
 			return;
@@ -1706,8 +1638,6 @@ namespace MoveRoutines
 		deps.resultsUI.UsedTextDialog(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView(), ctx.currentMove->GetName());
 
 		ctx.currentMove->DeductPP();
-
-		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 
 		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
 		{
@@ -1755,8 +1685,6 @@ namespace MoveRoutines
 
 		ctx.currentMove->DeductPP();
 
-		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
-
 		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
 		{
 			return;
@@ -1793,8 +1721,6 @@ namespace MoveRoutines
 		deps.resultsUI.UsedTextDialog(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView(), ctx.currentMove->GetName());
 
 		ctx.currentMove->DeductPP();
-
-		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 
 		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
 		{
@@ -1843,8 +1769,6 @@ namespace MoveRoutines
 
 		ctx.currentMove->DeductPP();
 
-		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
-
 		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
 		{
 			return;
@@ -1884,8 +1808,6 @@ namespace MoveRoutines
 		deps.resultsUI.UsedTextDialog(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView(), ctx.currentMove->GetName());
 
 		ctx.currentMove->DeductPP();
-
-		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 
 		StageUpRoutine(deps, 1, "attack", [](BattlePokemon& p) { return p.GetAttackStage(); }, [](BattlePokemon& p, int val) { p.SetAttackStage(val); });
 		StageUpRoutine(deps, 1, "special attack", [](BattlePokemon& p) { return p.GetSpecialAttackStage(); }, [](BattlePokemon& p, int val) { p.SetSpecialAttackStage(val); });
@@ -1941,8 +1863,6 @@ namespace MoveRoutines
 
 		ctx.currentMove->DeductPP();
 
-		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
-
 		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
 		{
 			return;
@@ -1989,8 +1909,6 @@ namespace MoveRoutines
 
 		ctx.currentMove->DeductPP();
 
-		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
-
 		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
 		{
 			return;
@@ -2036,8 +1954,6 @@ namespace MoveRoutines
 
 		ctx.currentMove->DeductPP();
 
-		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
-
 		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
 		{
 			return;
@@ -2082,8 +1998,6 @@ namespace MoveRoutines
 
 		ctx.currentMove->DeductPP();
 
-		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
-
 		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
 		{
 			return;
@@ -2119,8 +2033,6 @@ namespace MoveRoutines
 		deps.resultsUI.UsedTextDialog(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView(), ctx.currentMove->GetName());
 
 		ctx.currentMove->DeductPP();
-
-		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 
 		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
 		{
@@ -2158,8 +2070,6 @@ namespace MoveRoutines
 		deps.resultsUI.UsedTextDialog(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView(), ctx.currentMove->GetName());
 
 		ctx.currentMove->DeductPP();
-
-		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 
 		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
 		{
@@ -2221,8 +2131,6 @@ namespace MoveRoutines
 		deps.resultsUI.UsedTextDialog(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView(), ctx.currentMove->GetName());
 
 		ctx.currentMove->DeductPP();
-
-		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 
 		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
 		{
@@ -2306,8 +2214,6 @@ namespace MoveRoutines
 
 		ctx.currentMove->DeductPP();
 
-		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
-
 		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
 		{
 			return;
@@ -2360,8 +2266,6 @@ namespace MoveRoutines
 
 		ctx.currentMove->DeductPP();
 
-		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
-
 		StageUpRoutine(deps, 1, "attack", [](BattlePokemon& p) { return p.GetAttackStage(); }, [](BattlePokemon& p, int val) { p.SetAttackStage(val); });
 	}
 
@@ -2373,8 +2277,6 @@ namespace MoveRoutines
 
 		ctx.currentMove->DeductPP();
 
-		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
-
 		StageUpRoutine(deps, 2, "speed", [](BattlePokemon& p) { return p.GetSpeedStage(); }, [](BattlePokemon& p, int val) { p.SetSpeedStage(val); });
 	}
 
@@ -2385,8 +2287,6 @@ namespace MoveRoutines
 		deps.resultsUI.UsedTextDialog(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView(), ctx.currentMove->GetName());
 
 		ctx.currentMove->DeductPP();
-
-		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 
 		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
 		{
@@ -2425,8 +2325,6 @@ namespace MoveRoutines
 
 		ctx.currentMove->DeductPP();
 
-		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
-
 		if (ctx.attackingPlayer->GetPokemonLeft() == 1)
 		{
 			deps.resultsUI.DisplayFailedTextDialog();
@@ -2443,8 +2341,6 @@ namespace MoveRoutines
 		deps.resultsUI.UsedTextDialog(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView(), ctx.currentMove->GetName());
 
 		ctx.currentMove->DeductPP();
-
-		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 
 		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
 		{
@@ -2482,8 +2378,6 @@ namespace MoveRoutines
 		deps.resultsUI.UsedTextDialog(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView(), ctx.currentMove->GetName());
 
 		ctx.currentMove->DeductPP();
-
-		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 
 		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
 		{
@@ -2558,8 +2452,6 @@ namespace MoveRoutines
 
 		ctx.currentMove->DeductPP();
 
-		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
-
 		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
 		{
 			return;
@@ -2596,8 +2488,6 @@ namespace MoveRoutines
 
 		ctx.currentMove->DeductPP();
 
-		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
-
 		StageUpRoutine(deps, 1, "evasion", [](BattlePokemon& p) { return p.GetEvasionStage(); }, [](BattlePokemon& p, int val) { p.SetEvasionStage(val); });
 	}	 
 
@@ -2608,8 +2498,6 @@ namespace MoveRoutines
 		deps.resultsUI.UsedTextDialog(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView(), ctx.currentMove->GetName());
 
 		ctx.currentMove->DeductPP();
-
-		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 
 		if (ctx.attackingPokemon->GetCurrentHP() < ctx.attackingPokemon->GetMaxHP())
 		{
@@ -2634,8 +2522,6 @@ namespace MoveRoutines
 
 		ctx.currentMove->DeductPP();
 
-		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
-
 		StageUpRoutine(deps, 1, "defense", [](BattlePokemon& p) { return p.GetDefenseStage(); }, [](BattlePokemon& p, int val) { p.SetDefenseStage(val); });
 	}
 
@@ -2646,8 +2532,6 @@ namespace MoveRoutines
 		deps.resultsUI.UsedTextDialog(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView(), ctx.currentMove->GetName());
 
 		ctx.currentMove->DeductPP();
-
-		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 
 		ctx.attackingPokemon->SetUsedMinimize(true);
 
@@ -2662,8 +2546,6 @@ namespace MoveRoutines
 
 		ctx.currentMove->DeductPP();
 
-		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
-
 		StageUpRoutine(deps, 2, "defense", [](BattlePokemon& p) { return p.GetDefenseStage(); }, [](BattlePokemon& p, int val) { p.SetDefenseStage(val); });
 
 	}
@@ -2675,8 +2557,6 @@ namespace MoveRoutines
 		deps.resultsUI.UsedTextDialog(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView(), ctx.currentMove->GetName());
 
 		ctx.currentMove->DeductPP();
-
-		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 
 		if (ctx.attackingPlayer->HasLightScreen())
 		{
@@ -2696,8 +2576,6 @@ namespace MoveRoutines
 		deps.resultsUI.UsedTextDialog(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView(), ctx.currentMove->GetName());
 
 		ctx.currentMove->DeductPP();
-
-		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 
 		ctx.attackingPokemon->SetAttackStage(6);
 		ctx.attackingPokemon->SetDefenseStage(6);
@@ -2726,8 +2604,6 @@ namespace MoveRoutines
 
 		ctx.currentMove->DeductPP();
 
-		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
-
 		if (ctx.attackingPlayer->HasReflect())
 		{
 			deps.resultsUI.DisplayFailedTextDialog();
@@ -2747,8 +2623,6 @@ namespace MoveRoutines
 
 		ctx.currentMove->DeductPP();
 
-		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
-
 		if (ctx.attackingPokemon->HasFocusEnergy())
 		{
 			deps.resultsUI.DisplayFailedTextDialog();
@@ -2767,8 +2641,6 @@ namespace MoveRoutines
 	{
 		auto& ctx = deps.context;
 
-		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
-
 		if (!ctx.attackingPokemon->IsBiding())
 		{
 			deps.resultsUI.UsedTextDialog(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView(), ctx.currentMove->GetName());
@@ -2778,8 +2650,8 @@ namespace MoveRoutines
 			ctx.attackingPokemon->SetBide(true);
 			ctx.attackingPlayer->SetCanSwitch(false);
 
-			ctx.attackingPokemon->SetBideTurnCount(2);
-			ctx.attackingPokemon->ResetBideCounter();
+			ctx.attackingPokemon->SetLockedTurnCount(2);
+			ctx.attackingPokemon->ResetLockedCounter();
 
 			deps.resultsUI.DisplayBideStoringEnergyMsg(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView());
 
@@ -2849,9 +2721,9 @@ namespace MoveRoutines
 
 			const Move& selectedMove = Database::GetBaseMoveByID(id);
 
-			ctx.attackingPokemon->SetCalledMove(selectedMove);
-
 			deps.resultsUI.DisplayMetronomeMsg(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView(), selectedMove.GetName());
+
+			ctx.attackingPokemon->SetCalledMove(selectedMove);
 		}
 
 		pokemonMove* metronome = ctx.currentMove;
@@ -2860,24 +2732,11 @@ namespace MoveRoutines
 
 		ctx.currentMove = &calledMove;
 
-		if (ctx.attackingPlayer == ctx.playerOne)
-		{
-			ctx.playerOneCurrentMoveType = calledMove.GetMoveTypeEnum();
-		}
-		else
-		{
-			ctx.playerTwoCurrentMoveType = calledMove.GetMoveTypeEnum();
-		}
-
-		ctx.currentMoveType = (ctx.attackingPlayer == ctx.playerOne) ? ctx.playerOneCurrentMoveType : ctx.playerTwoCurrentMoveType;
-
 		{
 			Execute(calledMove.GetMoveEffectEnum(), deps);
 		}
 
 		ctx.currentMove = metronome;
-
-		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 	}
 
 	void MirrorMove(MoveRoutineDeps& deps)
@@ -2886,11 +2745,12 @@ namespace MoveRoutines
 
 		if (!(ctx.attackingPokemon->IsCharging() || ctx.attackingPokemon->IsRampaging()))
 		{
+			deps.resultsUI.UsedTextDialog(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView(), ctx.currentMove->GetName());
+
 			ctx.currentMove->DeductPP();
 
 			if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
 			{
-				ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 				return;
 			}
 
@@ -2911,8 +2771,6 @@ namespace MoveRoutines
 			const Move& selectedMove = Database::GetBaseMoveByIndex(targetLastUsedMove->GetMoveIndex());
 
 			ctx.attackingPokemon->SetCalledMove(selectedMove);
-
-			deps.resultsUI.UsedTextDialog(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView(), ctx.currentMove->GetName());
 		}
 
 		pokemonMove* mirrorMove = ctx.currentMove;
@@ -2921,24 +2779,11 @@ namespace MoveRoutines
 
 		ctx.currentMove = &calledMove;
 
-		if (ctx.attackingPlayer == ctx.playerOne)
-		{
-			ctx.playerOneCurrentMoveType = calledMove.GetMoveTypeEnum();
-		}
-		else
-		{
-			ctx.playerTwoCurrentMoveType = calledMove.GetMoveTypeEnum();
-		}
-
-		ctx.currentMoveType = (ctx.attackingPlayer == ctx.playerOne) ? ctx.playerOneCurrentMoveType : ctx.playerTwoCurrentMoveType;
-
 		{
 			Execute(calledMove.GetMoveEffectEnum(), deps);
 		}
 
 		ctx.currentMove = mirrorMove;
-
-		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 	}
 
 	void Explosion(MoveRoutineDeps& deps)
@@ -2948,8 +2793,6 @@ namespace MoveRoutines
 		deps.resultsUI.UsedTextDialog(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView(), ctx.currentMove->GetName());
 
 		ctx.currentMove->DeductPP();
-
-		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 
 		ctx.attackingPokemon->DamageCurrentHP(ctx.attackingPokemon->GetCurrentHP());
 
@@ -2996,8 +2839,6 @@ namespace MoveRoutines
 		deps.resultsUI.UsedTextDialog(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView(), ctx.currentMove->GetName());
 
 		ctx.currentMove->DeductPP();
-
-		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 
 		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
 		{
@@ -3083,8 +2924,6 @@ namespace MoveRoutines
 
 		ctx.currentMove->DeductPP();
 
-		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
-
 		StageUpRoutine(deps, 2, "special defense", [](BattlePokemon& p) { return p.GetSpecialDefenseStage(); }, [](BattlePokemon& p, int val) { p.SetSpecialDefenseStage(val); });
 	}
 
@@ -3095,8 +2934,6 @@ namespace MoveRoutines
 		deps.resultsUI.UsedTextDialog(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView(), ctx.currentMove->GetName());
 
 		ctx.currentMove->DeductPP();
-
-		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 
 		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
 		{
@@ -3144,8 +2981,6 @@ namespace MoveRoutines
 		deps.resultsUI.UsedTextDialog(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView(), ctx.currentMove->GetName());
 
 		ctx.currentMove->DeductPP();
-
-		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 
 		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
 		{
@@ -3236,8 +3071,6 @@ namespace MoveRoutines
 
 		ctx.currentMove->DeductPP();
 
-		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
-
 		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
 		{
 			return;
@@ -3268,8 +3101,6 @@ namespace MoveRoutines
 		deps.resultsUI.UsedTextDialog(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView(), ctx.currentMove->GetName());
 
 		ctx.currentMove->DeductPP();
-
-		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 
 		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
 		{
@@ -3312,8 +3143,6 @@ namespace MoveRoutines
 
 		ctx.currentMove->DeductPP();
 
-		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
-
 		deps.resultsUI.DisplaySplashMsg();
 	}
 
@@ -3324,8 +3153,6 @@ namespace MoveRoutines
 		deps.resultsUI.UsedTextDialog(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView(), ctx.currentMove->GetName());
 
 		ctx.currentMove->DeductPP();
-
-		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 
 		if (ctx.attackingPokemon->GetCurrentHP() >= ctx.attackingPokemon->GetMaxHP())
 		{
@@ -3351,8 +3178,6 @@ namespace MoveRoutines
 		deps.resultsUI.UsedTextDialog(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView(), ctx.currentMove->GetName());
 
 		ctx.currentMove->DeductPP();
-
-		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 
 		PokemonType firstAvailableMoveSlotType{};
 
@@ -3388,8 +3213,6 @@ namespace MoveRoutines
 		deps.resultsUI.UsedTextDialog(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView(), ctx.currentMove->GetName());
 
 		ctx.currentMove->DeductPP();
-
-		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 
 		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
 		{
@@ -3453,8 +3276,6 @@ namespace MoveRoutines
 
 		ctx.currentMove->DeductPP();
 
-		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
-
 		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
 		{
 			return;
@@ -3497,8 +3318,6 @@ namespace MoveRoutines
 
 		ctx.currentMove->DeductPP();
 
-		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
-
 		if (ctx.attackingPokemon->HasSubstitute())
 		{
 			deps.resultsUI.DisplayAlreadyHasSubstituteMsg(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView());
@@ -3538,8 +3357,6 @@ namespace MoveRoutines
 		deps.resultsUI.DisplayNoMovesLeftStruggleMsg(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView());
 
 		deps.resultsUI.UsedTextDialog(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView(), ctx.currentMove->GetName());
-
-		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 
 		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
 		{

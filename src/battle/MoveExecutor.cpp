@@ -28,7 +28,8 @@ void MoveExecutor::ExecuteMove()
 void MoveExecutor::TryPostMoveReactions()
 {
     if (m_deps.context.defendingPokemon->GetStatus() == Status::Frozen &&
-        m_deps.context.currentMoveType == PokemonType::Fire &&
+        m_deps.context.lastDamagingMove != nullptr &&
+        m_deps.context.lastDamagingMove->GetMoveTypeEnum() == PokemonType::Fire &&
         m_deps.context.lastDamageApplied > 0 &&
         !m_deps.context.flags.hitSubstitute)
     {

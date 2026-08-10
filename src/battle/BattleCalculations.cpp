@@ -75,7 +75,6 @@ void BattleCalculations::SetFirst(Player& first, Player& second)
 	m_context.attackingPokemon = (&first == m_context.playerOne) ? m_context.playerOneCurrentPokemon : m_context.playerTwoCurrentPokemon;
 	m_context.defendingPokemon = (&second == m_context.playerOne) ? m_context.playerOneCurrentPokemon : m_context.playerTwoCurrentPokemon;
 	m_context.currentMove = (&first == m_context.playerOne) ? m_context.playerOneCurrentMove : m_context.playerTwoCurrentMove;
-	m_context.currentMoveType = (&first == m_context.playerOne) ? m_context.playerOneCurrentMoveType : m_context.playerTwoCurrentMoveType;
 }
 
 bool BattleCalculations::CalculateCriticalHit(BattleContext& ctx, const BattlePokemon& source)
@@ -331,6 +330,7 @@ void BattleCalculations::ApplyDamage(const pokemonMove& currentMove, BattlePokem
 	m_context.flags.hitSubstitute = hitSubstitute;
 	damage = (hitSubstitute ? std::min(damage, target.GetSubstituteHP()) : std::min(damage, target.GetCurrentHP()));
 	m_context.lastDamageApplied = damage;
+	m_context.lastDamagingMove = m_context.currentMove;
 
 	unsigned int currentPixel = target.GetCurrentHP() * HP_BAR_WIDTH / target.GetMaxHP();
 	m_context.prevPixels = currentPixel;

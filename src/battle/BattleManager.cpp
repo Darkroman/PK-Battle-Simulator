@@ -252,7 +252,6 @@ BattleState BattleManager::ApplyPlayerDecisions()
 	{
 	case BattleAction::Fight:
 		m_context.playerOneCurrentMove = playerOneDecision.chosenMove;
-		m_context.playerOneCurrentMoveType = playerOneDecision.chosenMove->GetMoveTypeEnum();
 		break;
 		
 	case BattleAction::SwitchPokemon:
@@ -271,7 +270,6 @@ BattleState BattleManager::ApplyPlayerDecisions()
 	{
 	case BattleAction::Fight:
 		m_context.playerTwoCurrentMove = playerTwoDecision.chosenMove;
-		m_context.playerTwoCurrentMoveType = playerTwoDecision.chosenMove->GetMoveTypeEnum();
 		break;
 
 	case BattleAction::SwitchPokemon:
@@ -305,7 +303,6 @@ void BattleManager::ApplyPlayerOneAction()
 	{
 	case BattleAction::Fight:
 		m_context.playerOneCurrentMove = decision.chosenMove;
-		m_context.playerOneCurrentMoveType = decision.chosenMove->GetMoveTypeEnum();
 		break;
 
 	case BattleAction::SwitchPokemon:
@@ -337,7 +334,6 @@ void BattleManager::ApplyPlayerTwoAction()
 	{
 	case BattleAction::Fight:
 		m_context.playerTwoCurrentMove = decision.chosenMove;
-		m_context.playerTwoCurrentMoveType = decision.chosenMove->GetMoveTypeEnum();
 		break;
 
 	case BattleAction::SwitchPokemon:

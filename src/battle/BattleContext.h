@@ -45,9 +45,6 @@ struct BattleContext
     pokemonMove* playerOneCurrentMove{ nullptr };
     pokemonMove* playerTwoCurrentMove{ nullptr };
 
-    PokemonType playerOneCurrentMoveType{ PokemonType::None };
-    PokemonType playerTwoCurrentMoveType{ PokemonType::None };
-
     Player* attackingPlayer{ nullptr };
     Player* defendingPlayer{ nullptr };
 
@@ -55,7 +52,7 @@ struct BattleContext
     BattlePokemon* defendingPokemon{ nullptr };
 
     pokemonMove* currentMove{ nullptr };
-    PokemonType currentMoveType{ PokemonType::None };
+    pokemonMove* lastDamagingMove{ nullptr };
 
     const int HP_BAR_WIDTH{ 400 };
 
