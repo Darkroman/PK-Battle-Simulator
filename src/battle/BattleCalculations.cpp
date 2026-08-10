@@ -76,7 +76,6 @@ void BattleCalculations::SetFirst(Player& first, Player& second)
 	m_context.defendingPokemon = (&second == m_context.playerOne) ? m_context.playerOneCurrentPokemon : m_context.playerTwoCurrentPokemon;
 	m_context.currentMove = (&first == m_context.playerOne) ? m_context.playerOneCurrentMove : m_context.playerTwoCurrentMove;
 	m_context.currentMoveType = (&first == m_context.playerOne) ? m_context.playerOneCurrentMoveType : m_context.playerTwoCurrentMoveType;
-	m_context.currentMoveEffect = (&first == m_context.playerOne) ? m_context.playerOneCurrentMoveEffect : m_context.playerTwoCurrentMoveEffect;
 }
 
 bool BattleCalculations::CalculateCriticalHit(BattleContext& ctx, const BattlePokemon& source)

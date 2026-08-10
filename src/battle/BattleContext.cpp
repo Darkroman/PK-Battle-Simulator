@@ -48,9 +48,6 @@ void BattleContext::ResetBattleState()
     playerOneCurrentMoveType = PokemonType::None;
     playerTwoCurrentMoveType = PokemonType::None;
 
-    playerOneCurrentMoveEffect = MoveEffect::Noop;
-    playerTwoCurrentMoveEffect = MoveEffect::Noop;
-
     attackingPlayer = nullptr;
     defendingPlayer = nullptr;
 
@@ -59,7 +56,6 @@ void BattleContext::ResetBattleState()
 
     currentMove = nullptr;
     currentMoveType = PokemonType::None;
-    currentMoveEffect = MoveEffect::Noop;
 
     battleTurn = 0;
 

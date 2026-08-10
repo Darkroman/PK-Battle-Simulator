@@ -2815,9 +2815,9 @@ namespace MoveRoutines
 			deps.resultsUI.DisplayAttackMissedTextDialog(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView());
 			return;
 		}
-		
+
 		FixedDamageRoutine(deps, bideDamage);
-		
+
 		deps.statusProcessor.CheckSubstituteCondition(ctx.defendingPlayer, ctx.defendingPokemon);
 		deps.statusProcessor.CheckFaintCondition(*ctx.attackingPlayer, *ctx.defendingPlayer, *ctx.attackingPokemon, *ctx.defendingPokemon);
 	}
@@ -2826,120 +2826,119 @@ namespace MoveRoutines
 	{
 		auto& ctx = deps.context;
 
-		ctx.currentMove->DeductPP();
-
-		/* ---
-		Metronome cannot call these moves:
-		counter - 68
-		mimic - 102
-		metronome - 118
-		mirror move - 119
-		transform - 144
-		struggle - 165
-		  --- */
-
-		MoveID id = MoveID::Counter;
-
-		do
+		if (!(ctx.attackingPokemon->IsCharging() || ctx.attackingPokemon->IsRampaging() || ctx.attackingPokemon->IsBiding()))
 		{
-			id = RandomEnum(deps.rng.GetGenerator(), MoveID::Pound, MoveID::Substitute);
+			ctx.currentMove->DeductPP();
+
+			/* ---
+			Metronome cannot call these moves:
+			counter - 68
+			mimic - 102
+			metronome - 118
+			mirror move - 119
+			transform - 144
+			struggle - 165
+			  --- */
+
+			MoveID id = MoveID::Counter;
+
+			do
+			{
+				id = RandomEnum(deps.rng.GetGenerator(), MoveID::Pound, MoveID::Substitute);
+			} while (id == MoveID::Counter || id == MoveID::Mimic || id == MoveID::Metronome || id == MoveID::MirrorMove || id == MoveID::Transform);
+
+			const Move& selectedMove = Database::GetBaseMoveByID(id);
+
+			ctx.attackingPokemon->SetCalledMove(selectedMove);
+
+			deps.resultsUI.DisplayMetronomeMsg(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView(), selectedMove.GetName());
 		}
-		while (id == MoveID::Counter || id == MoveID::Mimic || id == MoveID::Metronome || id == MoveID::MirrorMove || id == MoveID::Transform);
-
-		const Move& selectedMove = Database::GetBaseMoveByID(id);
-
-		deps.resultsUI.DisplayMetronomeMsg(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView(), selectedMove.GetName());
-
-		ctx.attackingPokemon->SetMetronomeMove(selectedMove);
 
 		pokemonMove* metronome = ctx.currentMove;
 
-		ctx.currentMove = ctx.attackingPokemon->GetMetronomeMove();
-		
+		pokemonMove& calledMove = *ctx.attackingPokemon->GetCalledMove();
+
+		ctx.currentMove = &calledMove;
+
 		if (ctx.attackingPlayer == ctx.playerOne)
 		{
-			ctx.playerOneCurrentMoveType = selectedMove.GetMoveTypeEnum();
-			ctx.playerOneCurrentMoveEffect = selectedMove.GetMoveEffectEnum();
+			ctx.playerOneCurrentMoveType = calledMove.GetMoveTypeEnum();
 		}
 		else
 		{
-			ctx.playerTwoCurrentMoveType = selectedMove.GetMoveTypeEnum();
-			ctx.playerTwoCurrentMoveEffect = selectedMove.GetMoveEffectEnum();
+			ctx.playerTwoCurrentMoveType = calledMove.GetMoveTypeEnum();
 		}
 
 		ctx.currentMoveType = (ctx.attackingPlayer == ctx.playerOne) ? ctx.playerOneCurrentMoveType : ctx.playerTwoCurrentMoveType;
-		ctx.currentMoveEffect = (ctx.attackingPlayer == ctx.playerOne) ? ctx.playerOneCurrentMoveEffect : ctx.playerTwoCurrentMoveEffect;
 
 		{
-			Execute(selectedMove.GetMoveEffectEnum(), deps);
+			Execute(calledMove.GetMoveEffectEnum(), deps);
 		}
 
 		ctx.currentMove = metronome;
 
 		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
-
-		ctx.attackingPokemon->ResetMetronome();
 	}
 
 	void MirrorMove(MoveRoutineDeps& deps)
 	{
 		auto& ctx = deps.context;
 
-		deps.resultsUI.UsedTextDialog(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView(), ctx.currentMove->GetName());
-
-		ctx.currentMove->DeductPP();
-
-		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
+		if (!(ctx.attackingPokemon->IsCharging() || ctx.attackingPokemon->IsRampaging()))
 		{
-			ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
-			return;
+			ctx.currentMove->DeductPP();
+
+			if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
+			{
+				ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
+				return;
+			}
+
+			pokemonMove* targetLastUsedMove = ctx.defendingPokemon->GetLastUsedMove();
+
+			if (targetLastUsedMove == nullptr)
+			{
+				deps.resultsUI.DisplayFailedTextDialog();
+				return;
+			}
+
+			if (!targetLastUsedMove->IsAffectedByMirrorMove())
+			{
+				deps.resultsUI.DisplayFailedTextDialog();
+				return;
+			}
+
+			const Move& selectedMove = Database::GetBaseMoveByIndex(targetLastUsedMove->GetMoveIndex());
+
+			ctx.attackingPokemon->SetCalledMove(selectedMove);
+
+			deps.resultsUI.UsedTextDialog(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView(), ctx.currentMove->GetName());
 		}
-
-		pokemonMove* targetLastUsedMove = ctx.defendingPokemon->GetLastUsedMove();
-
-		if (targetLastUsedMove == nullptr)
-		{
-			deps.resultsUI.DisplayFailedTextDialog();
-			return;
-		}
-
-		if (!targetLastUsedMove->IsAffectedByMirrorMove())
-		{
-			deps.resultsUI.DisplayFailedTextDialog();
-			return;
-		}
-
-		const Move& selectedMove = Database::GetBaseMoveByIndex(targetLastUsedMove->GetMoveIndex());
-
-		ctx.attackingPokemon->SetMirrorMove(selectedMove);
 
 		pokemonMove* mirrorMove = ctx.currentMove;
 
-		ctx.currentMove = ctx.attackingPokemon->GetMirrorMoveCopiedMove();
+		pokemonMove& calledMove = *ctx.attackingPokemon->GetCalledMove();
+
+		ctx.currentMove = &calledMove;
 
 		if (ctx.attackingPlayer == ctx.playerOne)
 		{
-			ctx.playerOneCurrentMoveType = selectedMove.GetMoveTypeEnum();
-			ctx.playerOneCurrentMoveEffect = selectedMove.GetMoveEffectEnum();
+			ctx.playerOneCurrentMoveType = calledMove.GetMoveTypeEnum();
 		}
 		else
 		{
-			ctx.playerTwoCurrentMoveType = selectedMove.GetMoveTypeEnum();
-			ctx.playerTwoCurrentMoveEffect = selectedMove.GetMoveEffectEnum();
+			ctx.playerTwoCurrentMoveType = calledMove.GetMoveTypeEnum();
 		}
 
 		ctx.currentMoveType = (ctx.attackingPlayer == ctx.playerOne) ? ctx.playerOneCurrentMoveType : ctx.playerTwoCurrentMoveType;
-		ctx.currentMoveEffect = (ctx.attackingPlayer == ctx.playerOne) ? ctx.playerOneCurrentMoveEffect : ctx.playerTwoCurrentMoveEffect;
 
 		{
-			Execute(selectedMove.GetMoveEffectEnum(), deps);
+			Execute(calledMove.GetMoveEffectEnum(), deps);
 		}
 
 		ctx.currentMove = mirrorMove;
 
 		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
-
-		ctx.attackingPokemon->ResetMirrorMove();
 	}
 
 	void Explosion(MoveRoutineDeps& deps)

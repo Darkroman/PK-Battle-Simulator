@@ -48,9 +48,6 @@ struct BattleContext
     PokemonType playerOneCurrentMoveType{ PokemonType::None };
     PokemonType playerTwoCurrentMoveType{ PokemonType::None };
 
-    MoveEffect playerOneCurrentMoveEffect{};
-    MoveEffect playerTwoCurrentMoveEffect{};
-
     Player* attackingPlayer{ nullptr };
     Player* defendingPlayer{ nullptr };
 
@@ -59,7 +56,6 @@ struct BattleContext
 
     pokemonMove* currentMove{ nullptr };
     PokemonType currentMoveType{ PokemonType::None };
-    MoveEffect currentMoveEffect{};
 
     const int HP_BAR_WIDTH{ 400 };
 

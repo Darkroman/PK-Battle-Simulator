@@ -1438,42 +1438,16 @@ void BattlePokemon::DamageSubstitute(unsigned int damage)
     m_substituteHealth -= damage;
 }
 
-void BattlePokemon::SetMetronomeMove(const Move& move)
+void BattlePokemon::SetCalledMove(const Move& move)
 {
-    metronomeMove.SetMovePointer(&move);
-    metronomeMove.m_currentPP = 1;
-    metronomeMove.m_maxPP = 1;
+    calledMove.SetMovePointer(&move);
+    calledMove.m_currentPP = 1;
+    calledMove.m_maxPP = 1;
 }
 
-pokemonMove* BattlePokemon::GetMetronomeMove()
+pokemonMove* BattlePokemon::GetCalledMove()
 {
-    return &metronomeMove;
-}
-
-void BattlePokemon::ResetMetronome()
-{
-    metronomeMove.SetMovePointer(nullptr);
-    metronomeMove.m_currentPP = 1;
-    metronomeMove.m_maxPP = 1;
-}
-
-void BattlePokemon::SetMirrorMove(const Move& move)
-{
-    mirrorMove.SetMovePointer(&move);
-    mirrorMove.m_currentPP = 1;
-    mirrorMove.m_maxPP = 1;
-}
-
-pokemonMove* BattlePokemon::GetMirrorMoveCopiedMove()
-{
-    return &mirrorMove;
-}
-
-void BattlePokemon::ResetMirrorMove()
-{
-    mirrorMove.SetMovePointer(nullptr);
-    mirrorMove.m_currentPP = 1;
-    mirrorMove.m_maxPP = 1;
+    return &calledMove;
 }
 
 void BattlePokemon::ResetStatsOnSwitch()

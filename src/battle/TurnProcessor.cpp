@@ -121,7 +121,6 @@ void TurnProcessor::SwapRoles()
 
 	m_context.currentMove = currentIsPlayerOne ? m_context.playerTwoCurrentMove : m_context.playerOneCurrentMove;
 	m_context.currentMoveType = currentIsPlayerOne ? m_context.playerTwoCurrentMoveType : m_context.playerOneCurrentMoveType;
-	m_context.currentMoveEffect = currentIsPlayerOne ? m_context.playerTwoCurrentMoveEffect : m_context.playerOneCurrentMoveEffect;
 }
 
 TurnSwitchState TurnProcessor::CheckPendingSwitch()

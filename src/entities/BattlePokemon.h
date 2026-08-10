@@ -283,13 +283,8 @@ public:
     unsigned int GetSubstituteHP() const;
     void DamageSubstitute(unsigned int);
 
-    void SetMetronomeMove(const Move& move);
-    pokemonMove* GetMetronomeMove();
-    void ResetMetronome();
-
-    void SetMirrorMove(const Move& move);
-    pokemonMove* GetMirrorMoveCopiedMove();
-    void ResetMirrorMove();
+    void SetCalledMove(const Move& move);
+    pokemonMove* GetCalledMove();
 
 private:
     void ResetStatsAndMoves();
@@ -305,8 +300,7 @@ private:
     std::string m_nickname{};
     std::string m_boundMove{};
 
-    pokemonMove metronomeMove;
-    pokemonMove mirrorMove;
+    pokemonMove calledMove;
 
     pokemonMove* lastUsedMove{ nullptr };
 
