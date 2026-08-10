@@ -46,7 +46,7 @@ bool StatusEffectProcessor::CheckPerformativeStatus()
 		break;
 	}
 
-	if (m_context.currentMove->b_isDisabled && m_context.currentMove->GetMoveEffectEnum() == m_context.currentMove->GetMoveEffectEnum() && canPerform)
+	if (m_context.currentMove->b_isDisabled && m_context.attackingPokemon->GetLastUsedMove() == m_context.currentMove && canPerform)
 	{
 		canPerform = false;
 		m_statusEffectUI.DisplayMoveIsDisabledMsg(m_context.attackingPlayer->GetPlayerNameView(), m_context.attackingPokemon->GetNameView(), m_context.currentMove->GetName());
