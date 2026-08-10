@@ -2515,9 +2515,10 @@ namespace MoveRoutines
 
 		bool fail =
 			alreadyHasMove ||
+			targetLastUsedMove->GetMoveID() == MoveID::Metronome ||
+			targetLastUsedMove->GetMoveID() == MoveID::MirrorMove ||
 			targetLastUsedMove->GetMoveID() == MoveID::Transform ||
 			targetLastUsedMove->GetMoveID() == MoveID::Struggle ||
-			targetLastUsedMove->GetMoveID() == MoveID::Metronome ||
 			ctx.attackingPokemon->IsTransformed();
 		
 

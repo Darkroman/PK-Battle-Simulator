@@ -1,6 +1,5 @@
 #include <array>
 #include <algorithm>
-#include <utility>
 
 #include "HardAIScoring.h"
 
@@ -21,6 +20,48 @@
 
 namespace HardAIMoveScoring
 {
+	bool MirrorMoveIDFound(MoveID id)
+	{
+		switch (id)
+		{
+			case MoveID::Guillotine:
+			case MoveID::SandAttack:
+			case MoveID::HornDrill:
+			case MoveID::Sing:
+			case MoveID::HyperBeam:
+			case MoveID::PoisonPowder:
+			case MoveID::SleepPowder:
+			case MoveID::ThunderWave:
+			case MoveID::Fissure:
+			case MoveID::Toxic:
+			case MoveID::Hypnosis:
+			case MoveID::Screech:
+			case MoveID::Smokescreen:
+			case MoveID::ConfuseRay:
+			case MoveID::Glare:
+			case MoveID::LovelyKiss:
+			case MoveID::Spore:
+				return true;
+			default:
+				return false;
+		}
+	}
+
+	bool SpeedUpMoveEffectFound(MoveEffect effect)
+	{
+		switch (effect)
+		{
+			case MoveEffect::Stomp:
+			case MoveEffect::FlinchHit:
+			case MoveEffect::HealHalfHP:
+			case MoveEffect::Rest:
+			case MoveEffect::Substitute:
+				return true;
+			default:
+				return false;
+		}
+	}
+
 	ScoringResults RunExpertScoringRoutine(ScoringResults& result, std::span<ScoringResults>& results, const Player& self, const Player& targetPlayer, const pokemonMove& move, const BattlePokemon& selfMon, const BattlePokemon& targetMon, RandomEngine& rng)
 	{
 		int delta{};
@@ -187,28 +228,7 @@ namespace HardAIMoveScoring
 			targetLastUsedMoveID = targetMon.GetLastUsedMove()->GetMoveID();
 		}
 
-		std::array<MoveID, 17> mirrorMoveList
-		{
-			MoveID::Guillotine,
-			MoveID::SandAttack,
-			MoveID::HornDrill,
-			MoveID::Sing,
-			MoveID::HyperBeam,
-			MoveID::PoisonPowder,
-			MoveID::SleepPowder,
-			MoveID::ThunderWave,
-			MoveID::Fissure,
-			MoveID::Toxic,
-			MoveID::Hypnosis,
-			MoveID::Screech,
-			MoveID::Smokescreen,
-			MoveID::ConfuseRay,
-			MoveID::Glare,
-			MoveID::LovelyKiss,
-			MoveID::Spore
-		};
-
-		bool moveFound{ std::ranges::contains(mirrorMoveList, targetLastUsedMoveID) };
+		bool moveFound = MirrorMoveIDFound(targetLastUsedMoveID);
 
 		int delta{};
 
@@ -369,26 +389,17 @@ namespace HardAIMoveScoring
 			return delta;
 		}
 
-		std::array<MoveEffect, 5> moveEffectTable
-		{
-			MoveEffect::Stomp,
-			MoveEffect::FlinchHit,
-			MoveEffect::HealHalfHP,
-			MoveEffect::Rest,
-			MoveEffect::Substitute
-		};
-
-		bool foundMove{};
+		bool moveFound{};
 		for (const auto& move : selfMon.GetMoveArray())
 		{
-			if (std::ranges::contains(moveEffectTable, move.GetMoveEffectEnum()))
+			if (SpeedUpMoveEffectFound(move.GetMoveEffectEnum()))
 			{
-				foundMove = true;
+				moveFound = true;
 				break;
 			}
 		}
 
-		if (foundMove && !rng.RandomLT(70)) // 72.65625%
+		if (moveFound && !rng.RandomLT(70)) // 72.65625%
 		{
 			delta += 2;
 		}

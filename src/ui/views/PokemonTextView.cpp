@@ -12,6 +12,7 @@
 #include "../../entities/pokemonMove.h"
 #include "../../entities/BattlePokemon.h"
 #include "../../entities/Player.h"
+#include "../../data/MoveID.h"
 #include "../../data/Database.h"
 #include "../../data/Pokemon.h"
 #include "../../data/Move.h"
@@ -541,9 +542,10 @@ namespace PokemonTextView
 
             bool fail =
                 alreadyHasMove ||
+                targetLastUsedMove->GetMoveID() == MoveID::Metronome ||
+                targetLastUsedMove->GetMoveID() == MoveID::MirrorMove ||
                 targetLastUsedMove->GetMoveID() == MoveID::Transform ||
                 targetLastUsedMove->GetMoveID() == MoveID::Struggle ||
-                targetLastUsedMove->GetMoveID() == MoveID::Metronome ||
                 selfMon.IsTransformed();
 
             if (fail)

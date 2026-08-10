@@ -736,9 +736,10 @@ bool AIController::CalculateStatusMoveEffectiveness(const pokemonMove& currentMo
 
 		bool fail =
 			alreadyHasMove ||
+			targetLastUsedMove->GetMoveID() == MoveID::Metronome ||
+			targetLastUsedMove->GetMoveID() == MoveID::MirrorMove ||
 			targetLastUsedMove->GetMoveID() == MoveID::Transform ||
 			targetLastUsedMove->GetMoveID() == MoveID::Struggle ||
-			targetLastUsedMove->GetMoveID() == MoveID::Metronome ||
 			selfMon.IsTransformed();
 
 		if (fail)

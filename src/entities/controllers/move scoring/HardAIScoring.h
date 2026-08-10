@@ -6,11 +6,17 @@ class Player;
 class BattlePokemon;
 struct pokemonMove;
 class RandomEngine;
+enum class MoveID;
+enum class MoveEffect;
 
 #include "ScoringResultsStruct.h"
 
 namespace HardAIMoveScoring
 {
+	bool MirrorMoveIDFound(MoveID id);
+
+	bool SpeedUpMoveEffectFound(MoveEffect effect);
+
 	ScoringResults RunExpertScoringRoutine(ScoringResults& result, std::span<ScoringResults>& results, const Player& self, const Player& targetPlayer, const pokemonMove& move, const BattlePokemon& selfMon, const BattlePokemon& targetMon, RandomEngine& rng);
 
 	int SleepMove(std::span<ScoringResults>& results, RandomEngine& rng);
