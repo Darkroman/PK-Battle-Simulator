@@ -54,6 +54,12 @@ bool StatusEffectProcessor::CheckPerformativeStatus()
 		canPerform = FlinchStatus(canPerform);
 	}
 
+
+	if (m_context.attackingPokemon->MoveIsDisabled() && canPerform)
+	{
+		canPerform = CheckDisabled();
+	}
+
 	if (m_context.attackingPokemon->IsConfused() && canPerform)
 	{
 		canPerform = ConfusedStatus();
@@ -62,11 +68,6 @@ bool StatusEffectProcessor::CheckPerformativeStatus()
 	if (m_context.attackingPokemon->GetStatus() == Status::Paralyzed && canPerform)
 	{
 		canPerform = ParalysisStatus();
-	}
-
-	if (m_context.attackingPokemon->MoveIsDisabled() && canPerform)
-	{
-		canPerform = CheckDisabled();
 	}
 
 	if (m_context.attackingPokemon->IsCharging() && !canPerform)
