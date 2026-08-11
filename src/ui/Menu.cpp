@@ -2300,7 +2300,7 @@ void Menu::SetDefaultPokemon()
 
 	if (players[0]->GetBelt(1).GetCurrentHP() != 0)
 	{
-		players[0]->GetBelt(1).SetMove(1, "Disable"); 
+		players[0]->GetBelt(1).SetMove(1, "Mimic"); 
 		players[0]->GetBelt(1).SetMove(2, "Tackle");
 		//players[0]->GetBelt(1).SetMove(3, "Quick Attack");
 		//players[0]->GetBelt(1).SetMove(4, "Bite");
@@ -2308,8 +2308,8 @@ void Menu::SetDefaultPokemon()
 		//players[0]->GetBelt(2).SetMove(2, "Mega Drain");
 		//players[0]->GetBelt(2).SetMove(3, "Quick Attack");
 		//players[0]->GetBelt(2).SetMove(4, "Bite");
-		players[1]->GetBelt(1).SetMove(1, "Metronome");
-		//players[1]->GetBelt(1).SetMove(2, "Tackle");
+		players[1]->GetBelt(1).SetMove(1, "Disable");
+		players[1]->GetBelt(1).SetMove(2, "Mega Drain");
 		//players[1]->GetBelt(1).SetMove(3, "Quick Attack");
 		//players[1]->GetBelt(1).SetMove(4, "Bite");
 		//players[1]->GetBelt(2).SetMove(1, "Surf");

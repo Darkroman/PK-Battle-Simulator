@@ -256,6 +256,7 @@ public:
 
     bool HasUsedMimic() const;
     void SetUsedMimic(bool);
+    void PreserveLastUsedMoveForMimic();
     int GetMimicPP() const;
     void SetMimicPP(int);
 
@@ -298,6 +299,7 @@ private:
     std::string m_boundMove{};
 
     pokemonMove calledMove;
+    pokemonMove m_mimicLastUsedMove;
 
     pokemonMove* lastUsedMove{ nullptr };
 

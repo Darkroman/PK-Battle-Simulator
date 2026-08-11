@@ -2442,6 +2442,8 @@ namespace MoveRoutines
 
 		deps.resultsUI.DisplayLearnedMimicMoveMsg(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView(), targetLastUsedMove->GetName());
 
+		ctx.attackingPokemon->PreserveLastUsedMoveForMimic();
+
 		ctx.currentMove->SetMovePointer(copiedMove);
 
 		ctx.currentMove->m_currentPP = ctx.defendingPokemon->GetLastUsedMove()->GetPP();

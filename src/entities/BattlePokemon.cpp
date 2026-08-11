@@ -1224,6 +1224,12 @@ void BattlePokemon::SetUsedMimic(bool mimic)
     b_usedMimic = mimic;
 }
 
+void BattlePokemon::PreserveLastUsedMoveForMimic()
+{
+    m_mimicLastUsedMove = *lastUsedMove;
+    lastUsedMove = &m_mimicLastUsedMove;
+}
+
 int BattlePokemon::GetMimicPP() const
 {
     return m_mimicPP;
@@ -1490,6 +1496,8 @@ void BattlePokemon::ResetStatsOnSwitch()
     SetFocusEnergy(false);
     SetSubstitute(false);
     SetSubstituteHP(0);
+    SetRaging(false);
+
     lastUsedMove = nullptr;
 
     if (HasUsedMimic())
