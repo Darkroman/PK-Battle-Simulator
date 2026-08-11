@@ -394,6 +394,11 @@ namespace HardAIMoveScoring
 		{
 			if (SpeedUpMoveEffectFound(move.GetMoveEffectEnum()))
 			{
+				if (!move.HasMove())
+				{
+					continue;
+				}
+
 				moveFound = true;
 				break;
 			}

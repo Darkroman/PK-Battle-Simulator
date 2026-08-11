@@ -1465,14 +1465,14 @@ void BattlePokemon::ResetCalledMove()
 
 void BattlePokemon::ResetStatsOnSwitch()
 {
-    if (IsTransformed())
-    {
-        Detransform();
-    }
-
     if (IsConverted())
     {
         Deconvert();
+    }
+
+    if (IsTransformed())
+    {
+        Detransform();
     }
 
     SetAttackStage(6);
@@ -1583,14 +1583,14 @@ void BattlePokemon::ResetStatsAndMoves()
 
 void BattlePokemon::ResetValues()
 {
-    if (b_isTransformed)
-    {
-        Detransform();
-    }
-
     if (b_isConverted)
     {
         Deconvert();
+    }
+
+    if (b_isTransformed)
+    {
+        Detransform();
     }
 
     m_currentHP = GetMaxHP();

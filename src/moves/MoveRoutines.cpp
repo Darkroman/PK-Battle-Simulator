@@ -1045,8 +1045,6 @@ namespace MoveRoutines
 	{
 		auto& ctx = deps.context;
 
-		ctx.flags.hit = deps.calculations.CalculateHitChance(*ctx.currentMove, *ctx.attackingPokemon, *ctx.defendingPokemon);
-
 		deps.resultsUI.UsedTextDialog(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView(), ctx.currentMove->GetName());
 
 		ctx.currentMove->DeductPP();
@@ -1063,6 +1061,8 @@ namespace MoveRoutines
 			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.flags.currentEffectiveness));
 			return;
 		}
+
+		ctx.flags.hit = deps.calculations.CalculateHitChance(*ctx.currentMove, *ctx.attackingPokemon, *ctx.defendingPokemon);
 
 		if (!ctx.flags.hit)
 		{
