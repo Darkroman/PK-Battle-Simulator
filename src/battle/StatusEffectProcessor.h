@@ -17,6 +17,7 @@ public:
 	bool FlinchStatus();
 	bool ConfusedStatus();
 	bool ParalysisStatus();
+	bool CheckDisabled();
 
 	void ResetRampageState();
 	void RampageConfuse();

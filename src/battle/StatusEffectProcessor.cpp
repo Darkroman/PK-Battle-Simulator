@@ -6,7 +6,9 @@
 #include "BattleContext.h"
 #include "RandomEngine.h"
 #include "StageRatios.h"
+#include "../moves/MoveEffectEnums.h"
 #include "../ui/interfaces/IStatusEffectUI.h"
+#include "../entities/pokemonMove.h"
 #include "../entities/BattlePokemon.h"
 #include "../entities/Player.h"
 
@@ -46,12 +48,6 @@ bool StatusEffectProcessor::CheckPerformativeStatus()
 		break;
 	}
 
-	if (m_context.currentMove->b_isDisabled && m_context.attackingPokemon->GetLastUsedMove() == m_context.currentMove && canPerform)
-	{
-		canPerform = false;
-		m_statusEffectUI.DisplayMoveIsDisabledMsg(m_context.attackingPlayer->GetPlayerNameView(), m_context.attackingPokemon->GetNameView(), m_context.currentMove->GetName());
-	}
-
 	if (m_context.attackingPokemon->IsFlinched() && canPerform)
 	{
 		canPerform = FlinchStatus();
@@ -65,6 +61,11 @@ bool StatusEffectProcessor::CheckPerformativeStatus()
 	if (m_context.attackingPokemon->GetStatus() == Status::Paralyzed && canPerform)
 	{
 		canPerform = ParalysisStatus();
+	}
+
+	if (m_context.attackingPokemon->MoveIsDisabled() && canPerform)
+	{
+		canPerform = CheckDisabled();
 	}
 
 	if (m_context.attackingPokemon->IsCharging() && !canPerform)
@@ -222,6 +223,49 @@ bool StatusEffectProcessor::ParalysisStatus()
 		return true;
 	}
 
+}
+
+bool StatusEffectProcessor::CheckDisabled()
+{
+	bool canPerform{ true };
+
+	bool isLocked = m_context.attackingPokemon->IsCharging() || m_context.attackingPokemon->IsRecharging() ||
+		m_context.attackingPokemon->IsRampaging() || m_context.attackingPokemon->IsBiding();
+
+	const bool isCalledMoveContinuation = isLocked &&
+		(m_context.currentMove->GetMoveEffectEnum() == MoveEffect::Metronome ||
+			m_context.currentMove->GetMoveEffectEnum() == MoveEffect::MirrorMove);
+
+	const pokemonMove* disabledMove =
+		m_context.attackingPokemon->GetDisabledMove();
+
+	bool disabled = false;
+
+	if (isCalledMoveContinuation)
+	{
+		const pokemonMove* calledMove = m_context.attackingPokemon->GetCalledMove();
+
+		disabled = calledMove->HasMove() && calledMove->GetMoveID() == disabledMove->GetMoveID();
+	}
+	else if (isLocked)
+	{
+		const pokemonMove* lastUsed = m_context.attackingPokemon->GetLastUsedMove();
+
+		disabled = lastUsed != nullptr && lastUsed->GetMoveID() == disabledMove->GetMoveID();
+	}
+	else
+	{
+		disabled = m_context.currentMove->GetMoveID() == disabledMove->GetMoveID();
+	}
+
+	if (disabled)
+	{
+		canPerform = false;
+
+		m_statusEffectUI.DisplayMoveIsDisabledMsg(m_context.attackingPlayer->GetPlayerNameView(), m_context.attackingPokemon->GetNameView(), disabledMove->GetName());
+	}
+	
+	return canPerform;
 }
 
 void StatusEffectProcessor::ResetRampageState()

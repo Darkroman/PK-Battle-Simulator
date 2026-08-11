@@ -1128,14 +1128,14 @@ void BattlePokemon::SetDisabledStatus(bool disabled)
     b_moveIsDisabled = disabled;
 }
 
-void BattlePokemon::SetDisabledMoveID(MoveID id)
+void BattlePokemon::SetDisabledMove(pokemonMove* move)
 {
-    m_disabledMoveID = id;
+    m_disabledMove = move;
 }
 
-MoveID BattlePokemon::GetDisabledMoveID() const
+pokemonMove* BattlePokemon::GetDisabledMove() const
 {
-    return m_disabledMoveID;
+    return m_disabledMove;
 }
 
 void BattlePokemon::IncrementDisabledCounter()
@@ -1255,6 +1255,11 @@ void BattlePokemon::SetTransformation(BattlePokemon* pokemon)
 
     for (size_t i = 0; i < m_array_moves.size(); ++i)
     {
+        if (!m_array_moves[i].HasMove())
+        {
+            continue;
+        }
+
         m_array_moves[i].SetMovePointer(pokemon->GetMove(i + 1).GetMovePointer());
         m_array_moves[i].m_currentPP = 5;
         m_array_moves[i].m_maxPP = 5;
@@ -1280,7 +1285,12 @@ void BattlePokemon::SetTransformation(BattlePokemon* pokemon)
     {
         for (auto& move : GetMoveArray())
         {
-            if (move.GetMoveID() == m_disabledMoveID)
+            if (!move.HasMove())
+            {
+                continue;
+            }
+
+            if (move.GetMoveID() == m_disabledMove->GetMoveID())
             {
                 move.b_isDisabled = true;
                 break;
@@ -1319,6 +1329,11 @@ void BattlePokemon::Detransform()
 {
     for (size_t i = 0; i < m_array_moves.size(); ++i)
     {
+        if (!(m_array_moves[i].HasMove() && m_array_moves[i].HasMove()))
+        {
+            continue;
+        }
+
         m_array_moves[i].SetMovePointer(m_detransformData.m_array_moves[i].GetMovePointer());
         m_array_moves[i].m_currentPP = m_detransformData.m_array_moves[i].m_currentPP;
         m_array_moves[i].m_maxPP = m_detransformData.m_array_moves[i].m_maxPP;
@@ -1330,7 +1345,12 @@ void BattlePokemon::Detransform()
     {
         for (auto& move : GetMoveArray())
         {
-            if (move.GetMoveID() == m_disabledMoveID)
+            if (!move.HasMove())
+            {
+                continue;
+            }
+
+            if (move.GetMoveID() == m_disabledMove->GetMoveID())
             {
                 move.b_isDisabled = true;
                 break;
@@ -1419,13 +1439,20 @@ void BattlePokemon::DamageSubstitute(unsigned int damage)
 void BattlePokemon::SetCalledMove(const Move& move)
 {
     calledMove.SetMovePointer(&move);
-    calledMove.m_currentPP = 1;
-    calledMove.m_maxPP = 1;
+    calledMove.m_currentPP = 5;
+    calledMove.m_maxPP = 5;
 }
 
 pokemonMove* BattlePokemon::GetCalledMove()
 {
     return &calledMove;
+}
+
+void BattlePokemon::ResetCalledMove()
+{
+    calledMove.SetMovePointer(nullptr);
+    calledMove.m_currentPP = 5;
+    calledMove.m_maxPP = 5;
 }
 
 void BattlePokemon::ResetStatsOnSwitch()
@@ -1483,7 +1510,7 @@ void BattlePokemon::ResetStatsOnSwitch()
     if (MoveIsDisabled())
     {
         SetDisabledStatus(false);
-        SetDisabledMoveID(MoveID::None);
+        SetDisabledMove(nullptr);
         ResetDisabledCounter();
 
         for (size_t i = 1; i < 5; ++i)
@@ -1596,7 +1623,7 @@ void BattlePokemon::ResetValues()
 
     currentStatus = Status::Normal;
 
-    m_disabledMoveID = MoveID::None;
+    m_disabledMove = nullptr;
     ResetDisabledCounter();
 
     for (auto& i : m_array_moves)

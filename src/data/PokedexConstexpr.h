@@ -162,7 +162,7 @@ inline constexpr Pokemon global_pokedex[] = {
 { PokemonID::Mew,         "Mew",         100, 100, 100, 100, 100, 100, PokemonType::Psychic,  PokemonType::None,     40,   {MOVES_151, std::size(MOVES_151)} },
 
 #ifndef NDEBUG
-{ PokemonID::Test1,       "Test1",       100, 100, 100, 100, 100, 100, PokemonType::Fairy,   PokemonType::None,     40,   {MOVES_152, std::size(MOVES_152)} },
-{ PokemonID::Test2,       "Test2",       100, 100, 100, 100, 100, 100, PokemonType::Fairy,   PokemonType::None,     40,   {MOVES_152, std::size(MOVES_152)} },
+{ PokemonID::Test1,       "Test1",       255, 5, 255, 5, 255, 100, PokemonType::Fairy,   PokemonType::None,     40,   {MOVES_152, std::size(MOVES_152)} },
+{ PokemonID::Test2,       "Test2",       255, 5, 255, 5, 255, 100, PokemonType::Fairy,   PokemonType::None,     40,   {MOVES_152, std::size(MOVES_152)} },
 #endif
 };

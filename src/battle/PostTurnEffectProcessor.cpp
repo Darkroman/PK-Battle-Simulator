@@ -420,21 +420,18 @@ void PostTurnEffectProcessor::CheckDisabledStatus()
     {
         if (m_context.attackingPokemon->GetDisabledCounter() >= DisableTurnCount)
         {
-            std::string_view moveName{ "move" };
-
             for (auto& move : m_context.attackingPokemon->GetMoveArray())
             {
-                if (move.GetMoveID() == m_context.attackingPokemon->GetDisabledMoveID())
+                if (move.HasMove() && move.GetMoveID() == m_context.attackingPokemon->GetDisabledMove()->GetMoveID())
                 {
                     move.b_isDisabled = false;
-                    moveName = move.GetName();
                     break;
                 }
             }
 
-            m_statusEffectUI.DisplayMoveNoLongerDisabledMsg(m_context.attackingPlayer->GetPlayerNameView(), m_context.attackingPokemon->GetNameView(), moveName);
+            m_statusEffectUI.DisplayMoveNoLongerDisabledMsg(m_context.attackingPlayer->GetPlayerNameView(), m_context.attackingPokemon->GetNameView(), m_context.attackingPokemon->GetDisabledMove()->GetName());
             m_context.attackingPokemon->SetDisabledStatus(false);
-            m_context.attackingPokemon->SetDisabledMoveID(MoveID::None);
+            m_context.attackingPokemon->SetDisabledMove(nullptr);
             m_context.attackingPokemon->ResetDisabledCounter();
         }
         else
@@ -447,21 +444,18 @@ void PostTurnEffectProcessor::CheckDisabledStatus()
     {
         if (m_context.defendingPokemon->GetDisabledCounter() >= DisableTurnCount)
         {
-            std::string_view moveName{ "move" };
-
             for (auto& move : m_context.defendingPokemon->GetMoveArray())
             {
-                if (move.GetMoveID() == m_context.defendingPokemon->GetDisabledMoveID())
+                if (move.HasMove() && move.GetMoveID() == m_context.defendingPokemon->GetDisabledMove()->GetMoveID())
                 {
                     move.b_isDisabled = false;
-                    moveName = move.GetName();
                     break;
                 }
             }
 
-            m_statusEffectUI.DisplayMoveNoLongerDisabledMsg(m_context.defendingPlayer->GetPlayerNameView(), m_context.defendingPokemon->GetNameView(), moveName);
+            m_statusEffectUI.DisplayMoveNoLongerDisabledMsg(m_context.defendingPlayer->GetPlayerNameView(), m_context.defendingPokemon->GetNameView(), m_context.defendingPokemon->GetDisabledMove()->GetName());
             m_context.defendingPokemon->SetDisabledStatus(false);
-            m_context.defendingPokemon->SetDisabledMoveID(MoveID::None);
+            m_context.defendingPokemon->SetDisabledMove(nullptr);
             m_context.defendingPokemon->ResetDisabledCounter();
         }
         else

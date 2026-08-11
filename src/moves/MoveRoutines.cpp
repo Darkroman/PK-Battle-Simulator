@@ -557,6 +557,8 @@ namespace MoveRoutines
 			ctx.playerTwoCurrentPokemon = newMon;
 		}
 
+		ctx.defendingPokemon = newMon;
+
 		for (auto player : ctx.vec_aiPlayers)
 		{
 			player->GetAIController().OnActivePokemonChanged(ctx);
@@ -978,7 +980,10 @@ namespace MoveRoutines
 
 		deps.resultsUI.UsedTextDialog(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView(), ctx.currentMove->GetName());
 
-		ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
+		if (ctx.attackingPokemon->GetLockedCounter() > 0)
+		{
+			ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
+		}
 
 		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
 		{
@@ -1360,12 +1365,12 @@ namespace MoveRoutines
 		}
 
 		ctx.defendingPokemon->SetDisabledStatus(true);
-		ctx.defendingPokemon->SetDisabledMoveID(lastUsed->GetMoveID());
+		ctx.defendingPokemon->SetDisabledMove(lastUsed);
 		ctx.defendingPokemon->ResetDisabledCounter();
 
 		for (auto& move : ctx.defendingPokemon->GetMoveArray())
 		{
-			if (move.GetMoveID() == lastUsed->GetMoveID())
+			if (move.HasMove() && move.GetMoveID() == lastUsed->GetMoveID())
 			{
 				move.b_isDisabled = true;
 				break;
