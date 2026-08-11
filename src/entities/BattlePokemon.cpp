@@ -1641,14 +1641,15 @@ void BattlePokemon::ResetValues()
     {
         for (size_t i = 1; i < 5; ++i)
         {
-            if (this->GetMove(i).b_isMimicked)
+            if (GetMove(i).b_isMimicked)
             {
-                this->GetMove(i).SetMovePointer(Database::GetPointerToBaseMoveByID(MoveID::Mimic));
-                this->GetMove(i).m_currentPP = this->GetMimicPP();
-                this->GetMove(i).m_maxPP = this->GetMove(i).GetPP();
+                GetMove(i).SetMovePointer(Database::GetPointerToBaseMoveByID(MoveID::Mimic));
 
-                this->SetUsedMimic(false);
-                this->GetMove(i).b_isMimicked = false;
+                GetMove(i).m_maxPP = GetMove(i).GetPP();
+                GetMove(i).m_currentPP = GetMove(i).m_maxPP;
+
+                SetUsedMimic(false);
+                GetMove(i).b_isMimicked = false;
                 break;
             }
         }

@@ -26,12 +26,6 @@ TurnProcessor::TurnProcessor(BattleContext& context, BattleCalculations& calcula
 
 void TurnProcessor::DetermineTurnOrder()
 {
-	if (m_context.playerOne->IsSwitching() && m_context.playerTwo->IsSwitching())
-	{
-		m_calculations.RandomizeTurnOrder();
-		return;
-	}
-
 	const pokemonMove* moveOne = m_context.playerOneCurrentMove;
 	const pokemonMove* moveTwo = m_context.playerTwoCurrentMove;
 
