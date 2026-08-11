@@ -1,12 +1,10 @@
-#include <array>
-#include <algorithm>
+#include <span>
 
 #include "HardAIScoring.h"
 
 #include "AIScoreTag.h"
 #include "AIMoveScoring.h"
 #include "ScoringResultsStruct.h"
-#include "../AIController.h"
 #include "../../Player.h"
 #include "../../pokemonMove.h"
 #include "../../BattlePokemon.h"

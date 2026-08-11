@@ -3,7 +3,6 @@
 
 #include "BattleContext.h"
 #include "../data/StringToTypes.h"
-#include "../moves/MoveEffectEnums.h"
 
 BattleContext::BattleContext(std::vector<std::unique_ptr<Player>>& vec_players)
   : vec_aiPlayers([]() { std::vector<Player*> v; v.reserve(2); return v; }()),

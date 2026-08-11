@@ -8,7 +8,6 @@
 class Player;
 class BattlePokemon;
 struct pokemonMove;
-enum class MoveEffect;
 
 struct BattleStateFlags
 {

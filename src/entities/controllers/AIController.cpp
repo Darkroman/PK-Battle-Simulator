@@ -2,6 +2,7 @@
 #include <utility>
 #include <memory>
 #include <array>
+#include <span>
 
 #include "AIController.h"
 

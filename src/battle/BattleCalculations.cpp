@@ -151,7 +151,7 @@ bool BattleCalculations::CalculateHitChance(const pokemonMove& currentMove, cons
 {
 	if (
 		(target.IsSemiInvulnerableFromFly() && (currentMove.GetMoveEffectEnum() != MoveEffect::Gust && currentMove.GetMoveID() != MoveID::Thunder)) ||
-		(target.IsSemiInvulnerableFromDig() && (currentMove.GetMoveEffectEnum() != MoveEffect::Earthquake && currentMove.GetMoveID() != MoveID::Fissure))
+		(target.IsSemiInvulnerableFromDig() && (currentMove.GetMoveEffectEnum() != MoveEffect::Earthquake))
 		)
 	{
 		return false;
