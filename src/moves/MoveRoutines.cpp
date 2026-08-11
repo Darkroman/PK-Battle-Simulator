@@ -490,6 +490,9 @@ namespace MoveRoutines
 		}
 
 		DamageRoutine(deps);
+
+		deps.statusProcessor.CheckSubstituteCondition(ctx.defendingPlayer, ctx.defendingPokemon);
+		deps.statusProcessor.CheckFaintCondition(*ctx.attackingPlayer, *ctx.defendingPlayer, *ctx.attackingPokemon, *ctx.defendingPokemon);
 	}
 
 	void ForceSwitch(MoveRoutineDeps& deps)

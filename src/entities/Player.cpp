@@ -202,7 +202,7 @@ bool Player::CanSwitch() const
     return b_canSwitch;
 }
 
-void Player::UpdateSwitchState(BattlePokemon& pokemon)
+void Player::UpdateSwitchState(const BattlePokemon& pokemon)
 {
     const bool isGhost =
         pokemon.GetTypeOneEnum() == PokemonType::Ghost ||

@@ -54,7 +54,6 @@ bool StatusEffectProcessor::CheckPerformativeStatus()
 		canPerform = FlinchStatus(canPerform);
 	}
 
-
 	if (m_context.attackingPokemon->MoveIsDisabled() && canPerform)
 	{
 		canPerform = CheckDisabled();
@@ -161,7 +160,7 @@ bool StatusEffectProcessor::CheckDisabled()
 {
 	bool canPerform{ true };
 
-	bool isLocked = m_context.attackingPokemon->IsCharging() || m_context.attackingPokemon->IsRecharging() ||
+	bool isLocked = m_context.attackingPokemon->IsCharging() ||
 		m_context.attackingPokemon->IsRampaging() || m_context.attackingPokemon->IsBiding();
 
 	const bool isCalledMoveContinuation = isLocked &&
