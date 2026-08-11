@@ -210,6 +210,9 @@ BattleState BattleManager::DisplayFightingPokemon()
 
 BattleState BattleManager::BeginChooseAction()
 {
+	m_context.playerOne->UpdateSwitchState(*m_context.playerOneCurrentPokemon);
+	m_context.playerTwo->UpdateSwitchState(*m_context.playerTwoCurrentPokemon);
+
 	if (m_context.playerOneCurrentPokemon->IsCharging() || m_context.playerOneCurrentPokemon->IsRecharging() ||
 		m_context.playerOneCurrentPokemon->IsRampaging() || m_context.playerOneCurrentPokemon->IsBiding())
 	{
@@ -583,6 +586,9 @@ bool BattleManager::RunBattleSimulation()
 		++m_context.battleTurn;
 
 		m_battleAnnouncerUI.DisplayTurnNumber(m_context.battleTurn);
+
+		m_context.playerOne->UpdateSwitchState(*m_context.playerOneCurrentPokemon);
+		m_context.playerTwo->UpdateSwitchState(*m_context.playerTwoCurrentPokemon);
 
 		ApplyPlayerOneAction();
 

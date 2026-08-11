@@ -28,7 +28,6 @@ bool StatusEffectProcessor::CheckPerformativeStatus()
 	{
 		m_statusEffectUI.DisplayRechargeMsg(m_context.attackingPlayer->GetPlayerNameView(), m_context.attackingPokemon->GetNameView());
 		m_context.attackingPokemon->SetRecharging(false);
-		m_context.attackingPlayer->SetCanSwitch(true);
 		m_context.attackingPokemon->SetIsFlinched(false);
 
 		return false;
@@ -73,7 +72,6 @@ bool StatusEffectProcessor::CheckPerformativeStatus()
 	if (m_context.attackingPokemon->IsCharging() && !canPerform)
 	{
 		m_context.attackingPokemon->SetCharging(false);
-		m_context.attackingPlayer->SetCanSwitch(true);
 
 		if (m_context.attackingPokemon->IsSemiInvulnerable())
 		{
@@ -158,6 +156,49 @@ bool StatusEffectProcessor::FlinchStatus(bool canPerform)
 	return false;
 }
 
+bool StatusEffectProcessor::CheckDisabled()
+{
+	bool canPerform{ true };
+
+	bool isLocked = m_context.attackingPokemon->IsCharging() || m_context.attackingPokemon->IsRecharging() ||
+		m_context.attackingPokemon->IsRampaging() || m_context.attackingPokemon->IsBiding();
+
+	const bool isCalledMoveContinuation = isLocked &&
+		(m_context.currentMove->GetMoveEffectEnum() == MoveEffect::Metronome ||
+			m_context.currentMove->GetMoveEffectEnum() == MoveEffect::MirrorMove);
+
+	const Move* disabledMove =
+		m_context.attackingPokemon->GetDisabledMove();
+
+	bool disabled = false;
+
+	if (isCalledMoveContinuation)
+	{
+		const pokemonMove* calledMove = m_context.attackingPokemon->GetCalledMove();
+
+		disabled = calledMove->HasMove() && calledMove->GetMoveID() == disabledMove->GetMoveID();
+	}
+	else if (isLocked)
+	{
+		const pokemonMove* lastUsed = m_context.attackingPokemon->GetLastUsedMove();
+
+		disabled = lastUsed != nullptr && lastUsed->GetMoveID() == disabledMove->GetMoveID();
+	}
+	else
+	{
+		disabled = m_context.currentMove->GetMoveID() == disabledMove->GetMoveID();
+	}
+
+	if (disabled)
+	{
+		canPerform = false;
+
+		m_statusEffectUI.DisplayMoveIsDisabledMsg(m_context.attackingPlayer->GetPlayerNameView(), m_context.attackingPokemon->GetNameView(), disabledMove->GetName());
+	}
+
+	return canPerform;
+}
+
 bool StatusEffectProcessor::ConfusedStatus()
 {
 	if (m_context.attackingPokemon->GetConfusedCounter() >= m_context.attackingPokemon->GetConfusedTurnCount())
@@ -231,55 +272,11 @@ bool StatusEffectProcessor::ParalysisStatus()
 
 }
 
-bool StatusEffectProcessor::CheckDisabled()
-{
-	bool canPerform{ true };
-
-	bool isLocked = m_context.attackingPokemon->IsCharging() || m_context.attackingPokemon->IsRecharging() ||
-		m_context.attackingPokemon->IsRampaging() || m_context.attackingPokemon->IsBiding();
-
-	const bool isCalledMoveContinuation = isLocked &&
-		(m_context.currentMove->GetMoveEffectEnum() == MoveEffect::Metronome ||
-			m_context.currentMove->GetMoveEffectEnum() == MoveEffect::MirrorMove);
-
-	const Move* disabledMove =
-		m_context.attackingPokemon->GetDisabledMove();
-
-	bool disabled = false;
-
-	if (isCalledMoveContinuation)
-	{
-		const pokemonMove* calledMove = m_context.attackingPokemon->GetCalledMove();
-
-		disabled = calledMove->HasMove() && calledMove->GetMoveID() == disabledMove->GetMoveID();
-	}
-	else if (isLocked)
-	{
-		const pokemonMove* lastUsed = m_context.attackingPokemon->GetLastUsedMove();
-
-		disabled = lastUsed != nullptr && lastUsed->GetMoveID() == disabledMove->GetMoveID();
-	}
-	else
-	{
-		disabled = m_context.currentMove->GetMoveID() == disabledMove->GetMoveID();
-	}
-
-	if (disabled)
-	{
-		canPerform = false;
-
-		m_statusEffectUI.DisplayMoveIsDisabledMsg(m_context.attackingPlayer->GetPlayerNameView(), m_context.attackingPokemon->GetNameView(), disabledMove->GetName());
-	}
-	
-	return canPerform;
-}
-
 void StatusEffectProcessor::ResetRampageState()
 {
 	m_context.attackingPokemon->SetRampaging(false);
 	m_context.attackingPokemon->ResetLockedCounter();
 	m_context.attackingPokemon->SetLockedTurnCount(0);
-	m_context.attackingPlayer->SetCanSwitch(true);
 }
 
 void StatusEffectProcessor::RampageConfuse()
@@ -299,7 +296,6 @@ void StatusEffectProcessor::ResetBideState()
 	m_context.attackingPokemon->ResetLockedCounter();
 	m_context.attackingPokemon->SetLockedTurnCount(0);
 	m_context.attackingPokemon->ResetBideDamage();
-	m_context.attackingPlayer->SetCanSwitch(true);
 }
 
 void StatusEffectProcessor::CheckSubstituteCondition(Player* targetPlayer, BattlePokemon* targetPokemon)
@@ -323,7 +319,6 @@ void StatusEffectProcessor::CheckFaintCondition(Player& sourcePlayer, Player& ta
 		if (source.IsBound())
 		{
 			source.SetBound(false);
-			sourcePlayer.SetCanSwitch(true);
 			source.ResetBoundCounter();
 			source.SetBoundTurnCount(0);
 
@@ -337,7 +332,5 @@ void StatusEffectProcessor::CheckFaintCondition(Player& sourcePlayer, Player& ta
 				m_context.vec_outOfPokemon.emplace_back(&targetPlayer);
 			}
 		}
-
-		targetPlayer.SetCanSwitch(true);
 	}
 }

@@ -42,7 +42,7 @@ std::unique_ptr<IPlayerController> AIController::clone() const
 
 PlayerDecisionOutcome AIController::ChooseAction(Player& player, const Player& targetPlayer, BattlePokemon& selfMon, const BattlePokemon& targetMon, RandomEngine& rng)
 {
-	if (player.GetAIController().GetDifficulty() >= Difficulty::Medium)
+	if (player.CanSwitch() && player.GetAIController().GetDifficulty() >= Difficulty::Medium)
 	{
 		if (AISwitchLogic::WantsToSwitch(player, targetPlayer, selfMon, targetMon, rng))
 		{

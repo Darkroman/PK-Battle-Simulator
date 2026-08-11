@@ -332,7 +332,6 @@ bool PostTurnEffectProcessor::CheckBoundStatuses()
         if (m_context.attackingPokemon->GetBoundCounter() >= m_context.attackingPokemon->GetBoundTurnCount())
         {
             m_context.attackingPokemon->SetBound(false);
-            m_context.attackingPlayer->SetCanSwitch(true);
             m_context.attackingPokemon->ResetBoundCounter();
             m_context.attackingPokemon->SetBoundTurnCount(0);
 
@@ -367,7 +366,6 @@ bool PostTurnEffectProcessor::CheckBoundStatuses()
         {
 
             m_context.defendingPokemon->SetBound(false);
-            m_context.defendingPlayer->SetCanSwitch(true);
             m_context.defendingPokemon->ResetBoundCounter();
             m_context.defendingPokemon->SetBoundTurnCount(0);
 

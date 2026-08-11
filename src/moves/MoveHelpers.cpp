@@ -285,13 +285,11 @@ bool HandleCharging(MoveRoutineDeps& deps, ChargeMsgMemFn chargeMsg, const Charg
 		}
 
 		atkPkmn->SetCharging(true);
-		ctx.attackingPlayer->SetCanSwitch(false);
 
 		return true;
 	}
 
 	atkPkmn->SetCharging(false);
-	atkPlayer->SetCanSwitch(true);
 
 	if (hooks.postCharge)
 	{

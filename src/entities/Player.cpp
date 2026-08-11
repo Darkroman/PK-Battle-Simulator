@@ -9,6 +9,7 @@
 #include "Player.h"
 
 #include "BattlePokemon.h"
+#include "../data/StringToTypes.h"
 #include "controllers/IPlayerController.h"
 #include "controllers/AIController.h"
 
@@ -201,9 +202,21 @@ bool Player::CanSwitch() const
     return b_canSwitch;
 }
 
-void Player::SetCanSwitch(bool canSwitch)
+void Player::UpdateSwitchState(BattlePokemon& pokemon)
 {
-    b_canSwitch = canSwitch;
+    const bool isGhost =
+        pokemon.GetTypeOneEnum() == PokemonType::Ghost ||
+        pokemon.GetTypeTwoEnum() == PokemonType::Ghost;
+
+    const bool trappedByBinding = pokemon.IsBound() && !isGhost;
+
+    const bool locked =
+        pokemon.IsCharging() ||
+        pokemon.IsRecharging() ||
+        pokemon.IsRampaging() ||
+        pokemon.IsBiding();
+
+    b_canSwitch = !(trappedByBinding || locked);
 }
 
 bool Player::IsSwitching() const

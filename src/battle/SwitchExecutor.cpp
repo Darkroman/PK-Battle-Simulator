@@ -31,7 +31,6 @@ void SwitchExecutor::ExecuteSwitch(Player& player, BattlePokemon*& pokemon)
 		if (m_context.playerTwoCurrentPokemon->IsBound())
 		{
 			m_context.playerTwoCurrentPokemon->SetBound(false);
-			m_context.playerTwo->SetCanSwitch(true);
 			m_context.playerTwoCurrentPokemon->ResetBoundCounter();
 			m_context.playerTwoCurrentPokemon->SetBoundTurnCount(0);
 		}
@@ -43,7 +42,6 @@ void SwitchExecutor::ExecuteSwitch(Player& player, BattlePokemon*& pokemon)
 		if (m_context.playerOneCurrentPokemon->IsBound())
 		{
 			m_context.playerOneCurrentPokemon->SetBound(false);
-			m_context.playerOne->SetCanSwitch(true);
 			m_context.playerOneCurrentPokemon->ResetBoundCounter();
 			m_context.playerOneCurrentPokemon->SetBoundTurnCount(0);
 		}

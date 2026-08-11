@@ -59,7 +59,7 @@ public:
     void SetFirst(bool);
 
     bool CanSwitch() const;
-    void SetCanSwitch(bool);
+    void UpdateSwitchState(BattlePokemon&);
 
     bool IsSwitching() const;
     void SetIsSwitching(bool);

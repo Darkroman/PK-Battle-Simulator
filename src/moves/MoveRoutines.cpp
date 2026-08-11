@@ -538,14 +538,12 @@ namespace MoveRoutines
 		// Reset stats for the Pokémon being forced out
 		ctx.defendingPokemon->ResetStatsOnSwitch();
 		ctx.defendingPokemon->ResetLockedState();
-		ctx.defendingPlayer->SetCanSwitch(true);
 
 		if (ctx.attackingPokemon->IsBound())
 		{
 			ctx.attackingPokemon->SetBound(false);
 			ctx.attackingPokemon->ResetBoundCounter();
 			ctx.attackingPokemon->SetBoundTurnCount(0);
-			ctx.attackingPlayer->SetCanSwitch(true);
 		}
 
 		if (ctx.defendingPlayer == ctx.playerOne)
@@ -652,11 +650,6 @@ namespace MoveRoutines
 			bool isGhost = ctx.defendingPokemon->GetTypeOneEnum() == PokemonType::Ghost || ctx.defendingPokemon->GetTypeTwoEnum() == PokemonType::Ghost;
 
 			ctx.defendingPokemon->SetBound(true);
-
-			if (!isGhost)
-			{
-				ctx.defendingPlayer->SetCanSwitch(false);
-			}
 
 			unsigned int randomMod{ deps.rng.GetBoundTurnRoll() };
 			ctx.defendingPokemon->SetBoundTurnCount(randomMod);
@@ -971,7 +964,6 @@ namespace MoveRoutines
 			ctx.currentMove->DeductPP();
 
 			ctx.attackingPokemon->SetRampaging(true);
-			ctx.attackingPlayer->SetCanSwitch(false);
 
 			unsigned int randomMod{ deps.rng.GetRampageTurnRoll() };
 			ctx.attackingPokemon->SetLockedTurnCount(randomMod);
@@ -1598,7 +1590,6 @@ namespace MoveRoutines
 		deps.statusProcessor.CheckFaintCondition(*ctx.attackingPlayer, *ctx.defendingPlayer, *ctx.attackingPokemon, *ctx.defendingPokemon);
 
 		ctx.attackingPokemon->SetRecharging(true);
-		ctx.attackingPlayer->SetCanSwitch(false);
 	}
 
 	void LowKick(MoveRoutineDeps& deps)
@@ -2656,7 +2647,6 @@ namespace MoveRoutines
 			ctx.currentMove->DeductPP();
 
 			ctx.attackingPokemon->SetBide(true);
-			ctx.attackingPlayer->SetCanSwitch(false);
 
 			ctx.attackingPokemon->SetLockedTurnCount(2);
 			ctx.attackingPokemon->ResetLockedCounter();
@@ -3352,8 +3342,6 @@ namespace MoveRoutines
 			ctx.attackingPokemon->SetBound(false);
 			ctx.attackingPokemon->ResetBoundCounter();
 			ctx.attackingPokemon->SetBoundTurnCount(0);
-
-			ctx.attackingPlayer->SetCanSwitch(true);
 		}
 
 		deps.resultsUI.DisplayPutInSubstituteMsg(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView());
