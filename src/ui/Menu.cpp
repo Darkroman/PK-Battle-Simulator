@@ -2308,9 +2308,9 @@ void Menu::SetDefaultPokemon()
 		//players[0]->GetBelt(2).SetMove(2, "Mega Drain");
 		//players[0]->GetBelt(2).SetMove(3, "Quick Attack");
 		//players[0]->GetBelt(2).SetMove(4, "Bite");
-		players[1]->GetBelt(1).SetMove(1, "Disable");
-		players[1]->GetBelt(1).SetMove(2, "Mega Drain");
-		//players[1]->GetBelt(1).SetMove(3, "Quick Attack");
+		players[1]->GetBelt(1).SetMove(1, "Bite");
+		players[1]->GetBelt(1).SetMove(2, "Spore");
+		players[1]->GetBelt(1).SetMove(3, "Quick Attack");
 		//players[1]->GetBelt(1).SetMove(4, "Bite");
 		//players[1]->GetBelt(2).SetMove(1, "Surf");
 		//players[1]->GetBelt(2).SetMove(2, "Mega Drain");
@@ -2326,8 +2326,8 @@ void Menu::SetDefaultPokemon()
 		//players[0]->GetBelt(2).IncrementMoveCount();
 		//players[0]->GetBelt(2).IncrementMoveCount();
 		players[1]->GetBelt(1).IncrementMoveCount();
-		//players[1]->GetBelt(1).IncrementMoveCount();
-		//players[1]->GetBelt(1).IncrementMoveCount();
+		players[1]->GetBelt(1).IncrementMoveCount();
+		players[1]->GetBelt(1).IncrementMoveCount();
 		//players[1]->GetBelt(1).IncrementMoveCount();
 		//players[1]->GetBelt(2).IncrementMoveCount();
 		//players[1]->GetBelt(2).IncrementMoveCount();

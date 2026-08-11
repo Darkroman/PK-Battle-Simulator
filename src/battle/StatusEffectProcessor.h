@@ -14,7 +14,7 @@ public:
 	bool CheckPerformativeStatus();
 	bool SleepStatus();
 	bool FrozenStatus();
-	bool FlinchStatus();
+	bool FlinchStatus(bool);
 	bool ConfusedStatus();
 	bool ParalysisStatus();
 	bool CheckDisabled();

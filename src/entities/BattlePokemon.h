@@ -296,10 +296,6 @@ private:
 
     std::string m_name{};
     std::string m_nickname{};
-    std::string m_boundMove{};
-
-    pokemonMove calledMove;
-    pokemonMove m_mimicLastUsedMove;
 
     pokemonMove* lastUsedMove{ nullptr };
 
@@ -353,6 +349,7 @@ private:
 
     unsigned int m_disabledCounter{ 0 };
 
+    std::string m_boundMove{};
     unsigned int m_boundCounter{ 0 };
     unsigned int m_boundTurnCount{ 0 };
 
@@ -413,4 +410,8 @@ private:
     bool b_isTransformed{ false };
 
     DetransformData m_detransformData;
+
+    pokemonMove m_mimicLastUsedMove;
+
+    pokemonMove calledMove;
 };

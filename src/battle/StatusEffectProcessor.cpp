@@ -29,6 +29,7 @@ bool StatusEffectProcessor::CheckPerformativeStatus()
 		m_statusEffectUI.DisplayRechargeMsg(m_context.attackingPlayer->GetPlayerNameView(), m_context.attackingPokemon->GetNameView());
 		m_context.attackingPokemon->SetRecharging(false);
 		m_context.attackingPlayer->SetCanSwitch(true);
+		m_context.attackingPokemon->SetIsFlinched(false);
 
 		return false;
 	}
@@ -49,9 +50,9 @@ bool StatusEffectProcessor::CheckPerformativeStatus()
 		break;
 	}
 
-	if (m_context.attackingPokemon->IsFlinched() && canPerform)
+	if (m_context.attackingPokemon->IsFlinched())
 	{
-		canPerform = FlinchStatus();
+		canPerform = FlinchStatus(canPerform);
 	}
 
 	if (m_context.attackingPokemon->IsConfused() && canPerform)
@@ -145,10 +146,14 @@ bool StatusEffectProcessor::FrozenStatus()
 	}
 }
 
-bool StatusEffectProcessor::FlinchStatus()
+bool StatusEffectProcessor::FlinchStatus(bool canPerform)
 {
-	m_statusEffectUI.DisplayFlinchMsg(m_context.attackingPlayer->GetPlayerNameView(), m_context.attackingPokemon->GetNameView());
 	m_context.attackingPokemon->SetIsFlinched(false);
+	
+	if (canPerform)
+	{
+		m_statusEffectUI.DisplayFlinchMsg(m_context.attackingPlayer->GetPlayerNameView(), m_context.attackingPokemon->GetNameView());
+	}
 
 	return false;
 }
