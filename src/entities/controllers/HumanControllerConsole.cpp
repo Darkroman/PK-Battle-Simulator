@@ -83,7 +83,7 @@ PlayerDecisionOutcome HumanControllerConsole::ChooseAction(Player& player, const
                 break;
             }
             m_decisionOutcome.action = BattleAction::SwitchPokemon;
-            m_decisionOutcome.chosenPokemon = SwitchAction(player, currentPokemon);
+            m_decisionOutcome.chosenPokemon = SwitchAction(player, currentPokemon, true);
 
             if (!m_decisionOutcome.chosenPokemon)
             {
@@ -114,7 +114,7 @@ void HumanControllerConsole::SkipChooseAction()
 
 BattlePokemon* HumanControllerConsole::PromptForSwitch(Player& player, const Player& targetPlayer, const BattlePokemon& currentPokemon, const BattlePokemon& targetMon)
 {
-    m_decisionOutcome.chosenPokemon = SwitchAction(player, currentPokemon);
+    m_decisionOutcome.chosenPokemon = SwitchAction(player, currentPokemon, false);
     return m_decisionOutcome.chosenPokemon;
 }
 
@@ -196,7 +196,7 @@ pokemonMove* HumanControllerConsole::FightAction(const Player& player, const Pla
     }
 }
 
-BattlePokemon* HumanControllerConsole::SwitchAction(Player& currentPlayer, const BattlePokemon& currentPokemon)
+BattlePokemon* HumanControllerConsole::SwitchAction(Player& currentPlayer, const BattlePokemon& currentPokemon, bool allowCancel)
 {
     std::cout << "Choose Pokemon to switch out! 0 to cancel.\n";
 
@@ -219,14 +219,15 @@ BattlePokemon* HumanControllerConsole::SwitchAction(Player& currentPlayer, const
 
         int choice = std::stoi(input);
 
-        if (choice == 0 && currentPokemon.IsFainted())
+        if (choice == 0)
         {
-            std::cout << "Your " << currentPokemon.GetNameView() << " is fainted. You must select another pokemon to take its place!\n\n";
-            continue;
-        }
-        else if (choice == 0)
-        {
-            return selectedPokemon;
+            if (!allowCancel)
+            {
+                std::cout << "You must select another pokemon!\n\n";
+                continue;
+            }
+
+            return nullptr;
         }
 
         if (choice > 6)

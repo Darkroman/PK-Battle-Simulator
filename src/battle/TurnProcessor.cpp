@@ -73,16 +73,15 @@ TurnSwitchState TurnProcessor::ExecuteTurn()
 		return TurnSwitchState::ContinueRound;
 	}
 
-	else
-	{
-		if (!m_statusProcessor.CheckPerformativeStatus())
-		{
-			return TurnSwitchState::ContinueRound;
-		}
+	const bool canPerform = m_statusProcessor.CheckPerformativeStatus();
 
+	if (canPerform)
+	{
 		m_context.attackingPokemon->SetLastUsedMove(m_context.currentMove);
 
 		m_moveExecutor.ExecuteMove();
+
+		m_context.flags.moveWasUsed = true;
 	}
 
 	if (m_winChecker.CheckWinCondition(*m_context.attackingPlayer, *m_context.defendingPlayer))
@@ -93,6 +92,11 @@ TurnSwitchState TurnProcessor::ExecuteTurn()
 	if (m_winChecker.CheckWinCondition(*m_context.defendingPlayer, *m_context.attackingPlayer))
 	{
 		return TurnSwitchState::Victory;
+	}
+
+	if (!canPerform)
+	{
+		return TurnSwitchState::ContinueRound;
 	}
 
 	if (!m_context.attackingPlayer->IsPendingSwitch())

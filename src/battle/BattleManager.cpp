@@ -383,6 +383,11 @@ BattleState BattleManager::ProcessTurn()
 	TurnSwitchState curTurnState{};
 
 	curTurnState = m_turnProcessor.ExecuteTurn();
+
+	if (m_context.flags.moveWasUsed)
+	{
+		BattleAIProcedures::RefineEnemyModel(m_context);
+	}
 	
 	if (curTurnState == TurnSwitchState::Victory)
 	{ 
@@ -395,8 +400,6 @@ BattleState BattleManager::ProcessTurn()
 	}
 	else if (curTurnState == TurnSwitchState::ContinueRound)
 	{
-		BattleAIProcedures::RefineEnemyModel(m_context);
-
 		if (curActor == CurrentRoundActor::First)
 		{
 			if (!m_context.defendingPokemon->IsFainted())
@@ -604,6 +607,11 @@ bool BattleManager::RunBattleSimulation()
 			return true;
 		}
 
+		if (m_context.flags.moveWasUsed)
+		{
+			BattleAIProcedures::RefineEnemyModel(m_context);
+		}
+
 		if (m_context.attackingPlayer->IsPendingSwitch())
 		{
 			BattlePokemon* newPokemon = m_context.attackingPlayer->GetController().PromptForSwitch(*m_context.attackingPlayer, *m_context.defendingPlayer, *m_context.attackingPokemon, *m_context.defendingPokemon);
@@ -612,8 +620,6 @@ bool BattleManager::RunBattleSimulation()
 			m_switchExecutor.ExecuteSwitch(*m_context.attackingPlayer, m_context.attackingPokemon);
 			m_context.attackingPlayer->SetPendingSwitch(false);
 		}
-
-		BattleAIProcedures::RefineEnemyModel(m_context);
 
 		if (!m_context.defendingPokemon->IsFainted())
 		{
@@ -627,6 +633,11 @@ bool BattleManager::RunBattleSimulation()
 			if (curTurnState == TurnSwitchState::Victory)
 			{
 				return true;
+			}
+
+			if (m_context.flags.moveWasUsed)
+			{
+				BattleAIProcedures::RefineEnemyModel(m_context);
 			}
 
 			if (m_context.attackingPlayer->IsPendingSwitch())

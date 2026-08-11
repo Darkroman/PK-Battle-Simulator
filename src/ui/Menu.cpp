@@ -2296,40 +2296,40 @@ void Menu::SetDefaultPokemon()
 	players[0]->GetBelt(1).SetPokemon("Test1");
 	players[0]->GetBelt(2).SetPokemon("Test1");
 	players[1]->GetBelt(1).SetPokemon("Test2");
-	players[1]->GetBelt(2).SetPokemon("Blastoise");
+	//players[1]->GetBelt(2).SetPokemon("Blastoise");
 
 	if (players[0]->GetBelt(1).GetCurrentHP() != 0)
 	{
-		players[0]->GetBelt(1).SetMove(1, "Bind"); 
-		players[0]->GetBelt(1).SetMove(2, "Tackle");
-		players[0]->GetBelt(1).SetMove(3, "Quick Attack");
-		players[0]->GetBelt(1).SetMove(4, "Bite");
-		players[0]->GetBelt(2).SetMove(1, "Surf");
+		players[0]->GetBelt(1).SetMove(1, "Teleport"); 
+		//players[0]->GetBelt(1).SetMove(2, "Tackle");
+		//players[0]->GetBelt(1).SetMove(3, "Quick Attack");
+		//players[0]->GetBelt(1).SetMove(4, "Bite");
+		players[0]->GetBelt(2).SetMove(1, "Teleport");
 		//players[0]->GetBelt(2).SetMove(2, "Mega Drain");
 		//players[0]->GetBelt(2).SetMove(3, "Quick Attack");
 		//players[0]->GetBelt(2).SetMove(4, "Bite");
-		players[1]->GetBelt(1).SetMove(1, "Hyper Beam");
-		players[1]->GetBelt(1).SetMove(2, "Thunderbolt");
-		players[1]->GetBelt(1).SetMove(3, "Conversion");
-		players[1]->GetBelt(1).SetMove(4, "Tackle");
-		players[1]->GetBelt(2).SetMove(1, "Surf");
+		players[1]->GetBelt(1).SetMove(1, "Tackle");
+		//players[1]->GetBelt(1).SetMove(2, "Thunderbolt");
+		//players[1]->GetBelt(1).SetMove(3, "Conversion");
+		//players[1]->GetBelt(1).SetMove(4, "Tackle");
+		//players[1]->GetBelt(2).SetMove(1, "Surf");
 		//players[1]->GetBelt(2).SetMove(2, "Mega Drain");
 		//players[1]->GetBelt(2).SetMove(3, "Quick Attack");
 		//players[1]->GetBelt(2).SetMove(4, "Bite");
 
 		players[0]->GetBelt(1).IncrementMoveCount();
-		players[0]->GetBelt(1).IncrementMoveCount();
-		players[0]->GetBelt(1).IncrementMoveCount();
-		players[0]->GetBelt(1).IncrementMoveCount();
+		//players[0]->GetBelt(1).IncrementMoveCount();
+		//players[0]->GetBelt(1).IncrementMoveCount();
+		//players[0]->GetBelt(1).IncrementMoveCount();
 		players[0]->GetBelt(2).IncrementMoveCount();
 		//players[0]->GetBelt(2).IncrementMoveCount();
 		//players[0]->GetBelt(2).IncrementMoveCount();
 		//players[0]->GetBelt(2).IncrementMoveCount();
 		players[1]->GetBelt(1).IncrementMoveCount();
-		players[1]->GetBelt(1).IncrementMoveCount();
-		players[1]->GetBelt(1).IncrementMoveCount();
-		players[1]->GetBelt(1).IncrementMoveCount();
-		players[1]->GetBelt(2).IncrementMoveCount();
+		//players[1]->GetBelt(1).IncrementMoveCount();
+		//players[1]->GetBelt(1).IncrementMoveCount();
+		//players[1]->GetBelt(1).IncrementMoveCount();
+		//players[1]->GetBelt(2).IncrementMoveCount();
 		//players[1]->GetBelt(2).IncrementMoveCount();
 		//players[1]->GetBelt(2).IncrementMoveCount();
 		//players[1]->GetBelt(2).IncrementMoveCount();

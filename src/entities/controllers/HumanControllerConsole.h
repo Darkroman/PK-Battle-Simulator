@@ -28,6 +28,6 @@ public:
 
 private:
 	pokemonMove* FightAction(const Player&, const Player&, BattlePokemon&, const BattlePokemon&);
-	BattlePokemon* SwitchAction(Player&, const BattlePokemon&);
+	BattlePokemon* SwitchAction(Player&, const BattlePokemon&, bool);
 	BattleAction ForfeitAction(const Player&);
 };

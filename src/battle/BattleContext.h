@@ -20,6 +20,7 @@ struct BattleStateFlags
     bool hit{ false };
     bool hitSubstitute{ false };
     bool isCriticalHit{ false };
+    bool moveWasUsed{ false };
 };
 
 struct BattleContext

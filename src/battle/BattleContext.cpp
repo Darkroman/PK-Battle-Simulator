@@ -16,6 +16,7 @@ void BattleStateFlags::ResetBattleFlags()
     hit = false;
     hitSubstitute = false;
     isCriticalHit = false;
+    moveWasUsed = false;
     currentEffectiveness = Effectiveness::Normal;
 }
 
