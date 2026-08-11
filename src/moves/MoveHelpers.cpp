@@ -250,7 +250,7 @@ void RecoilRoutine(MoveRoutineDeps& deps, unsigned int recoilDivisor)
 {
 	auto& ctx = deps.context;
 
-	unsigned int recoilDamage = ctx.lastDamageApplied / recoilDivisor;
+	const unsigned int recoilDamage = (ctx.lastDamageApplied + recoilDivisor / 2) / recoilDivisor;
 
 	unsigned int finalDamage = std::max(1u, recoilDamage);
 
@@ -407,8 +407,7 @@ void ProcessRage(MoveRoutineDeps& deps)
 	}
 
 	if (ctx.defendingPokemon->IsRaging() &&
-		((ctx.lastDamageApplied > 0 && !ctx.flags.hitSubstitute) ||
-		ctx.currentMove->GetMoveEffectEnum() == MoveEffect::Disable)) // Target took damage or was targeted by Disable while raging
+		ctx.lastDamageApplied > 0 && !ctx.flags.hitSubstitute)
 	{
 		unsigned int attackStage = ctx.defendingPokemon->GetAttackStage();
 
