@@ -2756,6 +2756,15 @@ namespace MoveRoutines
 				return;
 			}
 
+			ctx.flags.hit = !ctx.defendingPokemon->IsSemiInvulnerable();
+
+			if (!ctx.flags.hit)
+			{
+				deps.resultsUI.DisplayAttackAvoidedTextDialog(ctx.defendingPlayer->GetPlayerNameView(),	ctx.defendingPokemon->GetNameView());
+
+				return;
+			}
+
 			pokemonMove* targetLastUsedMove = ctx.defendingPokemon->GetLastUsedMove();
 
 			if (targetLastUsedMove == nullptr)
