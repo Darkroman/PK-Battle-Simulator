@@ -1464,6 +1464,7 @@ namespace MoveRoutines
 		if (!ctx.flags.hit)
 		{
 			deps.resultsUI.DisplayAttackMissedTextDialog(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView());
+			return;
 		}
 
 		DamageRoutine(deps);

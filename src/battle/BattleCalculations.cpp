@@ -113,11 +113,6 @@ void BattleCalculations::CalculateTypeEffectiveness(BattleContext& ctx, const po
 	ctx.effectiveness = FixedPointBase;
 	ctx.flags.currentEffectiveness = Effectiveness::Normal;
 
-	if (currentMove.GetMoveEffectEnum() == MoveEffect::OHKO)
-	{
-		return;
-	}
-
 	if (currentMove.GetMoveEffectEnum() == MoveEffect::Struggle)
 	{
 		return;
