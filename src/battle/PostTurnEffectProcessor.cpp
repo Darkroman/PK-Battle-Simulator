@@ -9,7 +9,7 @@
 #include "WinChecker.h"
 #include "SwitchExecutor.h"
 #include "../ui/interfaces/IStatusEffectUI.h"
-#include "../data/MoveID.h"
+#include "../data/Move.h"
 #include "../entities/BattlePokemon.h"
 #include "../entities/Player.h"
 #include "../entities/controllers/IPlayerController.h"

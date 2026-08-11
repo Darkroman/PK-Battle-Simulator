@@ -1128,12 +1128,12 @@ void BattlePokemon::SetDisabledStatus(bool disabled)
     b_moveIsDisabled = disabled;
 }
 
-void BattlePokemon::SetDisabledMove(pokemonMove* move)
+void BattlePokemon::SetDisabledMove(const Move* move)
 {
     m_disabledMove = move;
 }
 
-pokemonMove* BattlePokemon::GetDisabledMove() const
+const Move* BattlePokemon::GetDisabledMove() const
 {
     return m_disabledMove;
 }
@@ -1255,14 +1255,21 @@ void BattlePokemon::SetTransformation(BattlePokemon* pokemon)
 
     for (size_t i = 0; i < m_array_moves.size(); ++i)
     {
-        if (!m_array_moves[i].HasMove())
+        const pokemonMove& targetMove = pokemon->GetMove(i + 1);
+
+        m_array_moves[i].SetMovePointer(targetMove.GetMovePointer());
+
+        if (targetMove.HasMove())
         {
-            continue;
+            m_array_moves[i].m_currentPP = 5;
+            m_array_moves[i].m_maxPP = 5;
+        }
+        else
+        {
+            m_array_moves[i].m_currentPP = 0;
+            m_array_moves[i].m_maxPP = 0;
         }
 
-        m_array_moves[i].SetMovePointer(pokemon->GetMove(i + 1).GetMovePointer());
-        m_array_moves[i].m_currentPP = 5;
-        m_array_moves[i].m_maxPP = 5;
         m_array_moves[i].b_isDisabled = false;
         m_array_moves[i].b_isMimicked = false;
     }
@@ -1329,11 +1336,6 @@ void BattlePokemon::Detransform()
 {
     for (size_t i = 0; i < m_array_moves.size(); ++i)
     {
-        if (!(m_array_moves[i].HasMove() && m_array_moves[i].HasMove()))
-        {
-            continue;
-        }
-
         m_array_moves[i].SetMovePointer(m_detransformData.m_array_moves[i].GetMovePointer());
         m_array_moves[i].m_currentPP = m_detransformData.m_array_moves[i].m_currentPP;
         m_array_moves[i].m_maxPP = m_detransformData.m_array_moves[i].m_maxPP;

@@ -1365,7 +1365,7 @@ namespace MoveRoutines
 		}
 
 		ctx.defendingPokemon->SetDisabledStatus(true);
-		ctx.defendingPokemon->SetDisabledMove(lastUsed);
+		ctx.defendingPokemon->SetDisabledMove(lastUsed->GetMovePointer());
 		ctx.defendingPokemon->ResetDisabledCounter();
 
 		for (auto& move : ctx.defendingPokemon->GetMoveArray())

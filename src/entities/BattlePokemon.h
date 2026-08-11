@@ -236,8 +236,8 @@ public:
     unsigned int GetDisabledCounter() const;
     void ResetDisabledCounter();
     bool MoveIsDisabled() const;
-    void SetDisabledMove(pokemonMove*);
-    pokemonMove* GetDisabledMove() const;
+    void SetDisabledMove(const Move*);
+    const Move* GetDisabledMove() const;
 
     bool HasPendingPostTurnEffect() const;
 
@@ -371,7 +371,7 @@ private:
     PokemonType m_beforeConversionType1_e{};
     PokemonType m_beforeConversionType2_e{};
 
-    pokemonMove* m_disabledMove{};
+    const Move* m_disabledMove{};
 
     bool b_hasNickname{ false };
 

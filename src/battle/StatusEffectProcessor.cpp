@@ -6,6 +6,7 @@
 #include "BattleContext.h"
 #include "RandomEngine.h"
 #include "StageRatios.h"
+#include "../data/Move.h"
 #include "../moves/MoveEffectEnums.h"
 #include "../ui/interfaces/IStatusEffectUI.h"
 #include "../entities/pokemonMove.h"
@@ -236,7 +237,7 @@ bool StatusEffectProcessor::CheckDisabled()
 		(m_context.currentMove->GetMoveEffectEnum() == MoveEffect::Metronome ||
 			m_context.currentMove->GetMoveEffectEnum() == MoveEffect::MirrorMove);
 
-	const pokemonMove* disabledMove =
+	const Move* disabledMove =
 		m_context.attackingPokemon->GetDisabledMove();
 
 	bool disabled = false;
