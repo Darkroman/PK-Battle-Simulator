@@ -281,6 +281,11 @@ unsigned int AIController::AICalculateMoveTypeEffectiveness(const pokemonMove& c
 		return 0;
 	}
 
+	if (currentMove.GetMoveEffectEnum() == MoveEffect::Struggle)
+	{
+		return NormalMultiplier;
+	}
+
 	unsigned int moveType = EnumIndex(currentMove.GetMoveTypeEnum());
 	unsigned int defensiveTypeOne = EnumIndex(target.GetTypeOneEnum());
 	unsigned int defensiveTypeTwo = EnumIndex(target.GetTypeTwoEnum());

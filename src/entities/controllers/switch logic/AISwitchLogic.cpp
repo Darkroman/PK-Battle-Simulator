@@ -194,7 +194,7 @@ namespace AISwitchLogic
 
 		std::array<CandidatePokemon, 6> candidatePkmnPool{};
 
-		auto canAttack = [&](const BattlePokemon& pokemon) -> bool { return !(pokemon.GetStatus() == Status::Frozen || pokemon.GetStatus() == Status::Sleeping); };
+		auto canAttack = [&](const BattlePokemon& pokemon) -> bool { return pokemon.GetStatus() != Status::Frozen && pokemon.GetStatus() != Status::Sleeping; };
 
 		size_t count{};
 		for (auto& pokemon : self.GetBeltArray())
@@ -299,72 +299,68 @@ namespace AISwitchLogic
 			}
 		}
 
-		std::ranges::sort(candidatePkmn, [](const CandidatePokemon& a, const CandidatePokemon& b)
+		auto getPriority = [&](const CandidatePokemon& candidate)
 			{
-				return std::tie(a.typeEffectiveness, b.highestDamageMove) <
-					std::tie(b.typeEffectiveness, a.highestDamageMove);
-			});
-
-		auto it = candidatePkmn.end();
-
-		if (!validObservedMoves.empty())
-		{
-			it = std::ranges::find_if(candidatePkmn, [](const CandidatePokemon& cp)
+				if (!validObservedMoves.empty())
 				{
-					return cp.canKO && cp.isFaster && cp.canSurviveOneHit;
-				});
-			
-
-			if (it == candidatePkmn.end())
-			{
-				it = std::ranges::find_if(candidatePkmn, [](const CandidatePokemon& cp)
+					if (candidate.canKO && candidate.isFaster && candidate.canSurviveOneHit)
 					{
-						return cp.canKO && cp.canSurviveTwoHits;
-					});
-			}
-		}
-		else
-		{
-			it = std::ranges::find_if(candidatePkmn, [](const CandidatePokemon& cp)
+						return 2u;
+					}
+
+					if (candidate.canKO && candidate.canSurviveTwoHits)
+					{
+						return 1u;
+					}
+
+					return 0u;
+				}
+
+				if (candidate.canKO && candidate.typeEffectiveness <= 2048)
 				{
-					return cp.canKO && cp.typeEffectiveness <= 2048;
-				});
+					return 3u;
+				}
 
-			if (it == candidatePkmn.end())
+				if (candidate.canKO && candidate.isFaster && candidate.pokemon->GetCurrentHP() == candidate.pokemon->GetMaxHP())
+				{
+					return 2u;
+				}
+
+				if (candidate.typeEffectiveness <= 2048)
+				{
+					return 1u;
+				}
+
+				return 0u;
+			};
+
+		auto it = std::max_element(candidatePkmn.begin(), candidatePkmn.end(),
+			[&](const CandidatePokemon& a, const CandidatePokemon& b)
 			{
-				it = std::ranges::find_if(candidatePkmn, [](const CandidatePokemon& cp)
-					{
-						return cp.canKO && cp.isFaster && cp.pokemon->GetCurrentHP() == cp.pokemon->GetMaxHP();
-					});
-			}
+				return std::tuple{
+					getPriority(a),
+					-static_cast<int>(a.typeEffectiveness),
+					a.highestDamageMove
+				}
+				<
+					std::tuple{
+					getPriority(b),
+					-static_cast<int>(b.typeEffectiveness),
+					b.highestDamageMove
+			};
+		});
 
-			if (it == candidatePkmn.end())
-			{
-				it = std::ranges::find_if(candidatePkmn, [](const CandidatePokemon& cp)
-					{
-						return cp.typeEffectiveness <= 2048;
-					});
-			}
-		}
-		BattlePokemon* chosenPokemon{};
-
-		if (it == candidatePkmn.end())
+		if (it == candidatePkmn.end() || getPriority(*it) == 0)
 		{
 			return nullptr;
 		}
-		else
-		{
-			chosenPokemon = it->pokemon;
-		}
 
-		if (chosenPokemon == &selfMon)
+		if (it->pokemon == &selfMon)
 		{
 			return nullptr;
 		}
-		else
-		{
-			return chosenPokemon;
-		}
+
+		return it->pokemon;
 	}
 
 	BattlePokemon* ChoosePostKOSwitch(Player& self, const Player& targetPlayer, const BattlePokemon& selfMon, const BattlePokemon& targetMon)
@@ -377,11 +373,12 @@ namespace AISwitchLogic
 			bool isFaster{};
 			bool canKO{};
 			bool canSurviveOneHit{};
+			bool canAttack{ false };
 		};
 
 		std::array<CandidatePokemon, 6> candidatePkmnPool{};
 
-		auto canAttack = [&](const BattlePokemon& pokemon) -> bool { return !(pokemon.GetStatus() == Status::Frozen || pokemon.GetStatus() == Status::Sleeping); };
+		auto canAttack = [&](const BattlePokemon& pokemon) -> bool { return pokemon.GetStatus() != Status::Frozen && pokemon.GetStatus() != Status::Sleeping; };
 
 		size_t count{};
 		for (auto& pokemon : self.GetBeltArray())
@@ -389,6 +386,8 @@ namespace AISwitchLogic
 			if (pokemon.HasPokemon() && !pokemon.IsFainted() && &pokemon != &selfMon)
 			{
 				candidatePkmnPool[count].pokemon = &pokemon;
+				candidatePkmnPool[count].canAttack = canAttack(pokemon);
+
 				++count;
 			}
 		}
@@ -458,80 +457,70 @@ namespace AISwitchLogic
 			}
 		}
 
-		std::ranges::sort(candidatePkmn, [](const CandidatePokemon& a, const CandidatePokemon& b)
+		auto getPriority = [&](const CandidatePokemon& candidate)
 			{
-				return std::tie(a.typeEffectiveness, b.highestDamageMove) <
-					std::tie(b.typeEffectiveness, a.highestDamageMove);
-			});
-
-		auto it = candidatePkmn.end();
-
-		if (!validObservedMoves.empty())
-		{
-			it = std::ranges::find_if(candidatePkmn, [](const CandidatePokemon& cp)
+				if (!validObservedMoves.empty())
 				{
-					return cp.canKO && cp.isFaster;
-				});
-
-			if (it == candidatePkmn.end())
-			{
-				it = std::ranges::find_if(candidatePkmn, [](const CandidatePokemon& cp)
+					if (candidate.canKO && candidate.isFaster)
 					{
-						return cp.canKO && cp.canSurviveOneHit;
-					});
-			}
+						return 5u;
+					}
 
-			if (it == candidatePkmn.end())
-			{
-				it = std::ranges::find_if(candidatePkmn, [](const CandidatePokemon& cp)
+					if (candidate.canKO && candidate.canSurviveOneHit)
 					{
-						return cp.isFaster && cp.canSurviveOneHit;
-					});
-			}
+						return 4u;
+					}
 
-			if (it == candidatePkmn.end())
-			{
-				it = std::ranges::find_if(candidatePkmn, [](const CandidatePokemon& cp)
+					if (candidate.isFaster && candidate.canSurviveOneHit)
 					{
-						return cp.canSurviveOneHit;
-					});
-			}
+						return 3u;
+					}
 
-			if (it == candidatePkmn.end())
-			{
-				it = std::ranges::find_if(candidatePkmn, [](const CandidatePokemon& cp)
+					if (candidate.canSurviveOneHit)
 					{
-						return cp.isFaster;
-					});
-			}
-		}
-		else
-		{
-			it = std::ranges::find_if(candidatePkmn, [](const CandidatePokemon& cp)
+						return 2u;
+					}
+
+					if (candidate.isFaster)
+					{
+						return 1u;
+					}
+
+					return 0u;
+				}
+
+				if (candidate.canKO && candidate.isFaster)
 				{
-					return cp.canKO && cp.isFaster;
-				});
+					return 2u;
+				}
 
-			if (it == candidatePkmn.end())
+				if (candidate.isFaster)
+				{
+					return 1u;
+				}
+
+				return 0u;
+			};
+
+		auto it = std::max_element(candidatePkmn.begin(), candidatePkmn.end(),
+			[&](const CandidatePokemon& a, const CandidatePokemon& b)
 			{
-				it = std::ranges::find_if(candidatePkmn, [](const CandidatePokemon& cp)
-					{
-						return cp.isFaster;
-					});
-			}
-		}
-		BattlePokemon* chosenPokemon{};
+				return std::tuple{
+				a.canAttack, 
+				getPriority(a),
+				-static_cast<int>(a.typeEffectiveness),
+				a.highestDamageMove
+				}
+				<
+				std::tuple{
+				b.canAttack,
+				getPriority(b),
+				-static_cast<int>(b.typeEffectiveness),
+				b.highestDamageMove
+			};
+		});
 
-		if (it == candidatePkmn.end())
-		{
-			chosenPokemon = candidatePkmn.front().pokemon;
-		}
-		else
-		{
-			chosenPokemon = it->pokemon;
-		}
-
-		return chosenPokemon;
+		return it->pokemon;
 	}
 
 	bool IsMoveSuperEffective(const Player& self, const pokemonMove& move, const BattlePokemon& pokemon)
