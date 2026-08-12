@@ -38,7 +38,7 @@ AIController::AIController(Difficulty difficulty)
 
 std::unique_ptr<IPlayerController> AIController::clone() const
 {
-	return std::make_unique<AIController>(*this);
+	return std::make_unique<AIController>(m_difficulty);
 }
 
 PlayerDecisionOutcome AIController::ChooseAction(Player& player, const Player& targetPlayer, BattlePokemon& selfMon, const BattlePokemon& targetMon, RandomEngine& rng)
@@ -313,12 +313,20 @@ unsigned int AIController::AICalculateDamage(const pokemonMove& currentMove, con
 		return 0;
 	}
 
+	if (currentMove.GetMoveEffectEnum() == MoveEffect::DreamEater &&
+		target.GetStatus() != Status::Sleeping)
+	{
+		return 0;
+	}
+
 	bool isFixedDamageMove = currentMove.GetMoveID() == MoveID::SonicBoom ||
 		currentMove.GetMoveID() == MoveID::SeismicToss ||
 		currentMove.GetMoveID() == MoveID::DragonRage ||
 		currentMove.GetMoveID() == MoveID::NightShade ||
 		currentMove.GetMoveID() == MoveID::Counter ||
-		currentMove.GetMoveID() == MoveID::Psywave;
+		currentMove.GetMoveID() == MoveID::Bide ||
+		currentMove.GetMoveID() == MoveID::Psywave ||
+		currentMove.GetMoveID() == MoveID::SuperFang;
 
 	if (isFixedDamageMove)
 	{
@@ -353,14 +361,27 @@ unsigned int AIController::AICalculateDamage(const pokemonMove& currentMove, con
 			}
 		}
 
+		case MoveID::Bide:
+			return 1;
+			break;
+
 		case MoveID::Psywave:
 			return 1;
+			break;
+
+		case MoveID::SuperFang:
+			return std::max(1u, target.GetCurrentHP() / 2);
 			break;
 		}
 	}
 
 	if ((currentMove.GetMoveEffectEnum() == MoveEffect::OHKO) && effectiveness != 0)
 	{
+		if (source.GetLevel() < target.GetLevel())
+		{
+			return 0;
+		}
+
 		baseDamage = target.GetCurrentHP();
 		return baseDamage;
 	}
@@ -423,6 +444,11 @@ unsigned int AIController::AICalculateDamage(const pokemonMove& currentMove, con
 	if (currentMove.GetMoveEffectEnum() == MoveEffect::LowKick)
 	{
 		currentMovePower = CalculateLowKickPower(target);
+	}
+
+	if (currentMove.GetMoveEffectEnum() == MoveEffect::Gust && target.IsSemiInvulnerableFromFly())
+	{
+		currentMovePower *= 2;
 	}
 
 	unsigned int level = source.GetLevel();
@@ -773,7 +799,7 @@ bool AIController::CalculateStatusMoveEffectiveness(const pokemonMove& currentMo
 		}
 
 		if ((selfMon.GetTypeOneEnum() == firstAvailableMoveSlotType &&
-			selfMon.GetTypeTwoEnum() == currentMove.GetMoveTypeEnum()) ||
+			selfMon.GetTypeTwoEnum() == PokemonType::None) ||
 			selfMon.IsConverted())
 		{
 			return false;

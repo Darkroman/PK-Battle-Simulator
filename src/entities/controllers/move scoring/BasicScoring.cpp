@@ -265,7 +265,7 @@ namespace BasicScoring
 			&& move.GetMoveID() == MoveID::ThunderWave;
 
 		bool isGrassType = targetMon.GetTypeOneEnum() == PokemonType::Grass || targetMon.GetTypeTwoEnum() == PokemonType::Grass;
-		bool isPowderImmune = isGrassType && move.GetMoveEffectEnum() == MoveEffect::PoisonPowder;
+		bool isPowderImmune = isGrassType && move.GetMoveEffectEnum() == MoveEffect::StunSpore;
 
 		if (targetMon.GetStatus() != Status::Normal || typeIsImmune || isThunderWaveImmune || isPowderImmune)
 		{
@@ -407,7 +407,7 @@ namespace BasicScoring
 		return delta;
 	}
 
-	int HazeCheck(const BattlePokemon& selfMon, const BattlePokemon targetMon)
+	int HazeCheck(const BattlePokemon& selfMon, const BattlePokemon& targetMon)
 	{
 		int delta{};
 

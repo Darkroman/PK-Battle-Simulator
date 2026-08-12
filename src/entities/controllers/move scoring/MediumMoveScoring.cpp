@@ -23,7 +23,7 @@ namespace MediumMoveScoring
 			{
 				damagingMoves[count] = &result;
 
-				if (!(result.tag == AIScoreTag::RechargeMove || result.tag == AIScoreTag::SelfFaintingDamage)) // don't consider recharge or self-fainting moves into highest damage calculation
+				if (!(result.tag == AIScoreTag::RechargeMove || result.tag == AIScoreTag::SelfFaintingDamage || result.tag == AIScoreTag::OHKO)) // don't consider recharge, self-fainting moves or OHKO moves into highest damage calculation
 				{
 					highestDamage = std::max(highestDamage, result.damage);
 				}

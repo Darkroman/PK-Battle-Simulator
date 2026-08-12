@@ -313,7 +313,7 @@ namespace HardAIMoveScoring
 
 			// In the OG Gen 5 assembly this is a bug.
 			// I believe the jump labels are wrong and instead should jump to label
-			// 0x095A insteaad of 0x0954 in the 0x0906 block
+			// 0x095A instead of 0x0954 in the 0x0906 block
 			//delta += 2;
 		}
 		// Like SpD Boost, this should only happen by fall through or baton pass check passes

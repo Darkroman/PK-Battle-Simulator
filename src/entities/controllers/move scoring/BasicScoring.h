@@ -32,7 +32,7 @@ namespace BasicScoring
 	int TargetSpeedReductionCheck(const BattlePokemon& targetMon);
 	int TargetAccuracyReductionCheck(const BattlePokemon& targetMon);
 
-	int HazeCheck(const BattlePokemon& selfMon, const BattlePokemon targetMon);
+	int HazeCheck(const BattlePokemon& selfMon, const BattlePokemon& targetMon);
 	int ForceSwitchCheck(const Player& targetPlayer);
 	int HealCheck(const BattlePokemon& selfMon);
 	int RestCheck(const BattlePokemon& selfMon);

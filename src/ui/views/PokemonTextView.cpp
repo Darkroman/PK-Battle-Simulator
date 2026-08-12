@@ -577,7 +577,7 @@ namespace PokemonTextView
             }
 
             if ((selfMon.GetTypeOneEnum() == firstAvailableMoveSlotType &&
-                selfMon.GetTypeTwoEnum() == currentMove.GetMoveTypeEnum()) ||
+                selfMon.GetTypeTwoEnum() == PokemonType::None) ||
                 selfMon.IsConverted())
             {
                 return "Ineffective";

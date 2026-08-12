@@ -39,6 +39,7 @@ private:
 		{ MoveEffect::SleepMove,             AIScoreTag::Sleep },
 		{ MoveEffect::SleepPowder,           AIScoreTag::Sleep },
 		{ MoveEffect::Paralyze,              AIScoreTag::Paralyze },
+		{ MoveEffect::StunSpore,			 AIScoreTag::Paralyze },
 		{ MoveEffect::PoisonGas,             AIScoreTag::Poison },
 		{ MoveEffect::PoisonPowder,          AIScoreTag::Poison },
 		{ MoveEffect::Toxic,                 AIScoreTag::Poison },
