@@ -508,6 +508,13 @@ unsigned int AIController::AICalculateDamage(const pokemonMove& currentMove, con
 		finalDamage = std::max(1u, finalDamage);
 	}
 
+	if (currentMove.GetMoveEffectEnum() == MoveEffect::MultiHit ||
+		currentMove.GetMoveEffectEnum() == MoveEffect::DoubleHit ||
+		currentMove.GetMoveEffectEnum() == MoveEffect::Twineedle)
+	{
+		return finalDamage * 2;
+	}
+
 	return finalDamage;
 }
 

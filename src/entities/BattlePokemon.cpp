@@ -640,7 +640,7 @@ bool BattlePokemon::WillPerformStruggle() const
 
 bool BattlePokemon::HasPokemon() const
 {
-    return (mp_pokemon == nullptr) ? false : true;
+    return mp_pokemon != nullptr;
 }
 
 bool BattlePokemon::HasMove(size_t moveslot)

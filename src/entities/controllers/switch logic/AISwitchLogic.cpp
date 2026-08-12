@@ -28,7 +28,7 @@ namespace AISwitchLogic
 			int willPerformStruggleCount{ 0 };
 			for (const auto& pokemon : self.GetBeltArray())
 			{
-				if (pokemon.IsFainted() || &pokemon == &selfMon)
+				if (!pokemon.HasPokemon() || pokemon.IsFainted() || &pokemon == &selfMon)
 				{
 					continue;
 				}
