@@ -132,6 +132,10 @@ namespace BasicScoring
 			delta += LightScreenCheck(self); // if attacking player already has light screen, score -8
 			break;
 
+		case AIScoreTag::Splash: // Just straight up useless
+			delta -= 20;
+			break;
+
 		case AIScoreTag::Mist:
 			delta += MistCheck(self); // if attacking player already has mist, score -8
 			break;
@@ -518,9 +522,9 @@ namespace BasicScoring
 			delta -= 8;
 		}
 
-		unsigned int hpPercent{ selfMon.GetCurrentHP() * 100 / selfMon.GetMaxHP() };
+		unsigned int substituteCost{ selfMon.GetMaxHP() / 4 };
 
-		if (hpPercent < 26)
+		if (selfMon.GetCurrentHP() <= substituteCost)
 		{
 			delta -= 10;
 		}

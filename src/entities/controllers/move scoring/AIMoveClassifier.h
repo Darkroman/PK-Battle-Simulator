@@ -62,6 +62,7 @@ private:
 		{ MoveEffect::SpeedDown2,            AIScoreTag::TargetSpeedDecrease },
 		{ MoveEffect::AccuracyDown,          AIScoreTag::TargetAccuracyDecrease },
 		{ MoveEffect::FocusEnergy,			 AIScoreTag::FocusEnergy },
+		{ MoveEffect::Splash,                AIScoreTag::Splash },
 		{ MoveEffect::Mist,                  AIScoreTag::Mist },
 		{ MoveEffect::LightScreen,           AIScoreTag::LightScreen },
 		{ MoveEffect::Reflect,               AIScoreTag::Reflect },

@@ -39,6 +39,7 @@ enum class AIScoreTag
 	TargetSpeedDecrease,
 	TargetAccuracyDecrease,
 	FocusEnergy,
+	Splash,
 	Mist,
 	LightScreen,
 	Reflect,
