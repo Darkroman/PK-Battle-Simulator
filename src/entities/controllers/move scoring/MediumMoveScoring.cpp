@@ -23,14 +23,14 @@ namespace MediumMoveScoring
 			{
 				damagingMoves[count] = &result;
 
-				if (!(result.tag == AIScoreTag::RechargeMove || result.tag == AIScoreTag::SelfFaintingDamage || result.tag == AIScoreTag::OHKO)) // don't consider recharge, self-fainting moves or OHKO moves into highest damage calculation
-				{
-					highestDamage = std::max(highestDamage, result.damage);
-				}
-
 				if (result.tag == AIScoreTag::ChargeMove || result.tag == AIScoreTag::SkyAttack) // halve the damage if two turn move and is not recharge move
 				{
 					result.damage /= 2;
+				}
+
+				if (!(result.tag == AIScoreTag::RechargeMove || result.tag == AIScoreTag::SelfFaintingDamage || result.tag == AIScoreTag::OHKO)) // don't consider recharge, self-fainting moves or OHKO moves into highest damage calculation
+				{
+					highestDamage = std::max(highestDamage, result.damage);
 				}
 				++count;
 			}

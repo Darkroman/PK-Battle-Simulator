@@ -107,7 +107,7 @@ namespace AISwitchLogic
 		}
 
 		const pokemonMove* targetMonLastUsedMove = targetMon.GetLastUsedMove();
-		bool lastUsedMoveAvailable = targetMonLastUsedMove != nullptr;
+		bool lastUsedMoveAvailable = targetMonLastUsedMove != nullptr && targetMonLastUsedMove->IsActive();
 
 		bool lastMoveCanKO{};
 
