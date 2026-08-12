@@ -106,9 +106,9 @@ namespace AIMoveScoring
 		return results;
 	}
 
-	unsigned int SwitchDamageScoringRoutine(const Player& self, const Player& targetPlayer, const pokemonMove& move, const BattlePokemon& selfMon, const BattlePokemon& targetMon)
+	unsigned int SwitchDamageScoringRoutine(const AIController& ai, const Player& defendingPlayer, const pokemonMove& move, const BattlePokemon& selfMon, const BattlePokemon& targetMon)
 	{
-		return self.GetAIController().AICalculateDamage(move, targetPlayer, selfMon, targetMon);
+		return ai.AICalculateDamage(move, defendingPlayer, selfMon, targetMon);
 	}
 
 	unsigned int CalculateSpeed(const BattlePokemon& pokemon)

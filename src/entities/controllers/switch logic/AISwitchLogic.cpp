@@ -55,7 +55,7 @@ namespace AISwitchLogic
 		{
 			if (move.IsActive() && move.GetCategoryEnum() != Category::Status) 
 			{
-				unsigned int damage = AIMoveScoring::SwitchDamageScoringRoutine(self, targetPlayer, move, selfMon, targetMon);
+				unsigned int damage = AIMoveScoring::SwitchDamageScoringRoutine(self.GetAIController(), targetPlayer, move, selfMon, targetMon);
 
 				if (damage > highestDamage)
 				{
@@ -113,7 +113,7 @@ namespace AISwitchLogic
 
 		if (lastUsedMoveAvailable)
 		{
-			unsigned int damage = AIMoveScoring::SwitchDamageScoringRoutine(targetPlayer, self, *targetMonLastUsedMove, targetMon, selfMon);
+			unsigned int damage = AIMoveScoring::SwitchDamageScoringRoutine(self.GetAIController(), self, *targetMonLastUsedMove, targetMon, selfMon);
 
 			if (damage >= selfMon.GetCurrentHP())
 			{
@@ -160,7 +160,7 @@ namespace AISwitchLogic
 					continue;
 				}
 
-				unsigned int damageToSelf = AIMoveScoring::SwitchDamageScoringRoutine(targetPlayer, self, *observedMove, targetMon, selfMon);
+				unsigned int damageToSelf = AIMoveScoring::SwitchDamageScoringRoutine(self.GetAIController(), self, *observedMove, targetMon, selfMon);
 
 				if (damageToSelf >= selfMon.GetCurrentHP())
 				{
@@ -244,7 +244,7 @@ namespace AISwitchLogic
 			// Evaluate most likely observed move AI will do against selfMon
 			for (const auto& observedMove : validObservedMoves)
 			{
-				unsigned int damageToSelf = AIMoveScoring::SwitchDamageScoringRoutine(targetPlayer, self, *observedMove, targetMon, selfMon);
+				unsigned int damageToSelf = AIMoveScoring::SwitchDamageScoringRoutine(self.GetAIController(), self, *observedMove, targetMon, selfMon);
 
 				if (damageToSelf > highestDamageToSelf)
 				{
@@ -260,7 +260,7 @@ namespace AISwitchLogic
 			{
 				if (move.IsActive() && move.GetCategoryEnum() != Category::Status)
 				{
-					unsigned int damage = AIMoveScoring::SwitchDamageScoringRoutine(self, targetPlayer, move, *candidate.pokemon, targetMon);
+					unsigned int damage = AIMoveScoring::SwitchDamageScoringRoutine(self.GetAIController(), targetPlayer, move, *candidate.pokemon, targetMon);
 
 					if (damage > candidate.highestDamageMove)
 					{
@@ -280,13 +280,13 @@ namespace AISwitchLogic
 
 			if (mostLikelyMove != nullptr)
 			{
-				unsigned int firstAttackVsCandidate = AIMoveScoring::SwitchDamageScoringRoutine(targetPlayer, self, *mostLikelyMove, targetMon, *candidate.pokemon);
+				unsigned int firstAttackVsCandidate = AIMoveScoring::SwitchDamageScoringRoutine(self.GetAIController(), self, *mostLikelyMove, targetMon, *candidate.pokemon);
 				unsigned int secondAttackVsCandidate{ 0 };
 
 				// Evaluate most likely observed move AI will do against candidateMon
 				for (const auto& observedMove : validObservedMoves)
 				{
-					unsigned int damageToCandidate = AIMoveScoring::SwitchDamageScoringRoutine(targetPlayer, self, *observedMove, targetMon, *candidate.pokemon);
+					unsigned int damageToCandidate = AIMoveScoring::SwitchDamageScoringRoutine(self.GetAIController(), self, *observedMove, targetMon, *candidate.pokemon);
 					if (damageToCandidate > secondAttackVsCandidate)
 					{
 						secondAttackVsCandidate = damageToCandidate;
@@ -422,7 +422,7 @@ namespace AISwitchLogic
 			{
 				if (move.IsActive() && move.GetCategoryEnum() != Category::Status)
 				{
-					unsigned int damage = AIMoveScoring::SwitchDamageScoringRoutine(self, targetPlayer, move, *candidate.pokemon, targetMon);
+					unsigned int damage = AIMoveScoring::SwitchDamageScoringRoutine(self.GetAIController(), targetPlayer, move, *candidate.pokemon, targetMon);
 
 					if (damage > candidate.highestDamageMove)
 					{
@@ -445,7 +445,7 @@ namespace AISwitchLogic
 				unsigned int highestDamageToCandidate{ 0 };
 				for (const auto& observedMove : validObservedMoves)
 				{
-					unsigned int damageToCandidate = AIMoveScoring::SwitchDamageScoringRoutine(targetPlayer, self, *observedMove, targetMon, *candidate.pokemon);
+					unsigned int damageToCandidate = AIMoveScoring::SwitchDamageScoringRoutine(self.GetAIController(), self, *observedMove, targetMon, *candidate.pokemon);
 
 					if (damageToCandidate > highestDamageToCandidate)
 					{

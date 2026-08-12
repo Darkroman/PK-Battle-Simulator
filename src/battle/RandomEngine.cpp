@@ -1,6 +1,6 @@
 #include <chrono>
 #include <random>
-#include <iostream>
+//#include <iostream>
 
 #include "RandomEngine.h"
 
@@ -21,22 +21,24 @@ RandomEngine::RandomEngine(int t)
 {
 
 }
-
+/*
 void RandomEngine::Call() const
 {
 	std::cout << "RNG called.\n";
 }
+
+
+void RandomEngine::GetCallAmount() const
+{
+	std::cout << "RNG Calls: " << rng_calls << '\n';
+}
+*/
 
 std::mt19937& RandomEngine::GetGenerator()
 {
 	//Call();
 	//++rng_calls;
 	return generator;
-}
-
-void RandomEngine::GetCallAmount() const
-{
-	std::cout << "RNG Calls: " << rng_calls << '\n';
 }
 
 size_t RandomEngine::RandomRange(size_t min, size_t max)
