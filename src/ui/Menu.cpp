@@ -2296,40 +2296,40 @@ void Menu::SetDefaultPokemon()
 	players[0]->GetBelt(1).SetPokemon("Test1");
 	players[0]->GetBelt(2).SetPokemon("Test1");
 	players[1]->GetBelt(1).SetPokemon("Test2");
-	//players[1]->GetBelt(2).SetPokemon("Blastoise");
+	players[1]->GetBelt(2).SetPokemon("Test2");
 
 	if (players[0]->GetBelt(1).GetCurrentHP() != 0)
 	{
-		players[0]->GetBelt(1).SetMove(1, "Teleport"); 
-		//players[0]->GetBelt(1).SetMove(2, "Tackle");
-		//players[0]->GetBelt(1).SetMove(3, "Quick Attack");
+		players[0]->GetBelt(1).SetMove(1, "Thunderbolt"); 
+		players[0]->GetBelt(1).SetMove(2, "Conversion");
+		players[0]->GetBelt(1).SetMove(3, "Transform");
 		//players[0]->GetBelt(1).SetMove(4, "Bite");
 		players[0]->GetBelt(2).SetMove(1, "Teleport");
 		//players[0]->GetBelt(2).SetMove(2, "Mega Drain");
 		//players[0]->GetBelt(2).SetMove(3, "Quick Attack");
 		//players[0]->GetBelt(2).SetMove(4, "Bite");
-		players[1]->GetBelt(1).SetMove(1, "Tackle");
-		//players[1]->GetBelt(1).SetMove(2, "Thunderbolt");
-		//players[1]->GetBelt(1).SetMove(3, "Conversion");
+		players[1]->GetBelt(1).SetMove(1, "Razor Leaf");
+		players[1]->GetBelt(1).SetMove(2, "Conversion");
+		players[1]->GetBelt(1).SetMove(3, "Transform");
 		//players[1]->GetBelt(1).SetMove(4, "Tackle");
-		//players[1]->GetBelt(2).SetMove(1, "Surf");
+		players[1]->GetBelt(2).SetMove(1, "Surf");
 		//players[1]->GetBelt(2).SetMove(2, "Mega Drain");
 		//players[1]->GetBelt(2).SetMove(3, "Quick Attack");
 		//players[1]->GetBelt(2).SetMove(4, "Bite");
 
 		players[0]->GetBelt(1).IncrementMoveCount();
-		//players[0]->GetBelt(1).IncrementMoveCount();
-		//players[0]->GetBelt(1).IncrementMoveCount();
+		players[0]->GetBelt(1).IncrementMoveCount();
+		players[0]->GetBelt(1).IncrementMoveCount();
 		//players[0]->GetBelt(1).IncrementMoveCount();
 		players[0]->GetBelt(2).IncrementMoveCount();
 		//players[0]->GetBelt(2).IncrementMoveCount();
 		//players[0]->GetBelt(2).IncrementMoveCount();
 		//players[0]->GetBelt(2).IncrementMoveCount();
 		players[1]->GetBelt(1).IncrementMoveCount();
+		players[1]->GetBelt(1).IncrementMoveCount();
+		players[1]->GetBelt(1).IncrementMoveCount();
 		//players[1]->GetBelt(1).IncrementMoveCount();
-		//players[1]->GetBelt(1).IncrementMoveCount();
-		//players[1]->GetBelt(1).IncrementMoveCount();
-		//players[1]->GetBelt(2).IncrementMoveCount();
+		players[1]->GetBelt(2).IncrementMoveCount();
 		//players[1]->GetBelt(2).IncrementMoveCount();
 		//players[1]->GetBelt(2).IncrementMoveCount();
 		//players[1]->GetBelt(2).IncrementMoveCount();
@@ -2344,7 +2344,7 @@ void Menu::SetDefaultPokemon()
 		//players[0]->GetBelt(1).SetAttackIV(31);
 		//players[0]->GetBelt(1).SetDefenseIV(31);
 		//players[0]->GetBelt(1).SetSpecialDefenseIV(31);
-		players[0]->GetBelt(1).SetSpeedIV(31);
+		//players[0]->GetBelt(1).SetSpeedIV(31);
 
 		//players[1]->GetBelt(1).SetHPEV(252);
 		//players[1]->GetBelt(1).SetAttackEV(252);
@@ -2354,7 +2354,7 @@ void Menu::SetDefaultPokemon()
 		//players[1]->GetBelt(1).SetAttackIV(31);
 		//players[1]->GetBelt(1).SetDefenseIV(31);
 		//players[1]->GetBelt(1).SetSpecialDefenseIV(31);
-		//players[1]->GetBelt(1).SetSpeedIV(30);
+		players[1]->GetBelt(1).SetSpeedIV(30);
 
 		//players[0]->GetBelt(1).ChangeStatus(Status::Paralyzed);
 		//players[0]->GetBelt(1).DamageCurrentHP(players[0]->GetBelt(1).GetMaxHP() - 1);

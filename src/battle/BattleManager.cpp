@@ -648,8 +648,6 @@ bool BattleManager::RunBattleSimulation()
 				m_switchExecutor.ExecuteSwitch(*m_context.attackingPlayer, m_context.attackingPokemon);
 				m_context.attackingPlayer->SetPendingSwitch(false);
 			}
-
-			BattleAIProcedures::RefineEnemyModel(m_context);
 		}
 
 		m_battleAnnouncerUI.NewLine();

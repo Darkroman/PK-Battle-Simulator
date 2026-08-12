@@ -1257,6 +1257,11 @@ bool BattlePokemon::IsTransformed() const
 
 void BattlePokemon::SetTransformation(BattlePokemon* pokemon)
 {
+    if (IsConverted())
+    {
+        Deconvert();
+    }
+    
     m_detransformData.BackupOriginalPokemonData(this);
 
     for (size_t i = 0; i < m_array_moves.size(); ++i)
