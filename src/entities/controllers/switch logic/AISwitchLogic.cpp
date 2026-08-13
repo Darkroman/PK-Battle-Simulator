@@ -272,11 +272,16 @@ namespace AISwitchLogic
 			if (mostLikelyMove != nullptr)
 			{
 				unsigned int firstAttackVsCandidate = AIMoveScoring::SwitchDamageScoringRoutine(self.GetAIController(), self, *mostLikelyMove, targetMon, *candidate.pokemon);
-				unsigned int secondAttackVsCandidate{ 0 };
+				unsigned int secondAttackVsCandidate{ firstAttackVsCandidate };
 
 				// Evaluate most likely observed move AI will do against candidateMon
 				for (const auto& observedMove : validObservedMoves)
 				{
+					if (observedMove == mostLikelyMove)
+					{
+						continue;
+					}
+
 					unsigned int damageToCandidate = AIMoveScoring::SwitchDamageScoringRoutine(self.GetAIController(), self, *observedMove, targetMon, *candidate.pokemon);
 					if (damageToCandidate > secondAttackVsCandidate)
 					{

@@ -4,7 +4,6 @@
 
 #include "AIScoreTag.h"
 #include "ScoringResultsStruct.h"
-#include "../AIController.h"
 #include "../../Player.h"
 #include "../../pokemonMove.h"
 #include "../../BattlePokemon.h"
@@ -14,13 +13,13 @@
 
 namespace BasicScoring
 {
-	int BaseDamageScoring(ScoringResults& result, const Player& self, const Player& targetPlayer, const pokemonMove& move, const BattlePokemon& selfMon, const BattlePokemon& targetMon)
+	int BaseDamageScoring(ScoringResults& result, const Player& self, const Player& targetPlayer, const pokemonMove& move, const BattlePokemon& selfMon, const BattlePokemon& targetMon, unsigned int effectiveness)
 	{
 		int delta{};
 
 		auto tags = result.tag;
 
-		delta += CheckDamageImmunity(move, self, targetMon); // score -10 if immune
+		delta += CheckDamageImmunity(move, self, targetMon, effectiveness); // score -10 if immune
 
 		switch (tags)
 		{
@@ -160,10 +159,8 @@ namespace BasicScoring
 		return delta;
 	}
 
-	int CheckDamageImmunity(const pokemonMove& move, const Player& self, const BattlePokemon& targetMon)
+	int CheckDamageImmunity(const pokemonMove& move, const Player& self, const BattlePokemon& targetMon, unsigned int effectiveness)
 	{
-		int effectiveness = self.GetAIController().AICalculateMoveTypeEffectiveness(move, targetMon);
-
 		int delta{};
 
 		if (effectiveness == 0)

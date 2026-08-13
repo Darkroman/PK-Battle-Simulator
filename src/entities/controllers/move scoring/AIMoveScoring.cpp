@@ -99,8 +99,9 @@ namespace AIMoveScoring
 		}
 		else
 		{
-			results.score += BasicScoring::BaseDamageScoring(results, self, targetPlayer, move, selfMon, targetMon);
-			results.damage = self.GetAIController().AICalculateDamage(move, targetPlayer, selfMon, targetMon);
+			unsigned int effectiveness = self.GetAIController().AICalculateMoveTypeEffectiveness(move, targetMon);
+			results.score += BasicScoring::BaseDamageScoring(results, self, targetPlayer, move, selfMon, targetMon, effectiveness);
+			results.damage = self.GetAIController().AICalculateDamage(move, targetPlayer, selfMon, targetMon, effectiveness);
 		}
 
 		return results;

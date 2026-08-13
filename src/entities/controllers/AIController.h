@@ -74,6 +74,7 @@ public:
 	unsigned int AICalculatePokemonTypeEffectiveness(const BattlePokemon& source, const BattlePokemon& target) const;
 	unsigned int AICalculateMoveTypeEffectiveness(const pokemonMove& currentMove, const BattlePokemon& target) const;
 	unsigned int AICalculateDamage(const pokemonMove&, const Player&, const BattlePokemon&, const BattlePokemon&) const;
+	unsigned int AICalculateDamage(const pokemonMove&, const Player&, const BattlePokemon&, const BattlePokemon&, unsigned int) const;
 	bool CalculateStatusMoveEffectiveness(const pokemonMove& currentMove, const Player&, const Player& targetPlayer, const BattlePokemon& source, const BattlePokemon& target) const;
 
 private:

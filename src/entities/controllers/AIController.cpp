@@ -310,14 +310,19 @@ unsigned int AIController::AICalculateMoveTypeEffectiveness(const pokemonMove& c
 
 unsigned int AIController::AICalculateDamage(const pokemonMove& currentMove, const Player& targetPlayer, const BattlePokemon& source, const BattlePokemon& target) const
 {
+	unsigned int effectiveness{ AICalculateMoveTypeEffectiveness(currentMove, target) };
+
+	return AICalculateDamage(currentMove, targetPlayer, source, target, effectiveness);
+}
+
+unsigned int AIController::AICalculateDamage(const pokemonMove& currentMove, const Player& targetPlayer, const BattlePokemon& source, const BattlePokemon& target, unsigned int effectiveness) const
+{
 	if (currentMove.GetCategoryEnum() == Category::Status)
 	{
 		return 0;
 	}
 
 	unsigned int baseDamage{ 0 };
-
-	unsigned int effectiveness = AICalculateMoveTypeEffectiveness(currentMove, target);
 
 	if (effectiveness <= 0)
 	{

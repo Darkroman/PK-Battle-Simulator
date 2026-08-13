@@ -7,10 +7,10 @@ struct ScoringResults;
 
 namespace BasicScoring
 {
-	int BaseDamageScoring(ScoringResults&, const Player& self, const Player& targetPlayer, const pokemonMove& move, const BattlePokemon& selfMon, const BattlePokemon& targetMon);
+	int BaseDamageScoring(ScoringResults&, const Player& self, const Player& targetPlayer, const pokemonMove& move, const BattlePokemon& selfMon, const BattlePokemon& targetMon, unsigned int effectiveness);
 	int BaseStatusScoring(ScoringResults&, const Player& self, const Player& targetPlayer, const pokemonMove& move, const BattlePokemon& selfMon, const BattlePokemon& targetMon);
 
-	int CheckDamageImmunity(const pokemonMove& move, const Player& self, const BattlePokemon& targetMon);
+	int CheckDamageImmunity(const pokemonMove& move, const Player& self, const BattlePokemon& targetMon, unsigned int effectiveness);
 	int CheckOHKOLevel(const BattlePokemon& selfMon, const BattlePokemon& targetMon);
 	int CheckExplosionLastPokemon(const Player& self, const Player& targetPlayer);
 	int DreamEaterSleepCheck(const BattlePokemon& targetMon);
