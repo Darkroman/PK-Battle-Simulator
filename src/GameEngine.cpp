@@ -1,11 +1,13 @@
-#include <iostream>
-#include <chrono>
-#include <thread>
-#include <mutex>
-#include <vector>
-#include <memory>
 #include <algorithm>
+#include <atomic>
+#include <chrono>
 #include <cstdint>
+#include <iostream>
+#include <memory>
+//#include <mutex>
+#include <new>
+#include <thread>
+#include <vector>
 
 #include "GameEngine.h"
 
@@ -23,12 +25,12 @@
 #include "ui/interfaces/IMoveResultsUI.h"
 #include "ui/MoveResultsQueuedConsole.h"
 #include "ui/MoveResultsHeadless.h"
-#include "ui/MoveResultsText.h"
+//#include "ui/MoveResultsText.h"
 
 #include "ui/interfaces/IStatusEffectUI.h"
 #include "ui/StatusEffectQueuedConsole.h"
 #include "ui/StatusEffectHeadless.h"
-#include "ui/StatusEffectText.h"
+//#include "ui/StatusEffectText.h"
 
 #include "common/AppState.h"
 #include "common/BattleState.h"
@@ -158,7 +160,7 @@ void GameEngine::RunSimulations()
 
     start = std::chrono::high_resolution_clock::now();
 
-    std::mutex localWinsMutex;
+    //std::mutex localWinsMutex;
 
     unsigned int numThreads = std::thread::hardware_concurrency();
 
@@ -172,12 +174,12 @@ void GameEngine::RunSimulations()
     unsigned int baseBattlesPerThread = simIterations / numThreads;
     unsigned int remainder = simIterations % numThreads;
 
-    std::atomic<uint64_t> numOfIterations{};
+    //std::atomic<uint64_t> numOfIterations{};
 
-    uint64_t pOneVictories{};
-    uint64_t pTwoVictories{};
+    alignas (std::hardware_destructive_interference_size) std::atomic<uint64_t> pOneVictories{};
+    alignas (std::hardware_destructive_interference_size) std::atomic<uint64_t> pTwoVictories{};
 
-    uint64_t totalTurns{};
+    alignas (std::hardware_destructive_interference_size) std::atomic<uint64_t> totalTurns{};
 
     std::vector<std::thread> workers;
     workers.reserve(numThreads);
@@ -192,7 +194,7 @@ void GameEngine::RunSimulations()
 
     //std::atomic<bool> found{};
     //ThreadDebugInfo info;
-    for (unsigned int t = 0; t < numThreads; ++t)
+    for (unsigned int t{}; t < numThreads; ++t)
     {
         workers.emplace_back([&, t]()
         {
@@ -219,7 +221,7 @@ void GameEngine::RunSimulations()
             uint64_t localP1Wins = 0;
             uint64_t localP2Wins = 0;
             uint64_t localThreadTurns = 0;
-            uint64_t localNumOfIterations = 0;
+            //uint64_t localNumOfIterations = 0;
 
             unsigned int battlesForThisThread =
             baseBattlesPerThread + (t < remainder ? 1 : 0);
@@ -284,14 +286,10 @@ void GameEngine::RunSimulations()
                 localManager.ResetValues();
             }
 
-            {
-                std::scoped_lock lock(localWinsMutex);
+            pOneVictories += localP1Wins;
+            pTwoVictories += localP2Wins;
+            totalTurns += localThreadTurns;
 
-                pOneVictories += localP1Wins;
-                pTwoVictories += localP2Wins;
-                totalTurns += localThreadTurns;
-                //numOfIterations += localNumOfIterations;
-            }
             /*
             ThreadDebugInfo info;
             info.threadIndex = t;
@@ -338,6 +336,7 @@ void GameEngine::RunSimulations()
             << '\n';
     }
     */
+
     std::chrono::duration<double> elapsed = (end - start);
 
     std::cout << "Time it took to do simulation: " << elapsed.count() << " seconds" << "\n\n";
