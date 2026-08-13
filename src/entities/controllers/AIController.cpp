@@ -322,12 +322,12 @@ unsigned int AIController::AICalculateDamage(const pokemonMove& currentMove, con
 		return 0;
 	}
 
-	unsigned int baseDamage{ 0 };
-
 	if (effectiveness <= 0)
 	{
 		return 0;
 	}
+
+	unsigned int baseDamage{ 0 };
 
 	MoveID moveId = currentMove.GetMoveID();
 	MoveEffect moveEffect = currentMove.GetMoveEffectEnum();
@@ -377,7 +377,7 @@ unsigned int AIController::AICalculateDamage(const pokemonMove& currentMove, con
 		break;
 	}
 	
-	if ((moveEffect == MoveEffect::OHKO) && effectiveness != 0)
+	if (moveEffect == MoveEffect::OHKO)
 	{
 		if (source.GetLevel() < target.GetLevel())
 		{
@@ -507,10 +507,8 @@ unsigned int AIController::AICalculateDamage(const pokemonMove& currentMove, con
 
 	unsigned int finalDamage = interimDamage * other / FixedPointBase;
 
-	if (effectiveness != 0)
-	{
-		finalDamage = std::max(1u, finalDamage);
-	}
+	finalDamage = std::max(1u, finalDamage);
+	
 
 	if (moveEffect == MoveEffect::MultiHit ||
 		moveEffect == MoveEffect::DoubleHit ||

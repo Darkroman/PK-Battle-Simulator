@@ -7,7 +7,6 @@
 #include "AIScoreTag.h"
 #include "ScoringResultsStruct.h"
 #include "../../BattlePokemon.h"
-#include "../../../moves/MoveEffectEnums.h"
 
 namespace MediumMoveScoring
 {
@@ -51,7 +50,7 @@ namespace MediumMoveScoring
 			// If move is enough to kill target
 			if (canKill)
 			{
-				if (result->move->GetMoveEffectEnum() == MoveEffect::Explosion)
+				if (result->tag == AIScoreTag::SelfFaintingDamage)
 				{
 					// do nothing
 				}
@@ -78,7 +77,7 @@ namespace MediumMoveScoring
 			}
 
 			// if self-fainting move
-			if (result->move->GetMoveEffectEnum() == MoveEffect::Explosion)
+			if (result->tag == AIScoreTag::SelfFaintingDamage)
 			{
 				result->score -= 2;
 			}

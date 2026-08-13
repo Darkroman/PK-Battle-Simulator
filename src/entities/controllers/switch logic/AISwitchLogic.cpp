@@ -107,7 +107,9 @@ namespace AISwitchLogic
 		}
 
 		const pokemonMove* targetMonLastUsedMove = targetMon.GetLastUsedMove();
-		bool lastUsedMoveAvailable = targetMonLastUsedMove != nullptr && targetMonLastUsedMove->IsActive();
+		bool lastUsedMoveAvailable = targetMonLastUsedMove != nullptr &&
+			targetMonLastUsedMove->IsActive() &&
+			targetMonLastUsedMove->GetCategoryEnum() != Category::Status;
 
 		if (!isFaster && lastUsedMoveAvailable)
 		{
