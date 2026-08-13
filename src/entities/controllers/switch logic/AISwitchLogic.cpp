@@ -150,11 +150,6 @@ namespace AISwitchLogic
 			bool targetMonHasKOMove{ false };
 			for (const auto& observedMove : observedMoves)
 			{
-				if (observedMove == nullptr)
-				{
-					break;
-				}
-
 				if (!observedMove->IsActive() || observedMove->GetCategoryEnum() == Category::Status)
 				{
 					continue;
@@ -220,11 +215,6 @@ namespace AISwitchLogic
 
 		for (const auto& observedMove : observedMoves)
 		{
-			if (observedMove == nullptr)
-			{
-				break;
-			}
-
 			if (!observedMove->IsActive() || observedMove->GetCategoryEnum() == Category::Status)
 			{
 				continue;
@@ -254,6 +244,8 @@ namespace AISwitchLogic
 			}
 		}
 
+		unsigned int targetMonSpeed = AIMoveScoring::CalculateSpeed(targetMon);
+
 		for (auto& candidate : candidatePkmn)
 		{
 			for (const auto& move : candidate.pokemon->GetMoveArray())
@@ -272,7 +264,6 @@ namespace AISwitchLogic
 			candidate.typeEffectiveness = PokemonTypeEffectiveness(self, targetMon, *candidate.pokemon);
 
 			unsigned int candidateMonSpeed = AIMoveScoring::CalculateSpeed(*candidate.pokemon);
-			unsigned int targetMonSpeed = AIMoveScoring::CalculateSpeed(targetMon);
 
 			candidate.isFaster = candidateMonSpeed >= targetMonSpeed;
 
@@ -400,11 +391,6 @@ namespace AISwitchLogic
 
 		for (const auto& observedMove : observedMoves)
 		{
-			if (observedMove == nullptr)
-			{
-				break;
-			}
-
 			if (!observedMove->IsActive() || observedMove->GetCategoryEnum() == Category::Status)
 			{
 				continue;
@@ -415,6 +401,8 @@ namespace AISwitchLogic
 		}
 
 		std::span<const pokemonMove*> validObservedMoves{ observedDamagingMoves.data(), observedCount };
+
+		unsigned int targetMonSpeed = AIMoveScoring::CalculateSpeed(targetMon);
 
 		for (auto& candidate : candidatePkmn)
 		{
@@ -434,7 +422,6 @@ namespace AISwitchLogic
 			candidate.typeEffectiveness = PokemonTypeEffectiveness(self, targetMon, *candidate.pokemon);
 
 			unsigned int candidateMonSpeed = AIMoveScoring::CalculateSpeed(*candidate.pokemon);
-			unsigned int targetMonSpeed = AIMoveScoring::CalculateSpeed(targetMon);
 
 			candidate.isFaster = candidateMonSpeed >= targetMonSpeed;
 

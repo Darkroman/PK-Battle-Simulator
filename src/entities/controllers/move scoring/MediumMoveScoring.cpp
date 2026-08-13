@@ -43,7 +43,7 @@ namespace MediumMoveScoring
 			bool isRechargeMove = result->tag == AIScoreTag::RechargeMove;
 
 			bool canKill{};
-			if (result->damage >= targetMon.GetCurrentHP())
+			if (result->damage >= targetMon.GetCurrentHP() && result->tag != AIScoreTag::OHKO)
 			{
 				canKill = true;
 			}

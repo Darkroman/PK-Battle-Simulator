@@ -170,7 +170,10 @@ std::span<const pokemonMove*> AIController::GetObservedMoves() const
 		return std::span<const pokemonMove*>{};
 	}
 
-	return activePokemon->observedMoves.moves;
+	return {
+		activePokemon->observedMoves.moves.data(),
+		static_cast<size_t>(activePokemon->observedMoves.count)
+	};
 }
 
 void AIController::UpdateObservedMoves(const pokemonMove& currentMove)
