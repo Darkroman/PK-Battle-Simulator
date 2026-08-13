@@ -7,13 +7,11 @@ class Player;
 class BattlePokemon;
 struct pokemonMove;
 class RandomEngine;
-class AIController;
 
 namespace AIMoveScoring
 {
 	pokemonMove* GetWinningMove(const Player& self, const Player& targetPlayer, BattlePokemon& selfMon, const BattlePokemon& targetMon, RandomEngine& rng);
 	pokemonMove* EvaluateScoredMoves(std::span<ScoringResults>& results, RandomEngine& rng);
 	ScoringResults RunScoringRoutine(ScoringResults& results, const Player& self, const Player& targetPlayer, const pokemonMove& move, const BattlePokemon& selfMon, const BattlePokemon& targetMon);
-	unsigned int SwitchDamageScoringRoutine(const AIController& ai, const Player& defendingPlayer, const pokemonMove& move, const BattlePokemon& selfMon, const BattlePokemon& targetMon);
 	unsigned int CalculateSpeed(const BattlePokemon&);
 }

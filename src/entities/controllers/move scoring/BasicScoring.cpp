@@ -61,7 +61,7 @@ namespace BasicScoring
 			break;
 
 		case AIScoreTag::Confuse:
-			delta += ConfuseCheck(targetMon); // if defender is already confused, score -10
+			delta += ConfuseCheck(targetMon); // if defender is already confused, score -5
 			break;
 
 			// Stat Stage boosts

@@ -99,17 +99,13 @@ namespace AIMoveScoring
 		}
 		else
 		{
-			unsigned int effectiveness = self.GetAIController().AICalculateMoveTypeEffectiveness(move, targetMon);
+			AIController& ai = self.GetAIController();
+			unsigned int effectiveness = ai.AICalculateMoveTypeEffectiveness(move, targetMon);
 			results.score += BasicScoring::BaseDamageScoring(results, self, targetPlayer, move, selfMon, targetMon, effectiveness);
-			results.damage = self.GetAIController().AICalculateDamage(move, targetPlayer, selfMon, targetMon, effectiveness);
+			results.damage = ai.AICalculateDamage(move, targetPlayer, selfMon, targetMon, effectiveness);
 		}
 
 		return results;
-	}
-
-	unsigned int SwitchDamageScoringRoutine(const AIController& ai, const Player& defendingPlayer, const pokemonMove& move, const BattlePokemon& selfMon, const BattlePokemon& targetMon)
-	{
-		return ai.AICalculateDamage(move, defendingPlayer, selfMon, targetMon);
 	}
 
 	unsigned int CalculateSpeed(const BattlePokemon& pokemon)

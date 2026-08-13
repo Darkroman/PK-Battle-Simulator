@@ -1,6 +1,7 @@
 #include "AISwitchLogic.h"
 
 #include <array>
+#include <cassert>
 #include <span>
 #include <algorithm>
 #include <tuple>
@@ -51,11 +52,13 @@ namespace AISwitchLogic
 		bool canKO{};
 		bool priorityCanKO{};
 
+		AIController& ai = self.GetAIController();
+
 		for (const auto& move : selfMon.GetMoveArray())
 		{
 			if (move.IsActive() && move.GetCategoryEnum() != Category::Status) 
 			{
-				unsigned int damage = AIMoveScoring::SwitchDamageScoringRoutine(self.GetAIController(), targetPlayer, move, selfMon, targetMon);
+				unsigned int damage = ai.AICalculateDamage(move, targetPlayer, selfMon, targetMon);
 
 				if (damage > highestDamage)
 				{
@@ -93,7 +96,7 @@ namespace AISwitchLogic
 		}
 
 		// if selfMon has priority move that can KO targetMon, don't switch (and self is hard difficulty)
-		if (self.GetAIController().GetDifficulty() == Difficulty::Hard && priorityCanKO)
+		if (ai.GetDifficulty() == Difficulty::Hard && priorityCanKO)
 		{
 			return false;
 		}
@@ -113,7 +116,7 @@ namespace AISwitchLogic
 
 		if (!isFaster && lastUsedMoveAvailable)
 		{
-			unsigned int lastMoveDamage = AIMoveScoring::SwitchDamageScoringRoutine(self.GetAIController(), self, *targetMonLastUsedMove, targetMon, selfMon);
+			unsigned int lastMoveDamage = ai.AICalculateDamage(*targetMonLastUsedMove, self, targetMon, selfMon);
 
 			if (lastMoveDamage >= selfMon.GetCurrentHP())
 			{
@@ -122,9 +125,9 @@ namespace AISwitchLogic
 			}
 		}
 
-		if (self.GetAIController().GetDifficulty() == Difficulty::Hard)
+		if (ai.GetDifficulty() == Difficulty::Hard)
 		{
-			bool selfTypingDisadvantageous{ PokemonTypeEffectiveness(self, targetMon, selfMon) > 4096 };
+			bool selfTypingDisadvantageous{ PokemonTypeEffectiveness(ai, targetMon, selfMon) > 4096 };
 
 			// if selfMon is slower and typing is disadvantageous, switch
 			if (!isFaster && selfTypingDisadvantageous)
@@ -132,7 +135,7 @@ namespace AISwitchLogic
 				return true;
 			}
 
-			bool isNotVeryEffective{ IsMoveNotVeryEffective(self, *highestDamagingMove, targetMon) };
+			bool isNotVeryEffective{ IsMoveNotVeryEffective(ai, *highestDamagingMove, targetMon) };
 
 			// if selfMon's typing is disadvantageous and highest damaging move is not very effective and cannot KO, switch
 			if (selfTypingDisadvantageous && isNotVeryEffective && !canKO)
@@ -146,7 +149,7 @@ namespace AISwitchLogic
 				return false;
 			}
 			
-			const auto& observedMoves = self.GetAIController().GetObservedMoves();
+			const auto& observedMoves = ai.GetObservedMoves();
 
 			for (const auto& observedMove : observedMoves)
 			{
@@ -160,7 +163,7 @@ namespace AISwitchLogic
 					continue;
 				}
 
-				unsigned int damageToSelf{ AIMoveScoring::SwitchDamageScoringRoutine(self.GetAIController(), self, *observedMove, targetMon, selfMon) };
+				unsigned int damageToSelf = ai.AICalculateDamage(*observedMove, self, targetMon, selfMon);
 
 				// If selfMon is slower and targetMon has a move that can KO, switch
 				if (damageToSelf >= selfMon.GetCurrentHP())
@@ -208,7 +211,9 @@ namespace AISwitchLogic
 
 		std::span<CandidatePokemon> candidatePkmn{ candidatePkmnPool.data(), count };
 
-		const auto& observedMoves = self.GetAIController().GetObservedMoves();
+		AIController& ai = self.GetAIController();
+
+		const auto& observedMoves = ai.GetObservedMoves();
 		std::array<const pokemonMove*, 4> observedDamagingMoves{};
 		size_t observedCount{};
 
@@ -233,7 +238,7 @@ namespace AISwitchLogic
 			// Evaluate most likely observed move AI will do against selfMon
 			for (const auto& observedMove : validObservedMoves)
 			{
-				unsigned int damageToSelf = AIMoveScoring::SwitchDamageScoringRoutine(self.GetAIController(), self, *observedMove, targetMon, selfMon);
+				unsigned int damageToSelf = ai.AICalculateDamage(*observedMove, self, targetMon, selfMon);
 
 				if (damageToSelf > highestDamageToSelf)
 				{
@@ -251,7 +256,7 @@ namespace AISwitchLogic
 			{
 				if (move.IsActive() && move.GetCategoryEnum() != Category::Status)
 				{
-					unsigned int damage = AIMoveScoring::SwitchDamageScoringRoutine(self.GetAIController(), targetPlayer, move, *candidate.pokemon, targetMon);
+					unsigned int damage = ai.AICalculateDamage(move, targetPlayer, *candidate.pokemon, targetMon);
 
 					if (damage > candidate.highestDamageMove)
 					{
@@ -260,7 +265,7 @@ namespace AISwitchLogic
 				}
 			}
 
-			candidate.typeEffectiveness = PokemonTypeEffectiveness(self, targetMon, *candidate.pokemon);
+			candidate.typeEffectiveness = PokemonTypeEffectiveness(ai, targetMon, *candidate.pokemon);
 
 			unsigned int candidateMonSpeed = AIMoveScoring::CalculateSpeed(*candidate.pokemon);
 
@@ -270,7 +275,7 @@ namespace AISwitchLogic
 
 			if (mostLikelyMove != nullptr)
 			{
-				unsigned int firstAttackVsCandidate = AIMoveScoring::SwitchDamageScoringRoutine(self.GetAIController(), self, *mostLikelyMove, targetMon, *candidate.pokemon);
+				unsigned int firstAttackVsCandidate = ai.AICalculateDamage(*mostLikelyMove, self, targetMon, *candidate.pokemon);
 				unsigned int secondAttackVsCandidate{ firstAttackVsCandidate };
 
 				// Evaluate most likely observed move AI will do against candidateMon
@@ -281,7 +286,7 @@ namespace AISwitchLogic
 						continue;
 					}
 
-					unsigned int damageToCandidate = AIMoveScoring::SwitchDamageScoringRoutine(self.GetAIController(), self, *observedMove, targetMon, *candidate.pokemon);
+					unsigned int damageToCandidate = ai.AICalculateDamage(*observedMove, self, targetMon, *candidate.pokemon);
 					if (damageToCandidate > secondAttackVsCandidate)
 					{
 						secondAttackVsCandidate = damageToCandidate;
@@ -387,9 +392,14 @@ namespace AISwitchLogic
 			}
 		}
 
+		assert(count > 0);
+
 		std::span<CandidatePokemon> candidatePkmn{ candidatePkmnPool.data(), count };
 
-		const auto& observedMoves = self.GetAIController().GetObservedMoves();
+		AIController& ai = self.GetAIController();
+
+		const auto& observedMoves = ai.GetObservedMoves();
+
 		std::array<const pokemonMove*, 4> observedDamagingMoves{};
 		size_t observedCount{};
 
@@ -414,7 +424,7 @@ namespace AISwitchLogic
 			{
 				if (move.IsActive() && move.GetCategoryEnum() != Category::Status)
 				{
-					unsigned int damage = AIMoveScoring::SwitchDamageScoringRoutine(self.GetAIController(), targetPlayer, move, *candidate.pokemon, targetMon);
+					unsigned int damage = ai.AICalculateDamage(move, targetPlayer, *candidate.pokemon, targetMon);
 
 					if (damage > candidate.highestDamageMove)
 					{
@@ -423,7 +433,7 @@ namespace AISwitchLogic
 				}
 			}
 
-			candidate.typeEffectiveness = PokemonTypeEffectiveness(self, targetMon, *candidate.pokemon);
+			candidate.typeEffectiveness = PokemonTypeEffectiveness(ai, targetMon, *candidate.pokemon);
 
 			unsigned int candidateMonSpeed = AIMoveScoring::CalculateSpeed(*candidate.pokemon);
 
@@ -436,7 +446,7 @@ namespace AISwitchLogic
 				unsigned int highestDamageToCandidate{ 0 };
 				for (const auto& observedMove : validObservedMoves)
 				{
-					unsigned int damageToCandidate = AIMoveScoring::SwitchDamageScoringRoutine(self.GetAIController(), self, *observedMove, targetMon, *candidate.pokemon);
+					unsigned int damageToCandidate = ai.AICalculateDamage(*observedMove, self, targetMon, *candidate.pokemon);
 
 					if (damageToCandidate > highestDamageToCandidate)
 					{
@@ -514,58 +524,58 @@ namespace AISwitchLogic
 		return it->pokemon;
 	}
 
-	bool IsMoveSuperEffective(const Player& self, const pokemonMove& move, const BattlePokemon& pokemon)
+	bool IsMoveSuperEffective(const AIController& self, const pokemonMove& move, const BattlePokemon& pokemon)
 	{
 		auto MoveEffectiveness = [&](const pokemonMove& move, const BattlePokemon& targetMon) {
-			return self.GetAIController().AICalculateMoveTypeEffectiveness(move, targetMon);
+			return self.AICalculateMoveTypeEffectiveness(move, targetMon);
 			};
 
 		return MoveEffectiveness(move, pokemon) > 4096 && move.GetPower() > 0 && move.m_currentPP > 0;
 	}
 
-	bool IsMoveAtMostEffective(const Player& self, const pokemonMove& move, const BattlePokemon& pokemon)
+	bool IsMoveAtMostEffective(const AIController& self, const pokemonMove& move, const BattlePokemon& pokemon)
 	{
 		auto MoveEffectiveness = [&](const pokemonMove& move, const BattlePokemon& targetMon) {
-			return self.GetAIController().AICalculateMoveTypeEffectiveness(move, targetMon);
+			return self.AICalculateMoveTypeEffectiveness(move, targetMon);
 			};
 
 		return MoveEffectiveness(move, pokemon) <= 4096 && move.GetPower() > 0 && move.m_currentPP > 0;
 	}
 
-	bool IsMoveAtLeastEffective(const Player& self, const pokemonMove& move, const BattlePokemon& pokemon)
+	bool IsMoveAtLeastEffective(const AIController& self, const pokemonMove& move, const BattlePokemon& pokemon)
 	{
 		auto MoveEffectiveness = [&](const pokemonMove& move, const BattlePokemon& targetMon) {
-			return self.GetAIController().AICalculateMoveTypeEffectiveness(move, targetMon);
+			return self.AICalculateMoveTypeEffectiveness(move, targetMon);
 			};
 
 		return MoveEffectiveness(move, pokemon) >= 4096 && move.GetPower() > 0 && move.m_currentPP > 0;
 	}
 
-	bool IsMoveNotEffective(const Player& self, const pokemonMove& move, const BattlePokemon& pokemon)
+	bool IsMoveNotEffective(const AIController& self, const pokemonMove& move, const BattlePokemon& pokemon)
 	{
 		auto MoveEffectiveness = [&](const pokemonMove& move, const BattlePokemon& targetMon) {
-			return self.GetAIController().AICalculateMoveTypeEffectiveness(move, targetMon);
+			return self.AICalculateMoveTypeEffectiveness(move, targetMon);
 			};
 
 		return MoveEffectiveness(move, pokemon) == 0 && move.GetPower() > 0 && move.m_currentPP > 0;
 	}
 
-	bool IsMoveNotVeryEffective(const Player& self, const pokemonMove& move, const BattlePokemon& pokemon)
+	bool IsMoveNotVeryEffective(const AIController& self, const pokemonMove& move, const BattlePokemon& pokemon)
 	{
 		auto MoveEffectiveness = [&](const pokemonMove& move, const BattlePokemon& targetMon) {
-			return self.GetAIController().AICalculateMoveTypeEffectiveness(move, targetMon);
+			return self.AICalculateMoveTypeEffectiveness(move, targetMon);
 			};
 
 		return MoveEffectiveness(move, pokemon) <= 2048 && move.GetPower() > 0 && move.m_currentPP > 0;
 	}
 
-	bool IsStatusMoveEffective(const Player& self, const Player& targetPlayer, const pokemonMove& move, const BattlePokemon& selfMon, const BattlePokemon& targetMon)
+	bool IsStatusMoveEffective(const AIController& self, const Player& selfPlayer, const Player& targetPlayer, const pokemonMove& move, const BattlePokemon& selfMon, const BattlePokemon& targetMon)
 	{
-		return self.GetAIController().CalculateStatusMoveEffectiveness(move, self, targetPlayer, selfMon, targetMon) && move.m_currentPP > 0;
+		return self.CalculateStatusMoveEffectiveness(move, selfPlayer, targetPlayer, selfMon, targetMon) && move.m_currentPP > 0;
 	}
 
-	unsigned int PokemonTypeEffectiveness(const Player& self, const BattlePokemon& source, const BattlePokemon& target)
+	unsigned int PokemonTypeEffectiveness(const AIController& self, const BattlePokemon& source, const BattlePokemon& target)
 	{
-		return self.GetAIController().AICalculatePokemonTypeEffectiveness(source, target);
+		return self.AICalculatePokemonTypeEffectiveness(source, target);
 	}
 }
