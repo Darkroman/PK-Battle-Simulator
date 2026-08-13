@@ -329,69 +329,55 @@ unsigned int AIController::AICalculateDamage(const pokemonMove& currentMove, con
 		return 0;
 	}
 
-	if (currentMove.GetMoveEffectEnum() == MoveEffect::DreamEater &&
+	MoveID moveId = currentMove.GetMoveID();
+	MoveEffect moveEffect = currentMove.GetMoveEffectEnum();
+
+	if (moveEffect == MoveEffect::DreamEater &&
 		target.GetStatus() != Status::Sleeping)
 	{
 		return 0;
 	}
 
-	bool isFixedDamageMove = currentMove.GetMoveID() == MoveID::SonicBoom ||
-		currentMove.GetMoveID() == MoveID::SeismicToss ||
-		currentMove.GetMoveID() == MoveID::DragonRage ||
-		currentMove.GetMoveID() == MoveID::NightShade ||
-		currentMove.GetMoveID() == MoveID::Counter ||
-		currentMove.GetMoveID() == MoveID::Bide ||
-		currentMove.GetMoveID() == MoveID::Psywave ||
-		currentMove.GetMoveID() == MoveID::SuperFang;
-
-	if (isFixedDamageMove)
+	switch (moveId)
 	{
-		MoveID moveID = currentMove.GetMoveID();
+	case MoveID::SonicBoom:
+		return 20;
 
-		switch (moveID)
+	case MoveID::SeismicToss:
+	case MoveID::NightShade:
+		return source.GetLevel();
+
+	case MoveID::DragonRage:
+		return 40;
+
+	case MoveID::Counter:
+	{
+		const pokemonMove* lastMove = target.GetLastUsedMove();
+
+		if (lastMove && lastMove->GetCategoryEnum() == Category::Physical)
 		{
-		case MoveID::SonicBoom:
-			return 20;
-			break;
-
-		case MoveID::SeismicToss:
-		case MoveID::NightShade:
-			return source.GetLevel();
-			break;
-
-		case MoveID::DragonRage:
-			return 40;
-			break;
-
-		case MoveID::Counter:
-		{
-			const pokemonMove* lastMove = target.GetLastUsedMove();
-
-			if (lastMove && lastMove->GetCategoryEnum() == Category::Physical)
-			{
-				return 1;
-			}
-			else
-			{
-				return 0;
-			}
+			return 1;
 		}
-
-		case MoveID::Bide:
-			return 1;
-			break;
-
-		case MoveID::Psywave:
-			return 1;
-			break;
-
-		case MoveID::SuperFang:
-			return std::max(1u, target.GetCurrentHP() / 2);
-			break;
+		else
+		{
+			return 0;
 		}
 	}
 
-	if ((currentMove.GetMoveEffectEnum() == MoveEffect::OHKO) && effectiveness != 0)
+	case MoveID::Bide:
+		return 1;
+
+	case MoveID::Psywave:
+		return 1;
+
+	case MoveID::SuperFang:
+		return std::max(1u, target.GetCurrentHP() / 2);
+
+	default:
+		break;
+	}
+	
+	if ((moveEffect == MoveEffect::OHKO) && effectiveness != 0)
 	{
 		if (source.GetLevel() < target.GetLevel())
 		{
@@ -405,7 +391,7 @@ unsigned int AIController::AICalculateDamage(const pokemonMove& currentMove, con
 	}
 
 	// START: Calculate total attack and defense values of attacker and defender
-	bool isPhysical{ currentMove.GetCategoryEnum() == Category::Physical };
+	bool isPhysical{ currentMove.GetCategoryEnum() == Category::Physical};
 
 	unsigned int baseSourceAttack{ isPhysical ? source.GetAttack() : source.GetSpecialAttack() };
 	unsigned int baseTargetDefense{ isPhysical ? target.GetDefense() : target.GetSpecialDefense() };
@@ -459,12 +445,12 @@ unsigned int AIController::AICalculateDamage(const pokemonMove& currentMove, con
 			return 120;
 		};
 
-	if (currentMove.GetMoveEffectEnum() == MoveEffect::LowKick)
+	if (moveEffect == MoveEffect::LowKick)
 	{
 		currentMovePower = CalculateLowKickPower(target);
 	}
 
-	if (currentMove.GetMoveEffectEnum() == MoveEffect::Gust && target.IsSemiInvulnerableFromFly())
+	if (moveEffect == MoveEffect::Gust && target.IsSemiInvulnerableFromFly())
 	{
 		currentMovePower *= 2;
 	}
@@ -483,7 +469,7 @@ unsigned int AIController::AICalculateDamage(const pokemonMove& currentMove, con
 
 	bool hasStab = (currentMove.GetMoveTypeEnum() == source.GetTypeOneEnum() ||
 		currentMove.GetMoveTypeEnum() == source.GetTypeTwoEnum())
-		&& currentMove.GetMoveEffectEnum() != MoveEffect::Struggle;
+		&& moveEffect != MoveEffect::Struggle;
 
 	if (hasStab)
 	{
@@ -499,12 +485,12 @@ unsigned int AIController::AICalculateDamage(const pokemonMove& currentMove, con
 
 	unsigned int other{ FixedPointBase };
 
-	if ((currentMove.GetMoveEffectEnum() == MoveEffect::Stomp || currentMove.GetMoveEffectEnum() == MoveEffect::BodySlam) && target.HasUsedMinimize())
+	if ((moveEffect == MoveEffect::Stomp || moveEffect == MoveEffect::BodySlam) && target.HasUsedMinimize())
 	{
 		other = (other * DoubleMultiplier + HalfMultiplier) / FixedPointBase;
 	}
 
-	if (currentMove.GetMoveEffectEnum() == MoveEffect::Earthquake && target.IsSemiInvulnerableFromDig())
+	if (moveEffect == MoveEffect::Earthquake && target.IsSemiInvulnerableFromDig())
 	{
 		other = (other * DoubleMultiplier + HalfMultiplier) / FixedPointBase;
 	}
@@ -526,9 +512,9 @@ unsigned int AIController::AICalculateDamage(const pokemonMove& currentMove, con
 		finalDamage = std::max(1u, finalDamage);
 	}
 
-	if (currentMove.GetMoveEffectEnum() == MoveEffect::MultiHit ||
-		currentMove.GetMoveEffectEnum() == MoveEffect::DoubleHit ||
-		currentMove.GetMoveEffectEnum() == MoveEffect::Twineedle)
+	if (moveEffect == MoveEffect::MultiHit ||
+		moveEffect == MoveEffect::DoubleHit ||
+		moveEffect == MoveEffect::Twineedle)
 	{
 		return finalDamage * 2;
 	}

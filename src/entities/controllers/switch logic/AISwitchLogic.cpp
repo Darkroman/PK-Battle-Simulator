@@ -109,13 +109,14 @@ namespace AISwitchLogic
 		const pokemonMove* targetMonLastUsedMove = targetMon.GetLastUsedMove();
 		bool lastUsedMoveAvailable = targetMonLastUsedMove != nullptr && targetMonLastUsedMove->IsActive();
 
+		unsigned int lastMoveDamage{};
 		bool lastMoveCanKO{};
 
 		if (lastUsedMoveAvailable)
 		{
-			unsigned int damage = AIMoveScoring::SwitchDamageScoringRoutine(self.GetAIController(), self, *targetMonLastUsedMove, targetMon, selfMon);
+			unsigned int lastMoveDamage = AIMoveScoring::SwitchDamageScoringRoutine(self.GetAIController(), self, *targetMonLastUsedMove, targetMon, selfMon);
 
-			if (damage >= selfMon.GetCurrentHP())
+			if (lastMoveDamage >= selfMon.GetCurrentHP())
 			{
 				lastMoveCanKO = true;
 			}
@@ -155,7 +156,16 @@ namespace AISwitchLogic
 					continue;
 				}
 
-				unsigned int damageToSelf = AIMoveScoring::SwitchDamageScoringRoutine(self.GetAIController(), self, *observedMove, targetMon, selfMon);
+				unsigned int damageToSelf{};
+
+				if (lastUsedMoveAvailable && observedMove == targetMonLastUsedMove)
+				{
+					damageToSelf = lastMoveDamage;
+				}
+				else
+				{
+					damageToSelf = AIMoveScoring::SwitchDamageScoringRoutine(self.GetAIController(), self, *observedMove, targetMon, selfMon);
+				}
 
 				if (damageToSelf >= selfMon.GetCurrentHP())
 				{
