@@ -75,7 +75,7 @@ namespace AISwitchLogic
 			}
 		}
 
-		// if all damaging moves are immune, switch
+		// if all moves are immune or all status moves, switch
 		if (highestDamage == 0)
 		{
 			return true;
@@ -109,23 +109,15 @@ namespace AISwitchLogic
 		const pokemonMove* targetMonLastUsedMove = targetMon.GetLastUsedMove();
 		bool lastUsedMoveAvailable = targetMonLastUsedMove != nullptr && targetMonLastUsedMove->IsActive();
 
-		unsigned int lastMoveDamage{};
-		bool lastMoveCanKO{};
-
-		if (lastUsedMoveAvailable)
+		if (!isFaster && lastUsedMoveAvailable)
 		{
 			unsigned int lastMoveDamage = AIMoveScoring::SwitchDamageScoringRoutine(self.GetAIController(), self, *targetMonLastUsedMove, targetMon, selfMon);
 
 			if (lastMoveDamage >= selfMon.GetCurrentHP())
 			{
-				lastMoveCanKO = true;
+				// if last move used by targetMon can KO selfMon and selfMon is slower, switch
+				return true;
 			}
-		}
-
-		// if selfMon is slower and last used move by targetMon can KO, switch
-		if (lastUsedMoveAvailable && !isFaster && lastMoveCanKO)
-		{
-			return true;
 		}
 
 		if (self.GetAIController().GetDifficulty() == Difficulty::Hard)
@@ -146,38 +138,33 @@ namespace AISwitchLogic
 				return true;
 			}
 			
+			// If selfMon is faster, skip the rest of the evaluation
+			if (isFaster)
+			{
+				return false;
+			}
+			
 			const auto& observedMoves = self.GetAIController().GetObservedMoves();
 
-			bool targetMonHasKOMove{ false };
 			for (const auto& observedMove : observedMoves)
 			{
+				if (observedMove == targetMonLastUsedMove)
+				{
+					continue;
+				}
+
 				if (!observedMove->IsActive() || observedMove->GetCategoryEnum() == Category::Status)
 				{
 					continue;
 				}
 
-				unsigned int damageToSelf{};
+				unsigned int damageToSelf{ AIMoveScoring::SwitchDamageScoringRoutine(self.GetAIController(), self, *observedMove, targetMon, selfMon) };
 
-				if (lastUsedMoveAvailable && observedMove == targetMonLastUsedMove)
-				{
-					damageToSelf = lastMoveDamage;
-				}
-				else
-				{
-					damageToSelf = AIMoveScoring::SwitchDamageScoringRoutine(self.GetAIController(), self, *observedMove, targetMon, selfMon);
-				}
-
+				// If selfMon is slower and targetMon has a move that can KO, switch
 				if (damageToSelf >= selfMon.GetCurrentHP())
 				{
-					targetMonHasKOMove = true;
-					break;
+					return true;
 				}
-			}
-
-			// If selfMon is slower, and targetMon's highest damaging observed move will KO selfMon, switch
-			if (!isFaster && targetMonHasKOMove)
-			{
-				return true;
 			}
 		}
 		
