@@ -392,9 +392,11 @@ unsigned int AIController::AICalculateDamage(const pokemonMove& currentMove, con
 		{
 			return 0;
 		}
-
+		return 1;
+		/*
 		baseDamage = target.GetMaxHP();
 		return baseDamage;
+		*/
 	}
 
 	// START: Calculate total attack and defense values of attacker and defender
