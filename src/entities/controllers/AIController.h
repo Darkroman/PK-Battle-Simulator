@@ -22,7 +22,7 @@ enum class Difficulty { Easy, Medium, Hard };
 struct ObservedPokemonMoves
 {
 	std::array<const pokemonMove*, 4> moves{};
-	std::array<bool, 4> revealed{};
+	int count{ 0 };
 };
 
 struct PersistentMemory

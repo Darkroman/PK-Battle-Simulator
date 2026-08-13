@@ -276,7 +276,7 @@ namespace AISwitchLogic
 
 			candidate.isFaster = candidateMonSpeed >= targetMonSpeed;
 
-			candidate.canKO = candidate.highestDamageMove >= targetMon.GetCurrentHP();
+			candidate.canKO = !targetMon.IsFainted() && candidate.highestDamageMove >= targetMon.GetCurrentHP();
 
 			if (mostLikelyMove != nullptr)
 			{
@@ -438,7 +438,7 @@ namespace AISwitchLogic
 
 			candidate.isFaster = candidateMonSpeed >= targetMonSpeed;
 
-			candidate.canKO = candidate.highestDamageMove >= targetMon.GetCurrentHP();
+			candidate.canKO = !targetMon.IsFainted() && candidate.highestDamageMove >= targetMon.GetCurrentHP();
 
 			if (!validObservedMoves.empty())
 			{

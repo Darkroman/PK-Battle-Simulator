@@ -155,8 +155,8 @@ void AIController::OnActivePokemonChanged(const BattleContext& context)
 
 void AIController::GetOpponentParty(const Player& opponent)
 {
-    for (size_t i = 0; i < memory.opponentMemory.size(); ++i)
-    {
+	for (size_t i = 0; i < memory.opponentMemory.size(); ++i)
+	{
 		memory.opponentMemory[i].pokemon = &(opponent.GetBelt(i + 1));
     }
 }
@@ -184,21 +184,27 @@ void AIController::UpdateObservedMoves(const pokemonMove& currentMove)
 
 	memory.activeOpponent.opponentLastUsedMove = &currentMove;
 
+	if (currentMove.GetMoveEffectEnum() == MoveEffect::Struggle)
+	{
+		return;
+	}
+
 	auto& observed = activePokemon->observedMoves;
 
-	for (size_t moveSlot = 0; moveSlot < observed.moves.size(); ++moveSlot)
-	{
-		if (observed.moves[moveSlot] != nullptr && observed.moves[moveSlot]->GetMoveID() == currentMove.GetMoveID())
-		{
-			return;
-		}
+	const int currentCount = observed.count;
 
-		if (observed.moves[moveSlot] == nullptr)
+	for (int moveSlot = 0; moveSlot < currentCount; ++moveSlot)
+	{
+		if (observed.moves[moveSlot] == &currentMove)
 		{
-			observed.moves[moveSlot] = &currentMove;
-			observed.revealed[moveSlot] = true;
 			return;
 		}
+	}
+
+	if (currentCount < observed.moves.size())
+	{
+		observed.moves[currentCount] = &currentMove;
+		observed.count = currentCount + 1;
 	}
 }
 
@@ -210,10 +216,7 @@ void AIController::ResetObservedMoves()
 		{
 			move = nullptr;
 		}
-		for (auto& move : pokemon.observedMoves.revealed)
-		{
-			move = false;
-		}
+		pokemon.observedMoves.count = 0;
 	}
 }
 
@@ -387,7 +390,7 @@ unsigned int AIController::AICalculateDamage(const pokemonMove& currentMove, con
 			return 0;
 		}
 
-		baseDamage = target.GetCurrentHP();
+		baseDamage = target.GetMaxHP();
 		return baseDamage;
 	}
 
