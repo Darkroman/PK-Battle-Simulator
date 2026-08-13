@@ -13,13 +13,17 @@
 
 namespace BasicScoring
 {
-	int BaseDamageScoring(ScoringResults& result, const Player& self, const Player& targetPlayer, const pokemonMove& move, const BattlePokemon& selfMon, const BattlePokemon& targetMon, unsigned int effectiveness)
+	int BaseDamageScoring(ScoringResults& result, const Player& self, const Player& targetPlayer, const BattlePokemon& selfMon, const BattlePokemon& targetMon, unsigned int effectiveness)
 	{
 		int delta{};
 
 		auto tags = result.tag;
 
-		delta += CheckDamageImmunity(move, self, targetMon, effectiveness); // score -10 if immune
+		// if immune, -10 to score and end early
+		if (effectiveness == 0)
+		{
+			return -10;
+		}
 
 		switch (tags)
 		{
@@ -144,7 +148,7 @@ namespace BasicScoring
 			break;
 
 		case AIScoreTag::Substitute:
-			delta += SubstituteCheck(selfMon); // if attacker has substitute already score -8, or if attacker's hp percent is less than 26, score -10
+			delta += SubstituteCheck(selfMon); // if attacker has substitute already score -8, or if attacker's hp percent is 25% or less, score -10
 			break;
 
 		case AIScoreTag::Seed:
@@ -154,18 +158,6 @@ namespace BasicScoring
 		case AIScoreTag::Disable:
 			delta += DisableCheck(targetMon); // if defender already has a move disabled, score -8
 			break;
-		}
-
-		return delta;
-	}
-
-	int CheckDamageImmunity(const pokemonMove& move, const Player& self, const BattlePokemon& targetMon, unsigned int effectiveness)
-	{
-		int delta{};
-
-		if (effectiveness == 0)
-		{
-			delta -= 10;
 		}
 
 		return delta;
@@ -410,8 +402,6 @@ namespace BasicScoring
 
 	int HazeCheck(const BattlePokemon& selfMon, const BattlePokemon& targetMon)
 	{
-		int delta{};
-
 		auto selfStats = { selfMon.GetAttackStage(), selfMon.GetDefenseStage(), selfMon.GetSpecialAttackStage(), selfMon.GetSpecialDefenseStage(), selfMon.GetSpeedStage(), selfMon.GetAccuracyStage(), selfMon.GetEvasionStage() };
 		bool selfHasBuff = std::any_of(selfStats.begin(), selfStats.end(), [](size_t s) { return s > 6; });
 
@@ -420,10 +410,18 @@ namespace BasicScoring
 
 		if (selfHasBuff || targetHasDebuff)
 		{
-			delta -= 10;
+			return -10;
 		}
 
-		return delta;
+		bool selfHasDebuff = std::any_of(selfStats.begin(), selfStats.end(), [](size_t s) { return s < 6; });
+		bool targetHasBuff = std::any_of(targetStats.begin(), targetStats.end(), [](size_t s) { return s > 6; });
+
+		if (selfHasDebuff || targetHasBuff)
+		{
+			return 0;
+		}
+
+		return -10;
 	}
 
 	int ForceSwitchCheck(const Player& targetPlayer)
@@ -516,14 +514,14 @@ namespace BasicScoring
 
 		if (selfMon.HasSubstitute())
 		{
-			delta -= 8;
+			return -8;
 		}
 
 		unsigned int substituteCost{ selfMon.GetMaxHP() / 4 };
 
 		if (selfMon.GetCurrentHP() <= substituteCost)
 		{
-			delta -= 10;
+			return -10;
 		}
 
 		return delta;

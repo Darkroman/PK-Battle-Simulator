@@ -3313,6 +3313,7 @@ namespace MoveRoutines
 		unsigned int finalDamage = std::max(1u, hpSource / 2);
 
 		deps.calculations.ApplyDamage(*ctx.currentMove, *ctx.defendingPokemon, finalDamage);
+		deps.resultsUI.DisplayDirectDamageInflictedMsg(finalDamage);
 		deps.resultsUI.DisplaySubstituteDamageTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ctx.defendingPokemon->GetSubstituteHP(), ctx.defendingPokemon->HasSubstitute(), ctx.flags.hitSubstitute);
 
 		ExecuteOnHitReactions(deps);

@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <array>
+#include <cassert>
 #include <span>
 #include <climits>
 
@@ -46,7 +47,7 @@ namespace AIMoveScoring
 
 		for (auto& result : resultsView)
 		{
-			result = RunScoringRoutine(result, self, targetPlayer, *result.move, selfMon, targetMon);
+			RunScoringRoutine(result, self, targetPlayer, *result.move, selfMon, targetMon);
 		}
 
 		if (self.GetAIController().GetDifficulty() >= Difficulty::Medium)
@@ -87,11 +88,13 @@ namespace AIMoveScoring
 			}
 		}
 
-		if (count == 0) { ++count; }
+		assert(!results.empty());
+		assert(count > 0);
+
 		return topScores[rng.RandomRange(0ull, count - 1ull)]->move;
 	}
 
-	ScoringResults RunScoringRoutine(ScoringResults& results, const Player& self, const Player& targetPlayer, const pokemonMove& move, const BattlePokemon& selfMon, const BattlePokemon& targetMon)
+	void RunScoringRoutine(ScoringResults& results, const Player& self, const Player& targetPlayer, const pokemonMove& move, const BattlePokemon& selfMon, const BattlePokemon& targetMon)
 	{
 		if (move.GetCategoryEnum() == Category::Status)
 		{
@@ -101,11 +104,9 @@ namespace AIMoveScoring
 		{
 			AIController& ai = self.GetAIController();
 			unsigned int effectiveness = ai.AICalculateMoveTypeEffectiveness(move, targetMon);
-			results.score += BasicScoring::BaseDamageScoring(results, self, targetPlayer, move, selfMon, targetMon, effectiveness);
+			results.score += BasicScoring::BaseDamageScoring(results, self, targetPlayer, selfMon, targetMon, effectiveness);
 			results.damage = ai.AICalculateDamage(move, targetPlayer, selfMon, targetMon, effectiveness);
 		}
-
-		return results;
 	}
 
 	unsigned int CalculateSpeed(const BattlePokemon& pokemon)
