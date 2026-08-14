@@ -1,4 +1,4 @@
-# PK-Battle-Simulator-Redux
+# PK-Battle-Simulator
 
 <details>
    <summary>
