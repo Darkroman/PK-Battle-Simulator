@@ -13,7 +13,6 @@
 
 #include "../data/Pokemon.h"
 #include "../data/StringToTypes.h"
-#include "../data/MoveID.h"
 #include "../moves/MoveEffectEnums.h"
 #include "../entities/pokemonMove.h"
 #include "../entities/Player.h"
@@ -149,14 +148,6 @@ void BattleCalculations::CalculateTypeEffectiveness(BattleContext& ctx, const po
 
 bool BattleCalculations::CalculateHitChance(const pokemonMove& currentMove, const BattlePokemon& source, const BattlePokemon& target)
 {
-	if (
-		(target.IsSemiInvulnerableFromFly() && (currentMove.GetMoveEffectEnum() != MoveEffect::Gust && currentMove.GetMoveID() != MoveID::Thunder)) ||
-		(target.IsSemiInvulnerableFromDig() && (currentMove.GetMoveEffectEnum() != MoveEffect::Earthquake))
-		)
-	{
-		return false;
-	}
-
 	int sourceAccuracy = source.GetAccuracyStage();
 	int targetEvasion = target.GetEvasionStage();
 

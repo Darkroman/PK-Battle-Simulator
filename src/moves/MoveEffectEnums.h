@@ -52,6 +52,7 @@ enum class MoveEffect
 	SpeedDown2,
 	DragonRage,
 	Paralyze,
+	Thunder,
 	Earthquake,
 	Dig,
 	Toxic,
