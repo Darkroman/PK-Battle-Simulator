@@ -6,6 +6,7 @@ class Player;
 class BattlePokemon;
 struct pokemonMove;
 class RandomEngine;
+class AIController;
 enum class MoveID;
 enum class MoveEffect;
 
@@ -17,7 +18,7 @@ namespace HardAIMoveScoring
 
 	bool SpeedUpMoveEffectFound(MoveEffect effect);
 
-	ScoringResults RunExpertScoringRoutine(ScoringResults& result, std::span<ScoringResults>& results, const Player& self, const Player& targetPlayer, const pokemonMove& move, const BattlePokemon& selfMon, const BattlePokemon& targetMon, RandomEngine& rng);
+	void RunExpertScoringRoutine(ScoringResults& result, std::span<ScoringResults>& results, const Player& self, const Player& targetPlayer, const pokemonMove& move, const BattlePokemon& selfMon, const BattlePokemon& targetMon, RandomEngine& rng);
 
 	int SleepMove(std::span<ScoringResults>& results, RandomEngine& rng);
 
@@ -37,5 +38,7 @@ namespace HardAIMoveScoring
 
 	int SelfSpDBoost(RandomEngine& rng, const BattlePokemon& selfMon, const BattlePokemon& targetMon);
 
+	int SelfAccuracyBoost(RandomEngine& rng, const BattlePokemon& selfMon);
 
+	int SelfEvasionBoost(RandomEngine& rng, AIController& self, const BattlePokemon& selfMon, const BattlePokemon& targetMon);
 }
