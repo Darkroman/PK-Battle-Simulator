@@ -97,7 +97,7 @@ inline constexpr Move global_movedex[] = {
 { MoveID::ThunderShock, "Thunder Shock",  PokemonType::Electric, Category::Special,   0, MoveEffect::ParalyzeHit,           10, 30,  40, 100, 0, 1, 0, 0, 1, 0, 0, 0 },
 { MoveID::Thunderbolt,  "Thunderbolt",    PokemonType::Electric, Category::Special,   0, MoveEffect::ParalyzeHit,           10, 15,  90, 100, 0, 1, 0, 0, 1, 0, 0, 0 },
 { MoveID::ThunderWave,  "Thunder Wave",   PokemonType::Electric, Category::Status,    0, MoveEffect::Paralyze,               0, 20,   0,  90, 0, 1, 1, 0, 1, 0, 0, 0 },
-{ MoveID::Thunder,      "Thunder",        PokemonType::Electric, Category::Special,   0, MoveEffect::ParalyzeHit,           30, 10, 110,  70, 0, 1, 0, 0, 1, 0, 0, 0 },
+{ MoveID::Thunder,      "Thunder",        PokemonType::Electric, Category::Special,   0, MoveEffect::Thunder,               30, 10, 110,  70, 0, 1, 0, 0, 1, 0, 0, 0 },
 { MoveID::RockThrow,    "Rock Throw",     PokemonType::Rock,     Category::Physical,  0, MoveEffect::NormalHit,              0, 15,  50,  90, 0, 1, 0, 0, 1, 1, 0, 0 },
 { MoveID::Earthquake,   "Earthquake",     PokemonType::Ground,   Category::Physical,  0, MoveEffect::Earthquake,             0, 10, 100, 100, 0, 1, 0, 0, 1, 1, 0, 0 },
 { MoveID::Fissure,      "Fissure",        PokemonType::Ground,   Category::Physical,  0, MoveEffect::OHKO,                   0,  5,   0,  30, 0, 1, 0, 0, 0, 0, 0, 0 },

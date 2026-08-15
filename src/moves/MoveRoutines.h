@@ -55,6 +55,7 @@ namespace MoveRoutines
     void SpeedDown2(MoveRoutineDeps& deps);
     void DragonRage(MoveRoutineDeps& deps);
     void Paralyze(MoveRoutineDeps& deps);
+    void Thunder(MoveRoutineDeps& deps);
     void Earthquake(MoveRoutineDeps& deps);
     void Dig(MoveRoutineDeps& deps);
     void Toxic(MoveRoutineDeps& deps);

@@ -11,6 +11,8 @@ struct MoveRoutineDeps;
 
 EffectivenessText ToEffectivenessText(BattleStateFlags::Effectiveness);
 
+bool IsBlockedBySemiInvulnerability(MoveRoutineDeps& deps);
+
 void InflictNVStatus(Status, int effectChance, MoveRoutineDeps&);
 
 bool DefendingPokemonIsFainted(BattleContext&, IMoveResultsUI&);
