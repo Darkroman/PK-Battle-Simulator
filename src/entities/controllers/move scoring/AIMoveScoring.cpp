@@ -59,7 +59,7 @@ namespace AIMoveScoring
 		{
 			for (auto& result : resultsView)
 			{
-				result = HardAIMoveScoring::RunExpertScoringRoutine(result, resultsView, self, targetPlayer, *result.move, selfMon, targetMon, rng);
+				HardAIMoveScoring::RunExpertScoringRoutine(result, resultsView, self, targetPlayer, *result.move, selfMon, targetMon, rng);
 			}
 		}
 		*/
