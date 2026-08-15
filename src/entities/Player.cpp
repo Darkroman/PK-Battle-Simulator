@@ -147,6 +147,21 @@ void Player::SetName(std::string_view input)
     m_name = input;
 }
 
+unsigned int Player::GetActivePokemonTurnCount() const
+{
+    return m_activePokemonTurnCount;
+}
+
+void Player::IncrementActivePokemonTurnCount()
+{
+    ++m_activePokemonTurnCount;
+}
+
+void Player::ResetActivePokemonTurnCount()
+{
+    m_activePokemonTurnCount = 0;
+}
+
 void Player::IncrementPokemonCount()
 {
     ++m_PokemonCount;
@@ -185,6 +200,12 @@ void Player::DecrementFaintedCount()
 int Player::GetPokemonLeft() const
 {
     return m_PokemonCount - m_faintedPokemon;
+}
+
+void Player::UpdateTurnState(const BattlePokemon& pokemon)
+{
+    IncrementActivePokemonTurnCount();
+    UpdateSwitchState(pokemon);
 }
 
 bool Player::IsFirst() const

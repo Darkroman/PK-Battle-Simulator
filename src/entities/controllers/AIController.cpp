@@ -509,15 +509,15 @@ unsigned int AIController::AICalculateDamage(const pokemonMove& currentMove, con
 
 	finalDamage = std::max(1u, finalDamage);
 	
-
-	if (moveEffect == MoveEffect::MultiHit ||
-		moveEffect == MoveEffect::DoubleHit ||
-		moveEffect == MoveEffect::Twineedle)
+	switch (moveEffect)
 	{
-		return finalDamage * 2;
+		case MoveEffect::MultiHit:
+		case MoveEffect::Twineedle:
+		case MoveEffect::DoubleHit:
+			return finalDamage * 2;
+		default:
+			return finalDamage;
 	}
-
-	return finalDamage;
 }
 
 bool AIController::CalculateStatusMoveEffectiveness(const pokemonMove& currentMove, const Player& self, const Player& targetPlayer, const BattlePokemon& selfMon, const BattlePokemon& targetMon) const
