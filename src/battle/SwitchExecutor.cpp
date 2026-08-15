@@ -23,7 +23,7 @@ void SwitchExecutor::ExecuteSwitch(Player& player, BattlePokemon*& pokemon)
 	}
 
 	pokemon->ResetStatsOnSwitch();
-
+	player.ResetActivePokemonTurnCount();
 	pokemon = player.GetPokemonToSwitchTo();
 
 	if (&player == m_context.playerOne)

@@ -44,6 +44,13 @@ public:
     BattlePokemon& GetBelt(size_t);
     const BattlePokemon& GetBelt(size_t) const;
 
+    unsigned int GetActivePokemonTurnCount() const;
+    void ResetActivePokemonTurnCount();
+
+private:
+    void IncrementActivePokemonTurnCount();
+
+public:
     void IncrementPokemonCount();
     void DecrementPokemonCount();
     int GetPokemonCount() const;
@@ -55,12 +62,17 @@ public:
 
     int GetPokemonLeft() const;
 
+    void UpdateTurnState(const BattlePokemon&);
+
     bool IsFirst() const;
     void SetFirst(bool);
 
     bool CanSwitch() const;
+
+private:
     void UpdateSwitchState(const BattlePokemon&);
 
+public:
     bool IsSwitching() const;
     void SetIsSwitching(bool);
 
@@ -98,7 +110,7 @@ public:
 
     void ResetValues();
 
-protected:
+private:
     std::array<BattlePokemon, 6> belt;
 
     std::string m_name;
@@ -106,6 +118,8 @@ protected:
     BattlePokemon* pokemonToSwitchTo{ nullptr };
 
     std::unique_ptr<IPlayerController> uptr_controller;
+
+    unsigned int m_activePokemonTurnCount{};
 
     int m_PokemonCount{ 0 };
     int m_faintedPokemon{ 0 };
