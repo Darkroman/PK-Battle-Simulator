@@ -21,7 +21,7 @@ class GameEngine
 public:
     GameEngine();
     void Run();
-    void RunSimulations();
+    void RunSimulations(unsigned int simIterations);
 
 private:
     void Bootstrap();
@@ -39,10 +39,10 @@ private:
     BattleUIEventQueue m_uiEventQueue;
 
     AppState currentState = AppState::MainMenu;
+    MenuResult m_pendingMenuResult{};
     std::optional<Menu> menu;
     std::optional<BattleManager> battleManager;
 
-    unsigned int simIterations{ 1 };
     int playerOneVictories{};
     int playerTwoVictories{};
 };

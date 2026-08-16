@@ -20,6 +20,7 @@ private:
 	std::vector<std::unique_ptr<Player>>& playerStorage;
 	std::array<Player*, 2> players;
 	std::string path = "./SavedParties";
+	unsigned int m_simIterations{ 1 };
 
 public:
 	Menu() = delete;
@@ -46,7 +47,7 @@ public:
 	bool SetPlayerPokemonSpecialDefenseEV(BattlePokemon&);
 	bool SetPlayerPokemonSpeedEV(BattlePokemon&);
 
-	AppState RunMenu(unsigned int&);
+	MenuResult RunMenu();
 	void ChangePlayerOneName();
 	void EditPlayerOnePokemon();
 	void ChangePlayerOneType();
@@ -81,7 +82,7 @@ public:
 	std::vector<std::filesystem::path> ListSavedParties();
 	std::vector<std::filesystem::path> GetSavedParties();
 
-	unsigned int SetSimIterations(unsigned int);
+	void SetSimIterations();
 
 	bool CheckIfBothPlayersAI();
 	bool IsPokemonSetupIncomplete();

@@ -9,3 +9,9 @@ enum class AppState
 	Simulate,
 	Exit
 };
+
+struct MenuResult
+{
+	AppState appState;
+	unsigned int simIterations{ 1 };
+};

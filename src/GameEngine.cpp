@@ -4,7 +4,6 @@
 #include <cstdint>
 #include <iostream>
 #include <memory>
-//#include <mutex>
 #include <new>
 #include <thread>
 #include <vector>
@@ -25,12 +24,10 @@
 #include "ui/interfaces/IMoveResultsUI.h"
 #include "ui/MoveResultsQueuedConsole.h"
 #include "ui/MoveResultsHeadless.h"
-//#include "ui/MoveResultsText.h"
 
 #include "ui/interfaces/IStatusEffectUI.h"
 #include "ui/StatusEffectQueuedConsole.h"
 #include "ui/StatusEffectHeadless.h"
-//#include "ui/StatusEffectText.h"
 
 #include "common/AppState.h"
 #include "common/BattleState.h"
@@ -81,17 +78,15 @@ void GameEngine::Run()
                 {
                     menu.emplace(players);
                 }
-
-                currentState = menu->RunMenu(simIterations);
+                m_pendingMenuResult = menu->RunMenu();
+                currentState = m_pendingMenuResult.appState;
 
                 break;
-
+            
             case AppState::InitBattle:
 
                 outputTarget = std::make_unique<ConsoleOutput>();
                 battleAnnouncer = std::make_unique<BattleAnnouncerText>();
-                //moveResults = std::make_unique<MoveResultsText>(*outputTarget);
-                //statusEffect = std::make_unique<StatusEffectText>(*outputTarget);
                 moveResults = std::make_unique<MoveResultsQueuedConsole>(m_uiEventQueue);
                 statusEffect = std::make_unique<StatusEffectQueuedConsole>(m_uiEventQueue);
 
@@ -124,7 +119,7 @@ void GameEngine::Run()
 
             case AppState::Simulate:
             {
-                RunSimulations();
+                RunSimulations(m_pendingMenuResult.simIterations);
 
                 currentState = AppState::MainMenu;
 
@@ -138,13 +133,14 @@ void GameEngine::Run()
     }
 }
 
-void GameEngine::RunSimulations()
+void GameEngine::RunSimulations(unsigned int simIterations)
 {
     if (simIterations <= 0)
     {
         std::cerr << "Simulation iterations must be greater than zero.\n";
         return;
     }
+
     /*
     struct ThreadDebugInfo
     {
