@@ -4,14 +4,14 @@
 
 #include "interfaces/IMoveResultsUI.h"
 
-class BattleUIEventQueue;
+class BattleEventQueue;
 enum class EffectivenessText;
 enum class MoveID;
 
-class MoveResultsQueuedConsole : public IMoveResultsUI
+class MoveResultsQueued : public IMoveResultsUI
 {
 public:
-	MoveResultsQueuedConsole(BattleUIEventQueue& queue);
+	MoveResultsQueued(BattleEventQueue& queue);
 
 	// Basic Move Results
 	void DisplayNoopMsg() const override;
@@ -157,5 +157,5 @@ public:
 	void PlayerChoosesMsg(std::string_view, std::string_view) const override;
 
 private:
-	BattleUIEventQueue& m_queue;
+	BattleEventQueue& m_queue;
 };

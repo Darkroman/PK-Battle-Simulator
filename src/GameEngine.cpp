@@ -22,12 +22,14 @@
 #include "ui/BattleAnnouncerHeadless.h"
 
 #include "ui/interfaces/IMoveResultsUI.h"
-#include "ui/MoveResultsQueuedConsole.h"
+#include "ui/MoveResultsQueued.h"
 #include "ui/MoveResultsHeadless.h"
 
 #include "ui/interfaces/IStatusEffectUI.h"
-#include "ui/StatusEffectQueuedConsole.h"
+#include "ui/StatusEffectQueued.h"
 #include "ui/StatusEffectHeadless.h"
+
+#include "ui/ConsoleBattleEventProcessor.h"
 
 #include "common/AppState.h"
 #include "common/BattleState.h"
@@ -87,14 +89,16 @@ void GameEngine::Run()
 
                 outputTarget = std::make_unique<ConsoleOutput>();
                 battleAnnouncer = std::make_unique<BattleAnnouncerText>();
-                moveResults = std::make_unique<MoveResultsQueuedConsole>(m_uiEventQueue);
-                statusEffect = std::make_unique<StatusEffectQueuedConsole>(m_uiEventQueue);
+                moveResults = std::make_unique<MoveResultsQueued>(m_eventQueue);
+                statusEffect = std::make_unique<StatusEffectQueued>(m_eventQueue);
+                
+                m_eventProcessor.emplace(m_eventQueue, *outputTarget);
 
                 PresetupBattle();
 
                 if (!battleManager)
                 {
-                    battleManager.emplace(context, rng, *battleAnnouncer, *moveResults, *statusEffect, *outputTarget, m_uiEventQueue);
+                    battleManager.emplace(context, rng, *battleAnnouncer, *moveResults, *statusEffect);
                 }
 
                 currentState = AppState::Battle;
@@ -102,12 +106,22 @@ void GameEngine::Run()
                 break;
 
             case AppState::Battle:
-                if (battleManager->RunBattle() == BattleState::Victory)
+            {
+                const BattleRunResult result = battleManager->RunBattle();
+
+                if (result.playEvents)
+                {
+                    m_eventProcessor->ProcessEvents();
+
+                }
+
+                if (result.state == BattleState::Victory)
                 {
                     currentState = AppState::Victory;
                 }
 
                 break;
+            }
 
             case AppState::Victory:
                 battleAnnouncer->AnnounceWinner(context);
@@ -212,7 +226,7 @@ void GameEngine::RunSimulations(unsigned int simIterations)
             if (localContext.playerOne->IsAI()) localContext.vec_aiPlayers.emplace_back(localContext.playerOne);
             if (localContext.playerTwo->IsAI()) localContext.vec_aiPlayers.emplace_back(localContext.playerTwo);
 
-            BattleManager localManager(localContext, localRng, *battleAnnouncer, *moveResults, *statusEffect, *outputTarget, m_uiEventQueue);
+            BattleManager localManager(localContext, localRng, *battleAnnouncer, *moveResults, *statusEffect);
 
             uint64_t localP1Wins = 0;
             uint64_t localP2Wins = 0;

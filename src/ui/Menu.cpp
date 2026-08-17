@@ -2743,6 +2743,7 @@ void Menu::SetSimIterations()
 		}
 
 		std::cout << "Iterations set at " << m_simIterations << '\n';
+		return;
 	}
 }
 

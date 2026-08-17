@@ -1,8 +1,9 @@
 #include <algorithm>
-#include <utility>
-#include <memory>
 #include <array>
+#include <cassert>
+#include <memory>
 #include <span>
+#include <utility>
 
 #include "AIController.h"
 
@@ -137,8 +138,6 @@ void AIController::OnBattleStart(const Player& self, BattleContext& context)
 		memory.selfPlayer = context.playerTwo;
 		memory.opponentPlayer = context.playerOne;
 	}
-
-	GetOpponentParty(*memory.opponentPlayer);
 }
 
 void AIController::OnActivePokemonChanged(const BattleContext& context)
@@ -153,17 +152,9 @@ void AIController::OnActivePokemonChanged(const BattleContext& context)
 	}
 }
 
-void AIController::GetOpponentParty(const Player& opponent)
-{
-	for (size_t i = 0; i < memory.opponentMemory.size(); ++i)
-	{
-		memory.opponentMemory[i].pokemon = &(opponent.GetBelt(i + 1));
-    }
-}
-
 std::span<const pokemonMove*> AIController::GetObservedMoves() const
 {
-	auto activePokemon = memory.slotOfActivePokemon;
+	auto activePokemon = memory.activeOpponentMemory;
 
 	if (activePokemon == nullptr || activePokemon->pokemon->IsFainted())
 	{
@@ -178,36 +169,34 @@ std::span<const pokemonMove*> AIController::GetObservedMoves() const
 
 void AIController::UpdateObservedMoves(const pokemonMove& currentMove)
 {
-	auto* activePokemon = memory.slotOfActivePokemon;
-
+	auto* activePokemon = memory.activeOpponentMemory;
+	
 	if (activePokemon == nullptr || activePokemon->pokemon->IsFainted())
 	{
 		return;
 	}
-
-	memory.activeOpponent.opponentLastUsedMove = &currentMove;
-
+	
 	if (currentMove.GetMoveEffectEnum() == MoveEffect::Struggle)
 	{
 		return;
 	}
 
 	auto& observed = activePokemon->observedMoves;
+	const int currentCount = observed.count; 
 
-	const int currentCount = observed.count;
-
+	bool alreadyObservedMove{};
 	for (int moveSlot = 0; moveSlot < currentCount; ++moveSlot)
 	{
 		if (observed.moves[moveSlot] == &currentMove)
-		{
+		{ 
 			return;
 		}
 	}
-
-	if (currentCount < observed.moves.size())
-	{
-		observed.moves[currentCount] = &currentMove;
-		observed.count = currentCount + 1;
+	
+	if (currentCount < observed.moves.size()) 
+	{ 
+		observed.moves[currentCount] = &currentMove; 
+		observed.count = currentCount + 1; 
 	}
 }
 
@@ -223,13 +212,27 @@ void AIController::ResetObservedMoves()
 	}
 }
 
-void AIController::UpdateOpponentActivePokemon(const BattlePokemon& activeOpponentMon)
+void AIController::UpdateOpponentActivePokemon(const BattlePokemon& opponent)
 {
-	if (!(&activeOpponentMon == memory.activeOpponent.opponentActivePokemon))
+	for (int i = 0; i < memory.opponentMemoryCount; ++i)
 	{
-		memory.activeOpponent.opponentActivePokemon = &activeOpponentMon;
-		memory.slotOfActivePokemon = FindActivePokemonSlot();
+		auto& pokemonMemory = memory.opponentMemory[i];
+
+		if (pokemonMemory.pokemon == &opponent)
+		{
+			memory.activeOpponentMemory = &pokemonMemory;
+			return;
+		}
 	}
+
+	assert(memory.opponentMemoryCount <
+		static_cast<int>(memory.opponentMemory.size()));
+
+	auto& newMemory =
+		memory.opponentMemory[memory.opponentMemoryCount++];
+
+	newMemory.pokemon = &opponent;
+	memory.activeOpponentMemory = &newMemory;
 }
 
 void AIController::OnMoveResolved(const BattleContext& context)
@@ -818,15 +821,15 @@ bool AIController::CalculateStatusMoveEffectiveness(const pokemonMove& currentMo
 	return true;
 }
 
-PersistentMemory* AIController::FindActivePokemonSlot()
+PersistentMemory* AIController::FindPokemonMemory(const BattlePokemon& pokemon)
 {
-	auto it = std::find_if(
-		memory.opponentMemory.begin(),
-		memory.opponentMemory.end(),
-		[this](const PersistentMemory& mem)
+	auto it = std::find_if(memory.opponentMemory.begin(), memory.opponentMemory.end(),
+		[&pokemon](const PersistentMemory& mem)
 		{
-			return memory.activeOpponent.opponentActivePokemon == mem.pokemon;
+			return mem.pokemon == &pokemon;
 		});
 
-	return (it == memory.opponentMemory.end()) ? nullptr : std::to_address(it);
+	return it == memory.opponentMemory.end()
+		? nullptr
+		: std::to_address(it);
 }

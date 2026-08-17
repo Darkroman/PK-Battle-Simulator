@@ -64,29 +64,27 @@ void BattleAnnouncerText::DisplayFightingPokemon(const BattleContext& context) c
     std::cout << '\n';
 }
 
-bool BattleAnnouncerText::AnnounceWinner(const BattleContext& context)
+void BattleAnnouncerText::AnnounceWinner(const BattleContext& context)
 {
     if (context.playerOne->HasForfeited() && context.playerTwo->HasForfeited())
     {
         std::cout << "Both players have forfeited!\n\n";
-        context.playerOne->SetWinCondition(false);
-        context.playerTwo->SetWinCondition(false);
-        return false;
+        return;
     }
 
     if (context.playerOne->HasWon())
     {
         std::cout << '\n' << context.playerOne->GetPlayerNameView() << " wins!\n\n";
-        return false;
+        return;
     }
 
     if (context.playerTwo->HasWon())
     {
         std::cout << '\n' << context.playerTwo->GetPlayerNameView() << " wins!\n\n";
-        return false;
+        return;
     }
 
-    return false;
+    return;
 }
 
 void BattleAnnouncerText::NewLine() const

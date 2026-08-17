@@ -14,8 +14,9 @@ set(SOURCES
     entities/pokemonMove.cpp
 
     # controllers
-    "entities/controllers/AIController.cpp"
-    "entities/controllers/HumanControllerConsole.cpp"
+    entities/controllers/AIController.cpp
+    entities/controllers/BattleAIUpdateRoutines.cpp
+    entities/controllers/HumanControllerConsole.cpp
 
     # move scoring
     "entities/controllers/move scoring/AIMoveClassifier.cpp"
@@ -28,7 +29,6 @@ set(SOURCES
     "entities/controllers/switch logic/AISwitchLogic.cpp"
 
     # battle
-    battle/BattleAIManager.cpp
     battle/BattleCalculations.cpp
     battle/BattleContext.cpp
     battle/BattleManager.cpp
@@ -46,13 +46,12 @@ set(SOURCES
 
     # UI
     ui/BattleAnnouncerText.cpp
-    ui/BattleUIEventQueue.cpp
+    ui/BattleEventQueue.cpp
+    ui/ConsoleBattleEventProcessor.cpp
     ui/ConsoleOutput.cpp
     ui/Menu.cpp
-    ui/MoveResultsQueuedConsole.cpp
-    ui/MoveResultsText.cpp
-    ui/StatusEffectQueuedConsole.cpp
-    ui/StatusEffectText.cpp
+    ui/MoveResultsQueued.cpp
+    ui/StatusEffectQueued.cpp
     ui/views/DatabaseTextView.cpp
     ui/views/PokemonTextView.cpp
 
@@ -80,30 +79,46 @@ include_directories(
 
 add_executable(PokemonBattleSimulator ${SOURCES})
 
-# Enable Interprocedural Optimization (Link-Time Optimization)
+# Enable Interprocedural Optimization / Link-Time Optimization for Release.
 include(CheckIPOSupported)
 check_ipo_supported(RESULT ipo_supported OUTPUT ipo_error)
 
 if(ipo_supported)
-    # Target-specific activation (Replace 'YourTargetName' with your actual target)
-    set_target_properties(PokemonBattleSimulator PROPERTIES INTERPROCEDURAL_OPTIMIZATION TRUE)
+    set_property(
+        TARGET PokemonBattleSimulator
+        PROPERTY INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE
+    )
+
     message(STATUS "LTO / Full Program Optimization enabled successfully.")
 else()
     message(WARNING "LTO / Full Program Optimization not supported: ${ipo_error}")
 endif()
 
 if(MSVC)
-    target_compile_options(PokemonBattleSimulator PRIVATE 
-        $<$<CONFIG:Release>:/O2 /Oi /Ot /Gw>
+    target_compile_options(PokemonBattleSimulator PRIVATE
+        $<$<CONFIG:Release>:/O2>
+        $<$<CONFIG:Release>:/Gw>
+        $<$<CONFIG:Release>:/arch:SSE4.2>
+    )
+
+    target_link_options(PokemonBattleSimulator PRIVATE
+        $<$<CONFIG:Release>:/OPT:REF>
+        $<$<CONFIG:Release>:/OPT:ICF>
+        $<$<CONFIG:Release>:/INCREMENTAL:NO>
     )
 else() # GCC and Clang
-    target_compile_options(PokemonBattleSimulator PRIVATE 
-        $<$<CONFIG:Release>:-O2 -msse4.2 -fomit-frame-pointer>
+    target_compile_options(PokemonBattleSimulator PRIVATE
+        $<$<CONFIG:Release>:-O2>
+        $<$<CONFIG:Release>:-msse4.2>
+        $<$<CONFIG:Release>:-fomit-frame-pointer>
     )
 endif()
 
 add_custom_command(TARGET PokemonBattleSimulator POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_CURRENT_BINARY_DIR}/SavedParties"
-    COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_SOURCE_DIR}/SavedParties" "${CMAKE_CURRENT_BINARY_DIR}/SavedParties"
+    COMMAND ${CMAKE_COMMAND} -E make_directory
+        "${CMAKE_CURRENT_BINARY_DIR}/SavedParties"
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${CMAKE_SOURCE_DIR}/SavedParties"
+        "${CMAKE_CURRENT_BINARY_DIR}/SavedParties"
     COMMENT "Copying saved parties to build directory..."
 )

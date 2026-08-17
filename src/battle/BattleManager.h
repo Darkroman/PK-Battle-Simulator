@@ -5,8 +5,6 @@ class RandomEngine;
 class IBattleAnnouncerUI;
 class IMoveResultsUI;
 class IStatusEffectUI;
-class IOutputTarget;
-class BattleUIEventQueue;
 
 #include "BattleCalculations.h"
 #include "SwitchExecutor.h"
@@ -21,9 +19,9 @@ class BattleUIEventQueue;
 class BattleManager
 {
 public:
-	BattleManager(BattleContext& context, RandomEngine& rng, IBattleAnnouncerUI& battleAnnouncerUI, IMoveResultsUI& moveResultsUI, IStatusEffectUI& statusEffectUI, IOutputTarget& outputTarget, BattleUIEventQueue& uiEventQueue);
+	BattleManager(BattleContext& context, RandomEngine& rng, IBattleAnnouncerUI& battleAnnouncerUI, IMoveResultsUI& moveResultsUI, IStatusEffectUI& statusEffectUI);
 
-	BattleState RunBattle();
+	BattleRunResult RunBattle();
 	bool RunBattleSimulation();
 	void ResetValues();
 
@@ -46,17 +44,12 @@ private:
 	BattleState Cleanup();
 	void ResolveSwitchDecisions(bool playerOneNeedsSwitch, bool playerTwoNeedsSwitch);
 
-	void TestBattleText() const;
-
 private:
 	BattleContext& m_context;
 	RandomEngine& m_rng;
 	IBattleAnnouncerUI& m_battleAnnouncerUI;
 	IMoveResultsUI& m_moveResultsUI;
 	IStatusEffectUI& m_statusEffectUI;
-	IOutputTarget& m_outputTarget;
-
-	BattleUIEventQueue& m_uiEventQueue;
 
 	BattleCalculations m_calculations;
 	SwitchExecutor m_switchExecutor;
