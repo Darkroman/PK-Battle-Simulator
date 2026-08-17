@@ -7,21 +7,22 @@
 #include "entities/Player.h"
 #include "battle/BattleContext.h"
 #include "battle/RandomEngine.h"
+#include "ui/BattleEventQueue.h"
+#include "ui/ConsoleBattleEventProcessor.h"
+#include "common/AppState.h"
+#include "ui/Menu.h"
+#include "battle/BattleManager.h"
 #include "ui/interfaces/IOutputTarget.h"
 #include "ui/interfaces/IBattleAnnouncerUI.h"
 #include "ui/interfaces/IMoveResultsUI.h"
 #include "ui/interfaces/IStatusEffectUI.h"
-#include "ui/BattleUIEventQueue.h"
-#include "common/AppState.h"
-#include "ui/Menu.h"
-#include "battle/BattleManager.h"
 
 class GameEngine
 {
 public:
     GameEngine();
     void Run();
-    void RunSimulations();
+    void RunSimulations(unsigned int simIterations);
 
 private:
     void Bootstrap();
@@ -35,14 +36,15 @@ private:
     std::unique_ptr<IBattleAnnouncerUI> battleAnnouncer;
     std::unique_ptr<IMoveResultsUI> moveResults;
     std::unique_ptr<IStatusEffectUI> statusEffect;
-
-    BattleUIEventQueue m_uiEventQueue;
+    std::optional<ConsoleBattleEventProcessor> m_eventProcessor;
+    
+    BattleEventQueue m_eventQueue;
 
     AppState currentState = AppState::MainMenu;
+    MenuResult m_pendingMenuResult{};
     std::optional<Menu> menu;
     std::optional<BattleManager> battleManager;
 
-    unsigned int simIterations{ 1 };
     int playerOneVictories{};
     int playerTwoVictories{};
 };

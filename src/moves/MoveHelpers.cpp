@@ -29,6 +29,31 @@ EffectivenessText ToEffectivenessText(BattleStateFlags::Effectiveness e)
 	}
 }
 
+bool IsBlockedBySemiInvulnerability(MoveRoutineDeps& deps)
+{
+	auto& ctx = deps.context;
+
+	if (!ctx.defendingPokemon->IsSemiInvulnerable())
+	{
+		return false;
+	}
+
+	const MoveEffect moveEffect = ctx.currentMove->GetMoveEffectEnum();
+
+	if (ctx.defendingPokemon->IsSemiInvulnerableFromFly())
+	{
+		return moveEffect != MoveEffect::Gust &&
+			moveEffect != MoveEffect::Thunder;
+	}
+
+	if (ctx.defendingPokemon->IsSemiInvulnerableFromDig())
+	{
+		return moveEffect != MoveEffect::Earthquake;
+	}
+
+	return true;
+}
+
 void InflictNVStatus(Status status, int effectChance, MoveRoutineDeps& deps)
 {
 	auto& ctx = deps.context;
@@ -337,6 +362,12 @@ void StageDownRoutine(MoveRoutineDeps& deps, int amount, std::string_view stageN
 	if (drop <= 0)
 	{
 		deps.resultsUI.DisplayStatLoweredFailMsg(playerName, pokemonName, stageName);
+		return;
+	}
+
+	if (ctx.defendingPlayer->HasMist() && ctx.flags.hit)
+	{
+		deps.resultsUI.DisplayProtectedByMistMsg(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView());
 		return;
 	}
 

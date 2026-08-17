@@ -157,12 +157,12 @@ namespace AISwitchLogic
 				{
 					continue;
 				}
-
+				
 				if (!observedMove->IsActive() || observedMove->GetCategoryEnum() == Category::Status)
 				{
 					continue;
 				}
-
+				
 				unsigned int damageToSelf = ai.AICalculateDamage(*observedMove, self, targetMon, selfMon);
 
 				// If selfMon is slower and targetMon has a move that can KO, switch
@@ -212,7 +212,7 @@ namespace AISwitchLogic
 		std::span<CandidatePokemon> candidatePkmn{ candidatePkmnPool.data(), count };
 
 		AIController& ai = self.GetAIController();
-
+		
 		const auto& observedMoves = ai.GetObservedMoves();
 		std::array<const pokemonMove*, 4> observedDamagingMoves{};
 		size_t observedCount{};
@@ -227,7 +227,7 @@ namespace AISwitchLogic
 			observedDamagingMoves[observedCount] = observedMove;
 			++observedCount;
 		}
-
+		
 		std::span<const pokemonMove*> validObservedMoves{ observedDamagingMoves.data(), observedCount };
 
 		unsigned int highestDamageToSelf{ 0 };
@@ -397,7 +397,7 @@ namespace AISwitchLogic
 		std::span<CandidatePokemon> candidatePkmn{ candidatePkmnPool.data(), count };
 
 		AIController& ai = self.GetAIController();
-
+		
 		const auto& observedMoves = ai.GetObservedMoves();
 
 		std::array<const pokemonMove*, 4> observedDamagingMoves{};

@@ -655,7 +655,7 @@ bool Menu::SetPlayerPokemonSpeedEV(BattlePokemon& pokemon)
 	return false;
 }
 
-AppState Menu::RunMenu(unsigned int& simIterations)
+MenuResult Menu::RunMenu()
 {
 	while (true)
 	{
@@ -692,7 +692,10 @@ AppState Menu::RunMenu(unsigned int& simIterations)
 		switch (choice)
 		{
 		case 0:
-			return AppState::Exit;
+			return
+			{
+				AppState::Exit
+			};
 		
 		case 1:
 			ChangePlayerOneName();
@@ -727,7 +730,7 @@ AppState Menu::RunMenu(unsigned int& simIterations)
 			break;
 
 		case 9:
-			simIterations = SetSimIterations(simIterations);
+			SetSimIterations();
 			break;
 
 		case 10:
@@ -735,14 +738,21 @@ AppState Menu::RunMenu(unsigned int& simIterations)
 			{
 				continue;
 			}
-			return AppState::Simulate;
+			return
+			{
+				AppState::Simulate,
+				m_simIterations
+			};
 
 		case 11:
 			if (IsPokemonSetupIncomplete())
 			{
 				continue;
 			}
-			return AppState::InitBattle;
+			return
+			{
+				AppState::InitBattle
+			};
 
 		default:
 			std::cout << "Invalid input!\n\n";
@@ -2697,7 +2707,7 @@ std::vector<std::filesystem::path> Menu::GetSavedParties()
 	return files;
 }
 
-unsigned int Menu::SetSimIterations(unsigned int simIterations)
+void Menu::SetSimIterations()
 {
 	while (true)
 	{
@@ -2708,14 +2718,14 @@ unsigned int Menu::SetSimIterations(unsigned int simIterations)
 		std::cout << "On an 8-core 16-thread AMD 5800x CPU and depending on AI difficulty >\n";
 		std::cout << "10 million iterations can take roughly 15-25 seconds.\n\n";
 
-		std::cout << "Iterations (currently at " << simIterations << "): ";
+		std::cout << "Iterations (currently at " << m_simIterations << "): ";
 		std::string input{};
 		std::getline(std::cin >> std::ws, input);
 		std::cout << '\n';
 
 		if (input == "0" || input == "00")
 		{
-			return simIterations;
+			return;
 		}
 
 		if (!IsDigits(input) || input.size() > 10)
@@ -2724,17 +2734,16 @@ unsigned int Menu::SetSimIterations(unsigned int simIterations)
 			continue;
 		}
 
-		int iterations{};
-		std::from_chars(input.data(), input.data() + input.size(), iterations);
+		std::from_chars(input.data(), input.data() + input.size(), m_simIterations);
 
-		if (iterations < 1)
+		if (m_simIterations < 1)
 		{
 			std::cout << "Invalid input!\n\n";
 			continue;
 		}
 
-		std::cout << "Iterations set at " << iterations << '\n';
-		return iterations;
+		std::cout << "Iterations set at " << m_simIterations << '\n';
+		return;
 	}
 }
 

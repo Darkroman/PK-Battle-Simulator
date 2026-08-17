@@ -12,6 +12,7 @@
 #include "../../../data/StringToTypes.h"
 #include "../../../battle/RandomEngine.h"
 #include "../../../moves/MoveEffectEnums.h"
+#include "../AIController.h"
 
 // Largely based on Da Squyd's reverse-engineered Gen 5 Expert AI scripts in his flag2.ais file
 // https://docs.google.com/document/d/1AziiMPsY1TcABKIwl92677A4nYGtByvjFOR7p6PAXY0
@@ -60,7 +61,7 @@ namespace HardAIMoveScoring
 		}
 	}
 
-	ScoringResults RunExpertScoringRoutine(ScoringResults& result, std::span<ScoringResults>& results, const Player& self, const Player& targetPlayer, const pokemonMove& move, const BattlePokemon& selfMon, const BattlePokemon& targetMon, RandomEngine& rng)
+	void RunExpertScoringRoutine(ScoringResults& result, std::span<ScoringResults>& results, const Player& self, const Player& targetPlayer, const pokemonMove& move, const BattlePokemon& selfMon, const BattlePokemon& targetMon, RandomEngine& rng)
 	{
 		int delta{};
 
@@ -82,7 +83,7 @@ namespace HardAIMoveScoring
 
 			case AIScoreTag::DreamEater:
 			{
-				delta += DreamEater(rng, targetMon);
+				delta += DreamEater(rng, targetMon); // Original script had ability checks
 			}
 			break;
 
@@ -116,13 +117,20 @@ namespace HardAIMoveScoring
 			}
 			break;
 
+			case AIScoreTag::SelfSpDBoost:
+			{
+				delta += SelfSpDBoost(rng, selfMon, targetMon);
+			}
+			break;
 
+			case AIScoreTag::SelfEvasionBoost:
+			{
+				delta += SelfEvasionBoost(rng, self.GetAIController(), selfMon, targetMon);
+			}
+			break;
 		}
 
 		result.score += delta;
-
-		return result;
-		
 	}
 
 	int SleepMove(std::span<ScoringResults>& results, RandomEngine& rng)
@@ -526,5 +534,121 @@ namespace HardAIMoveScoring
 		return delta;
 	}
 
+	int SelfAccuracyBoost(RandomEngine& rng, const BattlePokemon& selfMon)
+	{
+		int delta{};
 
+		int selfAccuracyStage = selfMon.GetAccuracyStage();
+
+		if (selfAccuracyStage >= 9)
+		{
+			if (!rng.RandomLT(50)) // 80.46875%
+			{
+				delta -= 2;
+			}
+		}
+
+		unsigned int currentHPPercent = selfMon.GetCurrentHP() * 100 / selfMon.GetMaxHP();
+
+		if (currentHPPercent < 70)
+		{
+			return delta -= 2;
+		}
+
+		return delta;
+	}
+
+	int SelfEvasionBoost(RandomEngine& rng, AIController& self, const BattlePokemon& selfMon, const BattlePokemon& targetMon)
+	{
+		int delta{};
+
+		const pokemonMove* targetLastMove = targetMon.GetLastUsedMove();
+
+		// Discourage and end if target's last move was an AlwaysHit move.
+		if (targetLastMove != nullptr &&
+			targetLastMove->GetMoveEffectEnum() == MoveEffect::AlwaysHit)
+		{
+			return -2;
+		}
+
+		bool userHasRecoveryMove{};
+
+		for (const auto& move : selfMon.GetMoveArray())
+		{
+			if (move.GetMoveEffectEnum() == MoveEffect::HealHalfHP)
+			{
+				userHasRecoveryMove = true;
+				break;
+			}
+		}
+
+		if (!userHasRecoveryMove &&
+			(selfMon.IsSeeded() ||
+				selfMon.GetStatus() == Status::Burned ||
+				selfMon.GetStatus() == Status::Poisoned ||
+				selfMon.GetStatus() == Status::Badly_Poisoned))
+		{
+			if (!rng.RandomLT(50))
+			{
+				delta -= 1;
+			}
+		}
+
+		bool observedTargetHasRecoveryMove{};
+
+		for (const auto* move : self.GetObservedMoves())
+		{
+			// cancel loop once it hits first null
+			if (move == nullptr)
+			{
+				break;
+			}
+
+			// Jump to next entry if move is disabled, 0 pp or null
+			if (!move->IsActive())
+			{
+				continue;
+			}
+
+			if (move->GetMoveEffectEnum() == MoveEffect::HealHalfHP)
+			{
+				observedTargetHasRecoveryMove = true;
+				break;
+			}
+		}
+
+		// No recovery move has yet been observed from the target.
+		if (!observedTargetHasRecoveryMove &&
+			(targetMon.IsSeeded() ||
+				targetMon.GetStatus() == Status::Burned ||
+				targetMon.GetStatus() == Status::Poisoned ||
+				targetMon.GetStatus() == Status::Badly_Poisoned))
+		{
+			if (!rng.RandomLT(50))
+			{
+				delta += 1;
+			}
+		}
+
+		const unsigned int hpPercent =
+			selfMon.GetCurrentHP() * 100 / selfMon.GetMaxHP();
+
+		if (selfMon.GetEvasionStage() >= 9 && hpPercent < 70)
+		{
+			if (!rng.RandomLT(50))
+			{
+				delta -= 1;
+			}
+		}
+
+		if (hpPercent < 50)
+		{
+			if (!rng.RandomLT(70))
+			{
+				delta -= 2;
+			}
+		}
+
+		return delta;
+	}
 }

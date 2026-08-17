@@ -16,10 +16,10 @@
 #include "../battle/StatusEffectProcessor.h"
 #include "../battle/BattleContext.h"
 #include "../battle/RandomEngine.h"
-#include "../entities/controllers/AIController.h"
 #include "../entities/BattlePokemon.h"
 #include "../entities/Player.h"
 #include "../entities/pokemonMove.h"
+#include "../entities/controllers/BattleAIUpdateRoutines.h"
 #include "../ui/interfaces/IMoveResultsUI.h"
 
 namespace MoveRoutines
@@ -78,6 +78,7 @@ namespace MoveRoutines
 		table[EnumIndex(MoveEffect::SpeedDown2)] = SpeedDown2;
 		table[EnumIndex(MoveEffect::DragonRage)] = DragonRage;
 		table[EnumIndex(MoveEffect::Paralyze)] = Paralyze;
+		table[EnumIndex(MoveEffect::Thunder)] = Thunder;
 		table[EnumIndex(MoveEffect::Earthquake)] = Earthquake;
 		table[EnumIndex(MoveEffect::Dig)] = Dig;
 		table[EnumIndex(MoveEffect::Toxic)] = Toxic;
@@ -151,6 +152,12 @@ namespace MoveRoutines
 			return;
 		}
 
+		if (IsBlockedBySemiInvulnerability(deps))
+		{
+			deps.resultsUI.DisplayAttackAvoidedTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView());
+			return;
+		}
+
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
 		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
@@ -186,6 +193,12 @@ namespace MoveRoutines
 			return;
 		}
 
+		if (IsBlockedBySemiInvulnerability(deps))
+		{
+			deps.resultsUI.DisplayAttackAvoidedTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView());
+			return;
+		}
+
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
 		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
@@ -218,6 +231,12 @@ namespace MoveRoutines
 
 		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
 		{ 
+			return;
+		}
+
+		if (IsBlockedBySemiInvulnerability(deps))
+		{
+			deps.resultsUI.DisplayAttackAvoidedTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView());
 			return;
 		}
 
@@ -268,6 +287,12 @@ namespace MoveRoutines
 			return;
 		}
 
+		if (IsBlockedBySemiInvulnerability(deps))
+		{
+			deps.resultsUI.DisplayAttackAvoidedTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView());
+			return;
+		}
+
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
 		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
@@ -302,6 +327,12 @@ namespace MoveRoutines
 
 		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
 		{
+			return;
+		}
+
+		if (IsBlockedBySemiInvulnerability(deps))
+		{
+			deps.resultsUI.DisplayAttackAvoidedTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView());
 			return;
 		}
 
@@ -342,6 +373,12 @@ namespace MoveRoutines
 			return;
 		}
 
+		if (IsBlockedBySemiInvulnerability(deps))
+		{
+			deps.resultsUI.DisplayAttackAvoidedTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView());
+			return;
+		}
+
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
 		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
@@ -376,6 +413,12 @@ namespace MoveRoutines
 
 		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
 		{
+			return;
+		}
+
+		if (IsBlockedBySemiInvulnerability(deps))
+		{
+			deps.resultsUI.DisplayAttackAvoidedTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView());
 			return;
 		}
 
@@ -418,6 +461,12 @@ namespace MoveRoutines
 
 		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
 		{
+			return;
+		}
+
+		if (IsBlockedBySemiInvulnerability(deps))
+		{
+			deps.resultsUI.DisplayAttackAvoidedTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView());
 			return;
 		}
 
@@ -467,6 +516,12 @@ namespace MoveRoutines
 			return;
 		}
 
+		if (IsBlockedBySemiInvulnerability(deps))
+		{
+			deps.resultsUI.DisplayAttackAvoidedTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView());
+			return;
+		}
+
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
 		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
@@ -508,19 +563,19 @@ namespace MoveRoutines
 			return;
 		}
 
+		if (IsBlockedBySemiInvulnerability(deps))
+		{
+			deps.resultsUI.DisplayAttackAvoidedTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView());
+			return;
+		}
+
 		if (ctx.defendingPlayer->GetPokemonLeft() == 1 || !ctx.defendingPlayer->IsFirst())
 		{
 			deps.resultsUI.DisplayFailedTextDialog();
 			return;
 		}
 
-		ctx.flags.hit = !ctx.defendingPokemon->IsSemiInvulnerable();
-
-		if (!ctx.flags.hit)
-		{
-			deps.resultsUI.DisplayAttackMissedTextDialog(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView());
-			return;
-		}
+		ctx.flags.hit = true;
 
 		std::array<BattlePokemon*, 6> enemyPokemonList{};
 
@@ -560,10 +615,7 @@ namespace MoveRoutines
 
 		ctx.defendingPokemon = newMon;
 
-		for (auto player : ctx.vec_aiPlayers)
-		{
-			player->GetAIController().OnActivePokemonChanged(ctx);
-		}
+		BattleAIUpdateRoutines::UpdateEnemyActivePokemon(ctx);
 
 		deps.resultsUI.DisplayEnemySwitchMsg(newMon->GetNameView());
 	}
@@ -579,7 +631,6 @@ namespace MoveRoutines
 		if (HandleCharging(deps, &IMoveResultsUI::DisplayFlyChargeMsg, hooks))
 		{
 			ctx.currentMove->DeductPP();
-
 			return;
 		}
 
@@ -589,6 +640,12 @@ namespace MoveRoutines
 
 		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
 		{
+			return;
+		}
+
+		if (IsBlockedBySemiInvulnerability(deps))
+		{
+			deps.resultsUI.DisplayAttackAvoidedTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView());
 			return;
 		}
 
@@ -624,6 +681,12 @@ namespace MoveRoutines
 
 		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
 		{
+			return;
+		}
+
+		if (IsBlockedBySemiInvulnerability(deps))
+		{
+			deps.resultsUI.DisplayAttackAvoidedTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView());
 			return;
 		}
 
@@ -676,6 +739,12 @@ namespace MoveRoutines
 			return;
 		}
 
+		if (IsBlockedBySemiInvulnerability(deps))
+		{
+			deps.resultsUI.DisplayAttackAvoidedTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView());
+			return;
+		}
+
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
 		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
@@ -725,6 +794,12 @@ namespace MoveRoutines
 			return;
 		}
 
+		if (IsBlockedBySemiInvulnerability(deps))
+		{
+			deps.resultsUI.DisplayAttackAvoidedTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView());
+			return;
+		}
+
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
 		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
@@ -761,27 +836,37 @@ namespace MoveRoutines
 			return;
 		}
 
-		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
-
-		bool isImmune =	ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No;
-
-		if (isImmune)
+		bool moveFailed{};
+		if (IsBlockedBySemiInvulnerability(deps))
 		{
-			ctx.flags.hit = false;
-			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.flags.currentEffectiveness));
+			deps.resultsUI.DisplayAttackAvoidedTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView());
+			moveFailed = true;
 		}
-		else
+
+		if (!moveFailed)
+		{
+			deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
+		}
+		
+		if (!moveFailed && ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
+		{
+			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.flags.currentEffectiveness));
+			moveFailed = true;
+		}
+
+		if (!moveFailed)
 		{
 			ctx.flags.hit = deps.calculations.CalculateHitChance(*ctx.currentMove, *ctx.attackingPokemon, *ctx.defendingPokemon);
 		}
-
-		if (isImmune || !ctx.flags.hit)
+		
+		if (!moveFailed && !ctx.flags.hit)
 		{
-			if (!isImmune)
-			{
-				deps.resultsUI.DisplayAttackMissedTextDialog(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView());
-			}
+			deps.resultsUI.DisplayAttackMissedTextDialog(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView());
+			moveFailed = true;
+		}
 
+		if (moveFailed)
+		{
 			unsigned int crashDamage = std::max(1u, ctx.attackingPokemon->GetMaxHP() / 2);
 
 			ctx.attackingPokemon->DamageCurrentHP(crashDamage);
@@ -809,6 +894,12 @@ namespace MoveRoutines
 
 		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
 		{
+			return;
+		}
+
+		if (IsBlockedBySemiInvulnerability(deps))
+		{
+			deps.resultsUI.DisplayAttackAvoidedTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView());
 			return;
 		}
 
@@ -849,23 +940,23 @@ namespace MoveRoutines
 			return;
 		}
 
+		if (IsBlockedBySemiInvulnerability(deps))
+		{
+			deps.resultsUI.DisplayAttackAvoidedTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView());
+			return;
+		}
+
 		ctx.flags.hit = deps.calculations.CalculateHitChance(*ctx.currentMove, *ctx.attackingPokemon, *ctx.defendingPokemon);
-
-		if (ctx.flags.hit && ctx.defendingPokemon->HasSubstitute() && !ctx.currentMove->CanBypassSubstitute())
-		{
-			deps.resultsUI.DisplayFailedTextDialog();
-			return;
-		}
-
-		if (ctx.defendingPlayer->HasMist() && ctx.flags.hit)
-		{
-			deps.resultsUI.DisplayProtectedByMistMsg(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView());
-			return;
-		}
 
 		if (!ctx.flags.hit)
 		{
 			deps.resultsUI.DisplayAttackAvoidedTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView());
+			return;
+		}
+
+		if (ctx.defendingPokemon->HasSubstitute() && !ctx.currentMove->CanBypassSubstitute())
+		{
+			deps.resultsUI.DisplayFailedTextDialog();
 			return;
 		}
 
@@ -882,6 +973,12 @@ namespace MoveRoutines
 
 		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
 		{
+			return;
+		}
+
+		if (IsBlockedBySemiInvulnerability(deps))
+		{
+			deps.resultsUI.DisplayAttackAvoidedTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView());
 			return;
 		}
 
@@ -934,6 +1031,12 @@ namespace MoveRoutines
 			return;
 		}
 
+		if (IsBlockedBySemiInvulnerability(deps))
+		{
+			deps.resultsUI.DisplayAttackAvoidedTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView());
+			return;
+		}
+
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
 		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
@@ -980,41 +1083,41 @@ namespace MoveRoutines
 			ctx.attackingPokemon->SetLastUsedMove(ctx.currentMove);
 		}
 
+		bool moveFailed{ false };
 		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
 		{
-			if (ctx.attackingPokemon->GetLockedCounter() >= ctx.attackingPokemon->GetLockedTurnCount() && !ctx.attackingPokemon->IsConfused())
-			{
-				deps.statusProcessor.RampageConfuse();
-			}
-
-			deps.statusProcessor.ResetRampageState();
-
-			return;
+			moveFailed = true;
 		}
 
-		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
-
-		bool isImmune = ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No;
-
-		if (isImmune)
+		if (!moveFailed && IsBlockedBySemiInvulnerability(deps))
 		{
-			ctx.flags.hit = false;
-			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.flags.currentEffectiveness));
+			deps.resultsUI.DisplayAttackAvoidedTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView());
+			moveFailed = true;
 		}
-		else
+
+		if (!moveFailed)
+		{
+			deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
+		}
+
+		if (!moveFailed && ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
+		{
+			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.flags.currentEffectiveness));
+			moveFailed = true;
+		}
+		
+		if (!moveFailed)
 		{
 			ctx.flags.hit = deps.calculations.CalculateHitChance(*ctx.currentMove, *ctx.attackingPokemon, *ctx.defendingPokemon);
 		}
-
-		if (isImmune || !ctx.flags.hit)
+	
+		if (!moveFailed && !ctx.flags.hit)
 		{
-			if (!isImmune)
-			{
-				deps.resultsUI.DisplayAttackMissedTextDialog(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView());
-			}
+			deps.resultsUI.DisplayAttackMissedTextDialog(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView());
+			moveFailed = true;
 		}
 
-		if (!isImmune && ctx.flags.hit)
+		if (!moveFailed)
 		{
 			DamageRoutine(deps);
 
@@ -1023,7 +1126,6 @@ namespace MoveRoutines
 		}
 
 		bool reachedEnd = ctx.attackingPokemon->GetLockedCounter() >= ctx.attackingPokemon->GetLockedTurnCount();
-		bool moveFailed = !ctx.flags.hit || isImmune;
 
 		if (moveFailed || reachedEnd)
 		{
@@ -1046,6 +1148,12 @@ namespace MoveRoutines
 
 		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
 		{
+			return;
+		}
+
+		if (IsBlockedBySemiInvulnerability(deps))
+		{
+			deps.resultsUI.DisplayAttackAvoidedTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView());
 			return;
 		}
 
@@ -1086,23 +1194,23 @@ namespace MoveRoutines
 			return;
 		}
 
+		if (IsBlockedBySemiInvulnerability(deps))
+		{
+			deps.resultsUI.DisplayAttackAvoidedTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView());
+			return;
+		}
+
 		ctx.flags.hit = deps.calculations.CalculateHitChance(*ctx.currentMove, *ctx.attackingPokemon, *ctx.defendingPokemon);
-
-		if (ctx.flags.hit && ctx.defendingPokemon->HasSubstitute() && !ctx.currentMove->CanBypassSubstitute())
-		{
-			deps.resultsUI.DisplayFailedTextDialog();
-			return;
-		}
-
-		if (ctx.defendingPlayer->HasMist() && ctx.flags.hit)
-		{
-			deps.resultsUI.DisplayProtectedByMistMsg(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView());
-			return;
-		}
 
 		if (!ctx.flags.hit)
 		{
 			deps.resultsUI.DisplayAttackAvoidedTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView());
+			return;
+		}
+
+		if (ctx.defendingPokemon->HasSubstitute() && !ctx.currentMove->CanBypassSubstitute())
+		{
+			deps.resultsUI.DisplayFailedTextDialog();
 			return;
 		}
 
@@ -1119,6 +1227,12 @@ namespace MoveRoutines
 
 		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
 		{
+			return;
+		}
+
+		if (IsBlockedBySemiInvulnerability(deps))
+		{
+			deps.resultsUI.DisplayAttackAvoidedTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView());
 			return;
 		}
 
@@ -1159,6 +1273,12 @@ namespace MoveRoutines
 			return;
 		}
 
+		if (IsBlockedBySemiInvulnerability(deps))
+		{
+			deps.resultsUI.DisplayAttackAvoidedTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView());
+			return;
+		}
+
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
 		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
@@ -1195,23 +1315,23 @@ namespace MoveRoutines
 			return;
 		}
 
+		if (IsBlockedBySemiInvulnerability(deps))
+		{
+			deps.resultsUI.DisplayAttackAvoidedTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView());
+			return;
+		}
+
 		ctx.flags.hit = deps.calculations.CalculateHitChance(*ctx.currentMove, *ctx.attackingPokemon, *ctx.defendingPokemon);
-
-		if (ctx.flags.hit && ctx.defendingPokemon->HasSubstitute() && !ctx.currentMove->CanBypassSubstitute())
-		{
-			deps.resultsUI.DisplayFailedTextDialog();
-			return;
-		}
-
-		if (ctx.defendingPlayer->HasMist() && ctx.flags.hit)
-		{
-			deps.resultsUI.DisplayProtectedByMistMsg(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView());
-			return;
-		}
 
 		if (!ctx.flags.hit)
 		{
 			deps.resultsUI.DisplayAttackAvoidedTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView());
+			return;
+		}
+
+		if (ctx.defendingPokemon->HasSubstitute() && !ctx.currentMove->CanBypassSubstitute())
+		{
+			deps.resultsUI.DisplayFailedTextDialog();
 			return;
 		}
 
@@ -1228,6 +1348,12 @@ namespace MoveRoutines
 
 		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
 		{
+			return;
+		}
+
+		if (IsBlockedBySemiInvulnerability(deps))
+		{
+			deps.resultsUI.DisplayAttackAvoidedTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView());
 			return;
 		}
 
@@ -1267,6 +1393,12 @@ namespace MoveRoutines
 			return;
 		}
 
+		if (IsBlockedBySemiInvulnerability(deps))
+		{
+			deps.resultsUI.DisplayAttackAvoidedTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView());
+			return;
+		}
+
 		ctx.flags.hit = deps.calculations.CalculateHitChance(*ctx.currentMove, *ctx.attackingPokemon, *ctx.defendingPokemon);
 
 		if (!ctx.flags.hit)
@@ -1300,6 +1432,12 @@ namespace MoveRoutines
 
 		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
 		{
+			return;
+		}
+
+		if (IsBlockedBySemiInvulnerability(deps))
+		{
+			deps.resultsUI.DisplayAttackAvoidedTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView());
 			return;
 		}
 
@@ -1340,6 +1478,22 @@ namespace MoveRoutines
 			return;
 		}
 
+		if (IsBlockedBySemiInvulnerability(deps))
+		{
+			deps.resultsUI.DisplayAttackAvoidedTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView());
+			return;
+		}
+
+		auto* lastUsed = ctx.defendingPokemon->GetLastUsedMove();
+
+		if (lastUsed == nullptr ||
+			lastUsed->m_currentPP <= 0 ||
+			lastUsed->GetMoveEffectEnum() == MoveEffect::Struggle)
+		{
+			deps.resultsUI.DisplayFailedTextDialog();
+			return;
+		}
+
 		ctx.flags.hit = deps.calculations.CalculateHitChance(*ctx.currentMove, *ctx.attackingPokemon, *ctx.defendingPokemon);
 
 		if (!ctx.flags.hit)
@@ -1348,12 +1502,7 @@ namespace MoveRoutines
 			return;
 		}
 
-		auto* lastUsed = ctx.defendingPokemon->GetLastUsedMove();
-
-		if (lastUsed ==	nullptr ||
-			ctx.defendingPokemon->MoveIsDisabled() ||
-			lastUsed->m_currentPP <= 0 ||
-			lastUsed->GetMoveEffectEnum() == MoveEffect::Struggle)
+		if (ctx.defendingPokemon->MoveIsDisabled())
 		{
 			deps.resultsUI.DisplayFailedTextDialog();
 			return;
@@ -1387,6 +1536,12 @@ namespace MoveRoutines
 
 		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
 		{
+			return;
+		}
+
+		if (IsBlockedBySemiInvulnerability(deps))
+		{
+			deps.resultsUI.DisplayAttackAvoidedTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView());
 			return;
 		}
 
@@ -1446,6 +1601,12 @@ namespace MoveRoutines
 			return;
 		}
 
+		if (IsBlockedBySemiInvulnerability(deps))
+		{
+			deps.resultsUI.DisplayAttackAvoidedTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView());
+			return;
+		}
+
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
 		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
@@ -1497,6 +1658,12 @@ namespace MoveRoutines
 			return;
 		}
 
+		if (IsBlockedBySemiInvulnerability(deps))
+		{
+			deps.resultsUI.DisplayAttackAvoidedTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView());
+			return;
+		}
+
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
 		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
@@ -1531,6 +1698,12 @@ namespace MoveRoutines
 
 		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
 		{
+			return;
+		}
+
+		if (IsBlockedBySemiInvulnerability(deps))
+		{
+			deps.resultsUI.DisplayAttackAvoidedTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView());
 			return;
 		}
 
@@ -1571,6 +1744,12 @@ namespace MoveRoutines
 			return;
 		}
 
+		if (IsBlockedBySemiInvulnerability(deps))
+		{
+			deps.resultsUI.DisplayAttackAvoidedTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView());
+			return;
+		}
+
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
 		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
@@ -1605,6 +1784,12 @@ namespace MoveRoutines
 
 		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
 		{
+			return;
+		}
+
+		if (IsBlockedBySemiInvulnerability(deps))
+		{
+			deps.resultsUI.DisplayAttackAvoidedTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView());
 			return;
 		}
 
@@ -1690,6 +1875,12 @@ namespace MoveRoutines
 			return;
 		}
 
+		if (IsBlockedBySemiInvulnerability(deps))
+		{
+			deps.resultsUI.DisplayAttackAvoidedTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView());
+			return;
+		}
+
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
 		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
@@ -1724,6 +1915,12 @@ namespace MoveRoutines
 
 		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
 		{
+			return;
+		}
+
+		if (IsBlockedBySemiInvulnerability(deps))
+		{
+			deps.resultsUI.DisplayAttackAvoidedTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView());
 			return;
 		}
 
@@ -1771,6 +1968,12 @@ namespace MoveRoutines
 
 		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
 		{
+			return;
+		}
+
+		if (IsBlockedBySemiInvulnerability(deps))
+		{
+			deps.resultsUI.DisplayAttackAvoidedTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView());
 			return;
 		}
 
@@ -1833,6 +2036,12 @@ namespace MoveRoutines
 			return;
 		}
 
+		if (IsBlockedBySemiInvulnerability(deps))
+		{
+			deps.resultsUI.DisplayAttackAvoidedTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView());
+			return;
+		}
+
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
 		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
@@ -1865,6 +2074,12 @@ namespace MoveRoutines
 
 		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
 		{
+			return;
+		}
+
+		if (IsBlockedBySemiInvulnerability(deps))
+		{
+			deps.resultsUI.DisplayAttackAvoidedTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView());
 			return;
 		}
 
@@ -1914,6 +2129,12 @@ namespace MoveRoutines
 			return;
 		}
 
+		if (IsBlockedBySemiInvulnerability(deps))
+		{
+			deps.resultsUI.DisplayAttackAvoidedTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView());
+			return;
+		}
+
 		bool isImmune = ((ctx.defendingPokemon->GetTypeOneEnum() == PokemonType::Grass || ctx.defendingPokemon->GetTypeTwoEnum() == PokemonType::Grass) ||
 			(ctx.defendingPokemon->GetTypeOneEnum() == PokemonType::Electric || ctx.defendingPokemon->GetTypeTwoEnum() == PokemonType::Electric));
 
@@ -1956,6 +2177,12 @@ namespace MoveRoutines
 
 		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
 		{
+			return;
+		}
+
+		if (IsBlockedBySemiInvulnerability(deps))
+		{
+			deps.resultsUI.DisplayAttackAvoidedTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView());
 			return;
 		}
 
@@ -2003,23 +2230,23 @@ namespace MoveRoutines
 			return;
 		}
 
+		if (IsBlockedBySemiInvulnerability(deps))
+		{
+			deps.resultsUI.DisplayAttackAvoidedTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView());
+			return;
+		}
+
 		ctx.flags.hit = deps.calculations.CalculateHitChance(*ctx.currentMove, *ctx.attackingPokemon, *ctx.defendingPokemon);
-
-		if (ctx.flags.hit && ctx.defendingPokemon->HasSubstitute() && !ctx.currentMove->CanBypassSubstitute())
-		{
-			deps.resultsUI.DisplayFailedTextDialog();
-			return;
-		}
-
-		if (ctx.defendingPlayer->HasMist() && ctx.flags.hit)
-		{
-			deps.resultsUI.DisplayProtectedByMistMsg(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView());
-			return;
-		}
 
 		if (!ctx.flags.hit)
 		{
 			deps.resultsUI.DisplayAttackAvoidedTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView());
+			return;
+		}
+
+		if (ctx.defendingPokemon->HasSubstitute() && !ctx.currentMove->CanBypassSubstitute())
+		{
+			deps.resultsUI.DisplayFailedTextDialog();
 			return;
 		}
 
@@ -2036,6 +2263,12 @@ namespace MoveRoutines
 
 		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
 		{
+			return;
+		}
+
+		if (IsBlockedBySemiInvulnerability(deps))
+		{
+			deps.resultsUI.DisplayAttackAvoidedTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView());
 			return;
 		}
 
@@ -2073,6 +2306,12 @@ namespace MoveRoutines
 
 		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
 		{
+			return;
+		}
+
+		if (IsBlockedBySemiInvulnerability(deps))
+		{
+			deps.resultsUI.DisplayAttackAvoidedTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView());
 			return;
 		}
 
@@ -2124,6 +2363,49 @@ namespace MoveRoutines
 		InflictNVStatus(Status::Paralyzed, 100, deps);
 	}
 
+	void Thunder(MoveRoutineDeps& deps)
+	{
+		auto& ctx = deps.context;
+
+		deps.resultsUI.UsedTextDialog(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView(), ctx.currentMove->GetName());
+
+		ctx.currentMove->DeductPP();
+
+		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
+		{
+			return;
+		}
+
+		if (IsBlockedBySemiInvulnerability(deps))
+		{
+			deps.resultsUI.DisplayAttackAvoidedTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView());
+			return;
+		}
+
+		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
+
+		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
+		{
+			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.flags.currentEffectiveness));
+			return;
+		}
+
+		ctx.flags.hit = deps.calculations.CalculateHitChance(*ctx.currentMove, *ctx.attackingPokemon, *ctx.defendingPokemon);
+		
+		if (!ctx.flags.hit)
+		{
+			deps.resultsUI.DisplayAttackMissedTextDialog(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView());
+			return;
+		}
+
+		DamageRoutine(deps);
+
+		deps.statusProcessor.CheckSubstituteCondition(ctx.defendingPlayer, ctx.defendingPokemon);
+		deps.statusProcessor.CheckFaintCondition(*ctx.attackingPlayer, *ctx.defendingPlayer, *ctx.attackingPokemon, *ctx.defendingPokemon);
+
+		InflictNVStatus(Status::Paralyzed, ctx.currentMove->GetEffectChance(), deps);
+	}
+
 	void Earthquake(MoveRoutineDeps& deps)
 	{
 		auto& ctx = deps.context;
@@ -2134,6 +2416,12 @@ namespace MoveRoutines
 
 		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
 		{
+			return;
+		}
+
+		if (IsBlockedBySemiInvulnerability(deps))
+		{
+			deps.resultsUI.DisplayAttackAvoidedTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView());
 			return;
 		}
 
@@ -2184,6 +2472,12 @@ namespace MoveRoutines
 			return;
 		}
 
+		if (IsBlockedBySemiInvulnerability(deps))
+		{
+			deps.resultsUI.DisplayAttackAvoidedTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView());
+			return;
+		}
+
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
 		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
@@ -2219,6 +2513,16 @@ namespace MoveRoutines
 			return;
 		}
 
+		bool attackerIsPoisonType =
+			ctx.attackingPokemon->GetTypeOneEnum() == PokemonType::Poison ||
+			ctx.attackingPokemon->GetTypeTwoEnum() == PokemonType::Poison;
+
+		if (IsBlockedBySemiInvulnerability(deps) && !attackerIsPoisonType)
+		{
+			deps.resultsUI.DisplayAttackAvoidedTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView());
+			return;
+		}
+
 		bool isImmune = ((ctx.defendingPokemon->GetTypeOneEnum() == PokemonType::Poison || ctx.defendingPokemon->GetTypeTwoEnum() == PokemonType::Poison) ||
 			(ctx.defendingPokemon->GetTypeOneEnum() == PokemonType::Steel || ctx.defendingPokemon->GetTypeTwoEnum() == PokemonType::Steel));
 
@@ -2228,7 +2532,7 @@ namespace MoveRoutines
 			return;
 		}
 
-		if (ctx.attackingPokemon->GetTypeOneEnum() == PokemonType::Poison || ctx.attackingPokemon->GetTypeTwoEnum() == PokemonType::Poison)
+		if (attackerIsPoisonType)
 		{
 			ctx.flags.hit = true;
 		}
@@ -2293,6 +2597,12 @@ namespace MoveRoutines
 			return;
 		}
 
+		if (IsBlockedBySemiInvulnerability(deps))
+		{
+			deps.resultsUI.DisplayAttackAvoidedTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView());
+			return;
+		}
+
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
 		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
@@ -2347,6 +2657,12 @@ namespace MoveRoutines
 			return;
 		}
 
+		if (IsBlockedBySemiInvulnerability(deps))
+		{
+			deps.resultsUI.DisplayAttackAvoidedTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView());
+			return;
+		}
+
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
 		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
@@ -2384,6 +2700,12 @@ namespace MoveRoutines
 			return;
 		}
 
+		if (IsBlockedBySemiInvulnerability(deps))
+		{
+			deps.resultsUI.DisplayAttackAvoidedTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView());
+			return;
+		}
+
 		pokemonMove* targetLastUsedMove = ctx.defendingPokemon->GetLastUsedMove();
 
 		if (targetLastUsedMove == nullptr)
@@ -2415,20 +2737,13 @@ namespace MoveRoutines
 			targetLastUsedMove->GetMoveID() == MoveID::Struggle ||
 			ctx.attackingPokemon->IsTransformed();
 		
-
 		if (fail)
 		{
 			deps.resultsUI.DisplayFailedTextDialog();
 			return;
 		}
 
-		ctx.flags.hit = !ctx.defendingPokemon->IsSemiInvulnerable();
-
-		if (!ctx.flags.hit)
-		{
-			deps.resultsUI.DisplayAttackAvoidedTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView());
-			return;
-		}
+		ctx.flags.hit = true;
 
 		ctx.attackingPokemon->SetUsedMimic(true);
 		ctx.attackingPokemon->SetMimicPP(ctx.currentMove->m_currentPP);
@@ -2459,23 +2774,23 @@ namespace MoveRoutines
 			return;
 		}
 
+		if (IsBlockedBySemiInvulnerability(deps))
+		{
+			deps.resultsUI.DisplayAttackAvoidedTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView());
+			return;
+		}
+
 		ctx.flags.hit = deps.calculations.CalculateHitChance(*ctx.currentMove, *ctx.attackingPokemon, *ctx.defendingPokemon);
-
-		if (ctx.flags.hit && ctx.defendingPokemon->HasSubstitute() && !ctx.currentMove->CanBypassSubstitute())
-		{
-			deps.resultsUI.DisplayFailedTextDialog();
-			return;
-		}
-
-		if (ctx.defendingPlayer->HasMist() && ctx.flags.hit)
-		{
-			deps.resultsUI.DisplayProtectedByMistMsg(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView());
-			return;
-		}
 
 		if (!ctx.flags.hit)
 		{
 			deps.resultsUI.DisplayAttackAvoidedTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView());
+			return;
+		}
+
+		if (ctx.flags.hit && ctx.defendingPokemon->HasSubstitute() && !ctx.currentMove->CanBypassSubstitute())
+		{
+			deps.resultsUI.DisplayFailedTextDialog();
 			return;
 		}
 
@@ -2669,7 +2984,12 @@ namespace MoveRoutines
 		if (bideDamage <= 0)
 		{
 			deps.resultsUI.DisplayFailedTextDialog();
+			return;
+		}
 
+		if (IsBlockedBySemiInvulnerability(deps))
+		{
+			deps.resultsUI.DisplayAttackAvoidedTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView());
 			return;
 		}
 
@@ -2678,7 +2998,6 @@ namespace MoveRoutines
 		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
 		{
 			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.flags.currentEffectiveness));
-
 			return;
 		}
 
@@ -2756,12 +3075,9 @@ namespace MoveRoutines
 				return;
 			}
 
-			ctx.flags.hit = !ctx.defendingPokemon->IsSemiInvulnerable();
-
-			if (!ctx.flags.hit)
+			if (IsBlockedBySemiInvulnerability(deps))
 			{
-				deps.resultsUI.DisplayAttackAvoidedTextDialog(ctx.defendingPlayer->GetPlayerNameView(),	ctx.defendingPokemon->GetNameView());
-
+				deps.resultsUI.DisplayAttackAvoidedTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView());
 				return;
 			}
 
@@ -2778,6 +3094,8 @@ namespace MoveRoutines
 				deps.resultsUI.DisplayFailedTextDialog();
 				return;
 			}
+
+			ctx.flags.hit = true;
 
 			const Move& selectedMove = Database::GetBaseMoveByIndex(targetLastUsedMove->GetMoveIndex());
 
@@ -2810,6 +3128,15 @@ namespace MoveRoutines
 		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
 		{
 			deps.statusProcessor.CheckFaintCondition(*ctx.defendingPlayer, *ctx.attackingPlayer, *ctx.defendingPokemon, *ctx.attackingPokemon);
+			return;
+		}
+
+		if (IsBlockedBySemiInvulnerability(deps))
+		{
+			deps.resultsUI.DisplayAttackAvoidedTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView());
+
+			deps.statusProcessor.CheckFaintCondition(*ctx.defendingPlayer, *ctx.attackingPlayer, *ctx.defendingPokemon, *ctx.attackingPokemon);
+
 			return;
 		}
 
@@ -2856,6 +3183,12 @@ namespace MoveRoutines
 			return;
 		}
 
+		if (IsBlockedBySemiInvulnerability(deps))
+		{
+			deps.resultsUI.DisplayAttackAvoidedTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView());
+			return;
+		}
+
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
 		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
@@ -2864,13 +3197,7 @@ namespace MoveRoutines
 			return;
 		}
 
-		ctx.flags.hit = !ctx.defendingPokemon->IsSemiInvulnerable();
-
-		if (!ctx.flags.hit)
-		{
-			deps.resultsUI.DisplayAttackMissedTextDialog(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView());
-			return;
-		}
+		ctx.flags.hit = true;
 
 		DamageRoutine(deps);
 
@@ -2902,6 +3229,12 @@ namespace MoveRoutines
 
 		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
 		{
+			return;
+		}
+
+		if (IsBlockedBySemiInvulnerability(deps))
+		{
+			deps.resultsUI.DisplayAttackAvoidedTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView());
 			return;
 		}
 
@@ -2951,6 +3284,12 @@ namespace MoveRoutines
 			return;
 		}
 
+		if (IsBlockedBySemiInvulnerability(deps))
+		{
+			deps.resultsUI.DisplayAttackAvoidedTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView());
+			return;
+		}
+
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
 		if (ctx.defendingPokemon->GetStatus() != Status::Sleeping || ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
@@ -2995,6 +3334,12 @@ namespace MoveRoutines
 
 		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
 		{
+			return;
+		}
+
+		if (IsBlockedBySemiInvulnerability(deps))
+		{
+			deps.resultsUI.DisplayAttackAvoidedTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView());
 			return;
 		}
 
@@ -3050,6 +3395,12 @@ namespace MoveRoutines
 			return;
 		}
 
+		if (IsBlockedBySemiInvulnerability(deps))
+		{
+			deps.resultsUI.DisplayAttackAvoidedTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView());
+			return;
+		}
+
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
 		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
@@ -3087,19 +3438,19 @@ namespace MoveRoutines
 			return;
 		}
 
+		if (IsBlockedBySemiInvulnerability(deps))
+		{
+			deps.resultsUI.DisplayAttackAvoidedTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView());
+			return;
+		}
+
 		if (ctx.attackingPokemon->IsTransformed() || ctx.defendingPokemon->IsTransformed() || ctx.defendingPokemon->HasSubstitute())
 		{
 			deps.resultsUI.DisplayFailedTextDialog();
 			return;
 		}
 
-		ctx.flags.hit = !ctx.defendingPokemon->IsSemiInvulnerable();
-
-		if (!ctx.flags.hit)
-		{
-			deps.resultsUI.DisplayAttackAvoidedTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView());
-			return;
-		}
+		ctx.flags.hit = true;
 
 		ctx.attackingPokemon->SetTransformation(ctx.defendingPokemon);
 		deps.resultsUI.DisplayTransformMsg(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView(), ctx.defendingPokemon->GetNameView());
@@ -3115,6 +3466,12 @@ namespace MoveRoutines
 
 		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
 		{
+			return;
+		}
+
+		if (IsBlockedBySemiInvulnerability(deps))
+		{
+			deps.resultsUI.DisplayAttackAvoidedTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView());
 			return;
 		}
 
@@ -3230,6 +3587,12 @@ namespace MoveRoutines
 			return;
 		}
 
+		if (IsBlockedBySemiInvulnerability(deps))
+		{
+			deps.resultsUI.DisplayAttackAvoidedTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView());
+			return;
+		}
+
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
 		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
@@ -3289,6 +3652,12 @@ namespace MoveRoutines
 
 		if (DefendingPokemonIsFainted(ctx, deps.resultsUI))
 		{
+			return;
+		}
+
+		if (IsBlockedBySemiInvulnerability(deps))
+		{
+			deps.resultsUI.DisplayAttackAvoidedTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView());
 			return;
 		}
 
@@ -3373,6 +3742,12 @@ namespace MoveRoutines
 			return;
 		}
 
+		if (IsBlockedBySemiInvulnerability(deps))
+		{
+			deps.resultsUI.DisplayAttackAvoidedTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView());
+			return;
+		}
+
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
 		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
@@ -3381,13 +3756,7 @@ namespace MoveRoutines
 			return;
 		}
 
-		ctx.flags.hit = !ctx.defendingPokemon->IsSemiInvulnerable();
-
-		if (!ctx.flags.hit)
-		{
-			deps.resultsUI.DisplayAttackMissedTextDialog(ctx.attackingPlayer->GetPlayerNameView(), ctx.attackingPokemon->GetNameView());
-			return;
-		}
+		ctx.flags.hit = true;
 
 		DamageRoutine(deps);
 

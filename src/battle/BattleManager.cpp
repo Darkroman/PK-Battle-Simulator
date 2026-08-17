@@ -2,7 +2,6 @@
 
 #include "BattleManager.h"
 
-#include "BattleAIManager.h"
 #include "BattleContext.h"
 #include "RandomEngine.h"
 #include "BattleAction.h"
@@ -11,24 +10,19 @@
 #include "../ui/interfaces/IBattleAnnouncerUI.h"
 #include "../ui/interfaces/IMoveResultsUI.h"
 #include "../ui/interfaces/IStatusEffectUI.h"
-#include "../ui/interfaces/IOutputTarget.h"
-#include "../ui/EffectivenessText.h"
-#include "../ui/BattleUIEventQueue.h"
 #include "../data/StringToTypes.h"
 #include "../entities/PlayerDecisionOutcome.h"
 #include "../entities/BattlePokemon.h"
 #include "../entities/Player.h"
 #include "../entities/controllers/IPlayerController.h"
-#include "../entities/controllers/AIController.h"
+#include "../entities/controllers/BattleAIUpdateRoutines.h"
 
-BattleManager::BattleManager(BattleContext& context, RandomEngine& rng, IBattleAnnouncerUI& battleAnnouncerUI, IMoveResultsUI& moveResultsUI, IStatusEffectUI& statusEffectUI, IOutputTarget& outputTarget, BattleUIEventQueue& uiEventQueue)
+BattleManager::BattleManager(BattleContext& context, RandomEngine& rng, IBattleAnnouncerUI& battleAnnouncerUI, IMoveResultsUI& moveResultsUI, IStatusEffectUI& statusEffectUI)
 	: m_context(context)
 	, m_rng(rng)
 	, m_battleAnnouncerUI(battleAnnouncerUI)
 	, m_moveResultsUI(moveResultsUI)
 	, m_statusEffectUI(statusEffectUI)
-	, m_outputTarget(outputTarget)
-	, m_uiEventQueue(uiEventQueue)
 	, m_calculations(context, rng)
 	, m_switchExecutor(context, moveResultsUI)
 	, m_winChecker(context)
@@ -39,8 +33,10 @@ BattleManager::BattleManager(BattleContext& context, RandomEngine& rng, IBattleA
 {
 }
 
-BattleState BattleManager::RunBattle()
+BattleRunResult BattleManager::RunBattle()
 {
+	bool playEvents{};
+
 	switch (curBattleState)
 	{
 		case BattleState::StartBattle:
@@ -85,7 +81,7 @@ BattleState BattleManager::RunBattle()
 
 			if (curBattleState == BattleState::PendingMidTurnSwitch || curBattleState == BattleState::Victory)
 			{
-				m_uiEventQueue.ProcessNextEvent(m_outputTarget);
+				playEvents = true;
 			}
 		}
 		break;
@@ -104,7 +100,7 @@ BattleState BattleManager::RunBattle()
 
 			if (curBattleState == BattleState::SwapRoles)
 			{
-				m_uiEventQueue.ProcessNextEvent(m_outputTarget);
+				playEvents = true;
 			}
 		}
 		break;
@@ -114,7 +110,7 @@ BattleState BattleManager::RunBattle()
 			// Returns either BattleState::CheckActivePokemonFaints or BattleState::Victory
 			curBattleState = ProcessPostTurn();
 
-			m_uiEventQueue.ProcessNextEvent(m_outputTarget);
+			playEvents = true;
 		}
 		break;
 
@@ -125,7 +121,7 @@ BattleState BattleManager::RunBattle()
 
 			if (curBattleState == BattleState::PromptUsersForSwitch)
 			{
-				m_uiEventQueue.ProcessNextEvent(m_outputTarget);
+				playEvents = true;
 			}
 		}
 		break;
@@ -144,7 +140,7 @@ BattleState BattleManager::RunBattle()
 
 			if (curBattleState == BattleState::Cleanup)
 			{
-				m_uiEventQueue.ProcessNextEvent(m_outputTarget);
+				playEvents = true;
 			}
 		}
 		break;
@@ -162,7 +158,7 @@ BattleState BattleManager::RunBattle()
 		}
 	}
 
-	return curBattleState;
+	return { curBattleState, playEvents };
 }
 
 void BattleManager::AssignFirstPokemon()
@@ -190,7 +186,7 @@ BattleState BattleManager::StartBattle()
 {
 	AssignFirstPokemon();
 
-	BattleAIProcedures::InitAIPlayers(m_context);
+	BattleAIUpdateRoutines::InitAIPlayers(m_context);
 
 	m_battleAnnouncerUI.ThrowOutFirstPokemon(m_context);
 
@@ -210,8 +206,8 @@ BattleState BattleManager::DisplayFightingPokemon()
 
 BattleState BattleManager::BeginChooseAction()
 {
-	m_context.playerOne->UpdateSwitchState(*m_context.playerOneCurrentPokemon);
-	m_context.playerTwo->UpdateSwitchState(*m_context.playerTwoCurrentPokemon);
+	m_context.playerOne->UpdateTurnState(*m_context.playerOneCurrentPokemon);
+	m_context.playerTwo->UpdateTurnState(*m_context.playerTwoCurrentPokemon);
 
 	if (m_context.playerOneCurrentPokemon->IsCharging() || m_context.playerOneCurrentPokemon->IsRecharging() ||
 		m_context.playerOneCurrentPokemon->IsRampaging() || m_context.playerOneCurrentPokemon->IsBiding())
@@ -386,7 +382,7 @@ BattleState BattleManager::ProcessTurn()
 
 	if (m_context.flags.moveWasUsed)
 	{
-		BattleAIProcedures::RefineEnemyModel(m_context);
+		BattleAIUpdateRoutines::RefineEnemyModel(m_context);
 	}
 	
 	if (curTurnState == TurnSwitchState::Victory)
@@ -582,7 +578,7 @@ bool BattleManager::RunBattleSimulation()
 
 	AssignFirstPokemon();
 
-	BattleAIProcedures::InitAIPlayers(m_context);
+	BattleAIUpdateRoutines::InitAIPlayers(m_context);
 
 	while (true)
 	{
@@ -590,8 +586,8 @@ bool BattleManager::RunBattleSimulation()
 
 		m_battleAnnouncerUI.DisplayTurnNumber(m_context.battleTurn);
 
-		m_context.playerOne->UpdateSwitchState(*m_context.playerOneCurrentPokemon);
-		m_context.playerTwo->UpdateSwitchState(*m_context.playerTwoCurrentPokemon);
+		m_context.playerOne->UpdateTurnState(*m_context.playerOneCurrentPokemon);
+		m_context.playerTwo->UpdateTurnState(*m_context.playerTwoCurrentPokemon);
 
 		ApplyPlayerOneAction();
 
@@ -609,7 +605,7 @@ bool BattleManager::RunBattleSimulation()
 
 		if (m_context.flags.moveWasUsed)
 		{
-			BattleAIProcedures::RefineEnemyModel(m_context);
+			BattleAIUpdateRoutines::RefineEnemyModel(m_context);
 		}
 
 		if (m_context.attackingPlayer->IsPendingSwitch())
@@ -637,7 +633,7 @@ bool BattleManager::RunBattleSimulation()
 
 			if (m_context.flags.moveWasUsed)
 			{
-				BattleAIProcedures::RefineEnemyModel(m_context);
+				BattleAIUpdateRoutines::RefineEnemyModel(m_context);
 			}
 
 			if (m_context.attackingPlayer->IsPendingSwitch())
@@ -693,151 +689,5 @@ void BattleManager::ResetValues()
 		pokemon.ResetValues();
 	}
 
-	for (auto* aiPlayers : m_context.vec_aiPlayers)
-	{
-		aiPlayers->GetAIController().ResetObservedMoves();
-	}
-}
-
-void BattleManager::TestBattleText() const
-{
-	// ============================
-	// MoveResultsText
-	// ============================
-
-	m_moveResultsUI.DisplayNoopMsg();
-
-	m_moveResultsUI.UsedTextDialog("Red", "Charizard", "Flamethrower");
-
-	m_moveResultsUI.DisplayCritTextDialog(true);
-
-	m_moveResultsUI.DisplayEffectivenessTextDialog("Blue", "Venusaur", EffectivenessText::Less);
-	m_moveResultsUI.DisplayEffectivenessTextDialog("Blue", "Venusaur", EffectivenessText::Super);
-	m_moveResultsUI.DisplayEffectivenessTextDialog("Blue", "Venusaur", EffectivenessText::No);
-
-	m_moveResultsUI.DisplayAttackMissedTextDialog("Red", "Charizard");
-	m_moveResultsUI.DisplayAttackAvoidedTextDialog("Blue", "Venusaur");
-	m_moveResultsUI.DisplayFailedTextDialog();
-
-	m_moveResultsUI.DisplayDirectDamageInflictedMsg(123);
-	m_moveResultsUI.DisplaySubstituteDamageTextDialog("Blue", "Venusaur", 25, true, true);
-
-	m_moveResultsUI.DisplayMultiAttackMsg("Venusaur", 5);
-
-	m_moveResultsUI.DisplayEnemySwitchMsg("Blastoise");
-
-	//m_moveResultsUI.BoundMoveText("Red", "Blue", "Charizard", "Venusaur", MoveID::Bind);
-	//m_moveResultsUI.BoundMoveText("Red", "Blue", "Charizard", "Venusaur", MoveID::Wrap);
-	//m_moveResultsUI.BoundMoveText("Red", "Blue", "Charizard", "Venusaur", MoveID::FireSpin);
-	//m_moveResultsUI.BoundMoveText("Red", "Blue", "Charizard", "Venusaur", MoveID::Clamp);
-	//m_moveResultsUI.BoundMoveText("Red", "Blue", "Charizard", "Venusaur", MoveID::None);
-
-	m_moveResultsUI.DisplaySplashMsg();
-	m_moveResultsUI.DisplayNoMovesLeftStruggleMsg("Red", "Charizard");
-
-	m_moveResultsUI.DisplayRazorWindChargeMsg("Red", "Charizard");
-	m_moveResultsUI.DisplayFlyChargeMsg("Red", "Charizard");
-	m_moveResultsUI.DisplaySolarBeamChargeMsg("Red", "Charizard");
-	m_moveResultsUI.DisplayDigChargeMsg("Red", "Charizard");
-	m_moveResultsUI.DisplaySkullBashChargeMsg("Red", "Charizard");
-	m_moveResultsUI.DisplaySkyAttackChargeMsg("Red", "Charizard");
-
-	m_moveResultsUI.DisplayJumpKickCrashMsg("Red", "Charizard");
-	m_moveResultsUI.DisplayRecoilMsg("Red", "Charizard");
-
-	m_moveResultsUI.DisplayEnergyDrainedMsg("Blue", "Venusaur");
-	m_moveResultsUI.DisplayRecoveredHPRestoredMsg("Red", "Charizard");
-	m_moveResultsUI.DisplayHPFullMsg("Red", "Charizard");
-	m_moveResultsUI.DisplayRestMsg("Red", "Charizard");
-
-	m_moveResultsUI.DisplayBurnSuccess("Blue", "Venusaur");
-	m_moveResultsUI.DisplayFreezeSuccess("Blue", "Venusaur");
-	m_moveResultsUI.DisplayParalyzeSuccess("Blue", "Venusaur");
-	m_moveResultsUI.DisplayPoisonSuccess("Blue", "Venusaur");
-	m_moveResultsUI.DisplayBadlyPoisonSuccess("Blue", "Venusaur");
-	m_moveResultsUI.DisplaySleepSuccess("Blue", "Venusaur");
-	m_moveResultsUI.DisplayBecameConfuseMsg("Blue", "Venusaur");
-
-	m_moveResultsUI.DisplayAlreadyPoisonedMsg("Blue", "Venusaur");
-	m_moveResultsUI.DisplayAlreadyParalyzedMsg("Blue", "Venusaur");
-	m_moveResultsUI.DisplayAlreadyAsleepMsg("Blue", "Venusaur");
-	m_moveResultsUI.DisplayDoesntAffectMsg("Blue", "Gengar");
-
-	m_moveResultsUI.DisplayStatRaised2Msg("Red", "Charizard", "Attack");
-	m_moveResultsUI.DisplayStatRaised1Msg("Red", "Charizard", "Defense");
-	m_moveResultsUI.DisplayStatRaiseFailMsg("Red", "Charizard", "Speed");
-
-	m_moveResultsUI.DisplayStatLowered2Msg("Blue", "Venusaur", "Attack");
-	m_moveResultsUI.DisplayStatLowered1Msg("Blue", "Venusaur", "Defense");
-	m_moveResultsUI.DisplayStatLoweredFailMsg("Blue", "Venusaur", "Speed");
-
-	// Legacy / extra messages
-	m_moveResultsUI.DisplayFocusEnergyMsg("Red", "Charizard");
-	m_moveResultsUI.DisplayMistMsg("Red");
-	m_moveResultsUI.DisplayProtectedByMistMsg("Blue", "Venusaur");
-	m_moveResultsUI.DisplaySeededMsg("Blue", "Venusaur");
-	m_moveResultsUI.DisplayLightScreenMsg("Red");
-	m_moveResultsUI.DisplayHazeMsg();
-	m_moveResultsUI.DisplayReflectMsg("Red");
-	m_moveResultsUI.DisplayRageStartedMsg("Red", "Charizard");
-
-	m_moveResultsUI.DisplayAlreadyHasSubstituteMsg("Red", "Charizard");
-	m_moveResultsUI.DisplayNotEnoughHPSubstituteMsg();
-	m_moveResultsUI.DisplayPutInSubstituteMsg("Red", "Charizard");
-
-	m_moveResultsUI.DisplayLearnedMimicMoveMsg("Red", "Charizard", "Thunderbolt");
-	m_moveResultsUI.DisplayTransformMsg("Red", "Ditto", "Mewtwo");
-	m_moveResultsUI.DisplayMetronomeMsg("Red", "Clefable", "Explosion");
-	m_moveResultsUI.DisplayConversionMsg("Red", "Porygon", "Electric");
-
-	m_moveResultsUI.DisplayBideUnleashedMsg("Red", "Charizard");
-	m_moveResultsUI.DisplayBideStoringEnergyMsg("Red", "Charizard");
-
-	m_moveResultsUI.DisplayMoveDisabledMsg("Blue", "Venusaur", "Sleep Powder");
-
-	m_moveResultsUI.SwitchOutNoFaintMsg("Red", "Charizard");
-	m_moveResultsUI.SwitchOutMsg("Blue", "Venusaur");
-	m_moveResultsUI.PlayerChoosesMsg("Red", "Pikachu");
-
-	// ============================
-	// StatusEffectText
-	// ============================
-
-	m_statusEffectUI.DisplayFellAsleepMsg("Blue", "Venusaur");
-	m_statusEffectUI.DisplayWokenUpMsg("Charizard");
-	m_statusEffectUI.DisplayIsAsleepMsg("Charizard");
-
-	m_statusEffectUI.DisplayFrozenSolidMsg("Articuno");
-	m_statusEffectUI.DisplayThawedMsg("Articuno");
-
-	m_statusEffectUI.DisplayNoLongerConfusedMsg("Red", "Charizard");
-	m_statusEffectUI.DisplayIsConfusedMsg("Red", "Charizard");
-	m_statusEffectUI.DisplayHurtItselfConfuseMsg();
-
-	m_statusEffectUI.DisplayCantMoveParalysisMsg("Pikachu");
-	m_statusEffectUI.DisplayFlinchMsg("Red", "Charizard");
-	m_statusEffectUI.DisplayRechargeMsg("Red", "Charizard");
-
-	m_statusEffectUI.DisplayBideStoringEnergyMsg("Red", "Charizard");
-
-	m_statusEffectUI.DisplayNoLongerProtectedMist("Red");
-	m_statusEffectUI.DisplayFieldEffectFadedMsg("Red", "Light Screen");
-	m_statusEffectUI.DisplayFieldEffectFadedMsg("Red", "Reflect");
-
-	m_statusEffectUI.DisplayLeechSeedSappedMsg("Blue", "Venusaur");
-	m_statusEffectUI.DisplayDamagedByStatusPostTurn("Blue", "Venusaur", "poison");
-
-	m_statusEffectUI.DisplayHurtByBoundMsg("Blue", "Venusaur", "Wrap");
-	m_statusEffectUI.DisplayFreedFromBoundMsg("Blue", "Venusaur", "Wrap");
-
-	m_statusEffectUI.DisplayRampageConfusionMsg("Red", "Charizard");
-
-	m_statusEffectUI.DisplayMoveIsDisabledMsg("Red", "Charizard", "Fly");
-	m_statusEffectUI.DisplayMoveNoLongerDisabledMsg("Red", "Charizard", "Fly");
-
-	m_statusEffectUI.DisplaySubstituteFadedMsg("Blue", "Venusaur");
-
-	m_statusEffectUI.DisplayFaintedMsg("Blue", "Venusaur");
-
-	m_statusEffectUI.NewLine();
+	BattleAIUpdateRoutines::ResetAIObservedMoves(m_context);
 }

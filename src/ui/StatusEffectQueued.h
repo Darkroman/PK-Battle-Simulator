@@ -4,12 +4,12 @@
 
 #include "../ui/interfaces/IStatusEffectUI.h"
 
-class BattleUIEventQueue;
+class BattleEventQueue;
 
-class StatusEffectQueuedConsole : public IStatusEffectUI
+class StatusEffectQueued : public IStatusEffectUI
 {
 public:
-	StatusEffectQueuedConsole(BattleUIEventQueue& queue);
+	StatusEffectQueued(BattleEventQueue& queue);
 
 	// Status changes
 	void DisplayFellAsleepMsg(std::string_view, std::string_view) const override;
@@ -55,5 +55,5 @@ public:
 	void BlockForSwitching() const override;
 
 private:
-	BattleUIEventQueue& m_queue;
+	BattleEventQueue& m_queue;
 };

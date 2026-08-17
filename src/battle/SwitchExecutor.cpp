@@ -3,8 +3,8 @@
 #include "BattleContext.h"
 #include "../entities/BattlePokemon.h"
 #include "../entities/Player.h"
+#include "../entities/controllers/BattleAIUpdateRoutines.h"
 #include "../ui/interfaces/IMoveResultsUI.h"
-#include "../entities/controllers/AIController.h"
 
 SwitchExecutor::SwitchExecutor(BattleContext& context, IMoveResultsUI& moveResultsUI) :
 	m_context(context), m_moveResultsUI(moveResultsUI) {}
@@ -23,7 +23,7 @@ void SwitchExecutor::ExecuteSwitch(Player& player, BattlePokemon*& pokemon)
 	}
 
 	pokemon->ResetStatsOnSwitch();
-
+	player.ResetActivePokemonTurnCount();
 	pokemon = player.GetPokemonToSwitchTo();
 
 	if (&player == m_context.playerOne)
@@ -49,10 +49,7 @@ void SwitchExecutor::ExecuteSwitch(Player& player, BattlePokemon*& pokemon)
 		m_context.playerTwoCurrentPokemon = pokemon;
 	}
 
-	for (auto& aiPlayer : m_context.vec_aiPlayers)
-	{
-		aiPlayer->GetAIController().OnActivePokemonChanged(m_context);
-	}
+	BattleAIUpdateRoutines::UpdateEnemyActivePokemon(m_context);
 
 	player.SetIsSwitching(false);
 

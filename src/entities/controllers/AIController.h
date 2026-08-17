@@ -6,8 +6,6 @@
 
 #include "IPlayerController.h"
 
-//#include "../PlayerDecisionOutcome.h"
-
 struct pokemonMove;
 class Move;
 struct BattleContext;
@@ -22,19 +20,13 @@ enum class Difficulty { Easy, Medium, Hard };
 struct ObservedPokemonMoves
 {
 	std::array<const pokemonMove*, 4> moves{};
-	int count{ 0 };
+	int count{};
 };
 
 struct PersistentMemory
 {
-	const BattlePokemon* pokemon;
+	const BattlePokemon* pokemon{};
 	ObservedPokemonMoves observedMoves{};
-};
-
-struct ActiveOpponentPokemonMemory
-{
-	const BattlePokemon* opponentActivePokemon{};
-	const pokemonMove* opponentLastUsedMove{};
 };
 
 struct AIMemory
@@ -42,8 +34,9 @@ struct AIMemory
 	const Player* selfPlayer{};
 	const Player* opponentPlayer{};
 	std::array<PersistentMemory, 6> opponentMemory{};
-	ActiveOpponentPokemonMemory activeOpponent{};
-	PersistentMemory* slotOfActivePokemon{};
+	int opponentMemoryCount{};
+
+	PersistentMemory* activeOpponentMemory{};
 };
 
 class AIController : public IPlayerController
@@ -65,9 +58,7 @@ public:
 	void OnBattleStart(const Player&, BattleContext&);
 	void OnActivePokemonChanged(const BattleContext&);
 
-	//std::array<const pokemonMove*, 4> GetObservedMoves() const;
 	std::span<const pokemonMove*> GetObservedMoves() const;
-
 	void ResetObservedMoves();
 
 	void OnMoveResolved(const BattleContext&);
@@ -85,16 +76,14 @@ private:
 
 	BattleAction ForfeitAction(const Player&);
 
-	void GetOpponentParty(const Player&);
-
 	void UpdateObservedMoves(const pokemonMove&);
 	void UpdateOpponentActivePokemon(const BattlePokemon&);
 
-	PersistentMemory* FindActivePokemonSlot();
+	PersistentMemory* FindPokemonMemory(const BattlePokemon& pokemon);
 
 public:
 	AIMemory memory;
-	
+
 private:
 	Difficulty m_difficulty{};
 };
