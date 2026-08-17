@@ -1,4 +1,4 @@
-//#include <chrono>
+#include <chrono>
 #include <random>
 //#include <iostream>
 
@@ -6,8 +6,8 @@
 
 RandomEngine::RandomEngine()
 	:
-	seed(12345),
-	//seed(static_cast<unsigned int>(std::chrono::system_clock::now().time_since_epoch().count())),
+	//seed(12345),
+	seed(static_cast<unsigned int>(std::chrono::system_clock::now().time_since_epoch().count())),
 	generator(seed)
 {
 
@@ -15,8 +15,8 @@ RandomEngine::RandomEngine()
 
 RandomEngine::RandomEngine(int t)
 	:
-	seed(12345),
-	//seed(static_cast<unsigned int>(std::chrono::system_clock::now().time_since_epoch().count())),
+	//seed(12345),
+	seed(static_cast<unsigned int>(std::chrono::system_clock::now().time_since_epoch().count())),
 	generator(seed)
 {
 
