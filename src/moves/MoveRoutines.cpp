@@ -16,10 +16,10 @@
 #include "../battle/StatusEffectProcessor.h"
 #include "../battle/BattleContext.h"
 #include "../battle/RandomEngine.h"
-#include "../entities/controllers/AIController.h"
 #include "../entities/BattlePokemon.h"
 #include "../entities/Player.h"
 #include "../entities/pokemonMove.h"
+#include "../entities/controllers/BattleAIUpdateRoutines.h"
 #include "../ui/interfaces/IMoveResultsUI.h"
 
 namespace MoveRoutines
@@ -615,10 +615,7 @@ namespace MoveRoutines
 
 		ctx.defendingPokemon = newMon;
 
-		for (auto player : ctx.vec_aiPlayers)
-		{
-			player->GetAIController().OnActivePokemonChanged(ctx);
-		}
+		BattleAIUpdateRoutines::UpdateEnemyActivePokemon(ctx);
 
 		deps.resultsUI.DisplayEnemySwitchMsg(newMon->GetNameView());
 	}

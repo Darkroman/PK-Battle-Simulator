@@ -1,5 +1,13 @@
 #pragma once
 
+enum class BattleState;
+
+struct BattleRunResult
+{
+	BattleState state{};
+	bool playEvents{};
+};
+
 enum class BattleState
 {
 	None,

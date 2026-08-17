@@ -1,5 +1,21 @@
 #pragma once
 
+#include <array>
+#include <string_view>
+#include <variant>
+
+#include "EffectivenessText.h"
+#include "../entities/BattlePokemon.h"
+
+enum class BattleEvents;
+
+struct QueuedBattleEvent
+{
+	BattleEvents event;
+	using UIArg = std::variant<std::monostate, std::string_view, unsigned int, int, EffectivenessText, Status>;
+	std::array<UIArg, 4> args{};
+};
+
 enum class BattleEvents
 {
 	//// --- MOVERESULTS --- ////

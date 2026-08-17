@@ -9,7 +9,7 @@ public:
 
     virtual void ThrowOutFirstPokemon(const BattleContext&) const = 0;
     virtual void DisplayFightingPokemon(const BattleContext&) const = 0;
-    virtual bool AnnounceWinner(const BattleContext&) = 0;
+    virtual void AnnounceWinner(const BattleContext&) = 0;
 
     virtual void NewLine() const = 0;
     virtual void DisplayTurnNumber(int) const = 0;
