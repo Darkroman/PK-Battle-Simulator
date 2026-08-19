@@ -23,26 +23,26 @@ namespace HardAIMoveScoring
 	{
 		switch (id)
 		{
-			case MoveID::Guillotine:
-			case MoveID::SandAttack:
-			case MoveID::HornDrill:
-			case MoveID::Sing:
-			case MoveID::HyperBeam:
-			case MoveID::PoisonPowder:
-			case MoveID::SleepPowder:
-			case MoveID::ThunderWave:
-			case MoveID::Fissure:
-			case MoveID::Toxic:
-			case MoveID::Hypnosis:
-			case MoveID::Screech:
-			case MoveID::Smokescreen:
-			case MoveID::ConfuseRay:
-			case MoveID::Glare:
-			case MoveID::LovelyKiss:
-			case MoveID::Spore:
-				return true;
-			default:
-				return false;
+		case MoveID::Guillotine:
+		case MoveID::SandAttack:
+		case MoveID::HornDrill:
+		case MoveID::Sing:
+		case MoveID::HyperBeam:
+		case MoveID::PoisonPowder:
+		case MoveID::SleepPowder:
+		case MoveID::ThunderWave:
+		case MoveID::Fissure:
+		case MoveID::Toxic:
+		case MoveID::Hypnosis:
+		case MoveID::Screech:
+		case MoveID::Smokescreen:
+		case MoveID::ConfuseRay:
+		case MoveID::Glare:
+		case MoveID::LovelyKiss:
+		case MoveID::Spore:
+			return true;
+		default:
+			return false;
 		}
 	}
 
@@ -50,14 +50,14 @@ namespace HardAIMoveScoring
 	{
 		switch (effect)
 		{
-			case MoveEffect::Stomp:
-			case MoveEffect::FlinchHit:
-			case MoveEffect::HealHalfHP:
-			case MoveEffect::Rest:
-			case MoveEffect::Substitute:
-				return true;
-			default:
-				return false;
+		case MoveEffect::Stomp:
+		case MoveEffect::FlinchHit:
+		case MoveEffect::HealHalfHP:
+		case MoveEffect::Rest:
+		case MoveEffect::Substitute:
+			return true;
+		default:
+			return false;
 		}
 	}
 
@@ -92,7 +92,7 @@ namespace HardAIMoveScoring
 				delta += MirrorMove(rng, selfMon, targetMon);
 			}
 			break;
-
+			
 			case AIScoreTag::SelfAttackBoost:
 			{
 				delta += SelfAttackBoost(rng, selfMon);
@@ -110,24 +110,84 @@ namespace HardAIMoveScoring
 				delta += SelfSpeedBoost(rng, selfMon, targetMon);
 			}
 			break;
-
+			/*
 			case AIScoreTag::SelfSpABoost:
 			{
 				delta += SelfSpABoost(rng, selfMon);
 			}
 			break;
-
+			*/
 			case AIScoreTag::SelfSpDBoost:
 			{
 				delta += SelfSpDBoost(rng, selfMon, targetMon);
 			}
 			break;
-
-			case AIScoreTag::SelfEvasionBoost:
+			/*
+			case AIScoreTag::SelfAccuracyBoost:
+			{
+				delta += SelfAccuracyBoost(rng, selfMon, targetMon);
+			}
+			*/
+			case AIScoreTag::SelfEvasionBoost: // for both -1 and -2 stage decreases
 			{
 				delta += SelfEvasionBoost(rng, self.GetAIController(), selfMon, targetMon);
 			}
 			break;
+
+			case AIScoreTag::Growth:
+			{
+				delta += Growth(rng, selfMon);
+			}
+			break;
+
+			case AIScoreTag::AlwaysHit:
+			{
+				delta += AlwaysHit(rng, selfMon, targetMon);
+			}
+			break;
+
+			case AIScoreTag::TargetAttackDecrease: // for both -1 and -2
+			{
+				delta += TargetAttackDecrease(rng, selfMon, targetMon);
+			}
+			break;
+
+			case AIScoreTag::TargetDefenseDecrease: // for both -1, and -2, and -1 atk and def moves (future gens)
+			{
+				delta += TargetDefenseDecrease(rng, selfMon, targetMon);
+			}
+			break;
+
+			case AIScoreTag::TargetSpeedDecrease:
+			{
+				delta += TargetSpeedDecrease(rng, selfMon, targetMon);
+			}
+			break;
+			/*
+			case AIScoreTag::TargetSpecialAttackDecrease:
+			{
+				delta += TargetSpecialAttackDecrease(rng, selfMon, targetMon);
+			}
+			break;
+
+			case AIScoreTag::TargetSpecialDefenseDecrease:
+			{
+				delta += TargetSpecialDefenseDecrease(rng, selfMon, targetMon);
+			}
+			break;
+			*/
+			case AIScoreTag::TargetAccuracyDecrease:
+			{
+				delta += TargetAccuracyDecrease(rng, selfMon, targetMon);
+			}
+			break;
+			/*
+			case AIScoreTag::TargetEvasionDecrease:
+			{
+				delta += TargetEvasionDecrease(rng, selfMon, targetMon);
+			}
+			break;
+			*/
 		}
 
 		result.score += delta;
@@ -209,7 +269,7 @@ namespace HardAIMoveScoring
 		{
 			delta += 1;
 		}
-		
+
 		return delta;
 	}
 
@@ -266,14 +326,14 @@ namespace HardAIMoveScoring
 	int SelfAttackBoost(RandomEngine& rng, const BattlePokemon& selfMon)
 	{
 		int delta{};
-		
+
 		int currentAttackStage{ selfMon.GetAttackStage() };
 		unsigned int currentHPPercent{ selfMon.GetCurrentHP() * 100 / selfMon.GetMaxHP() };
 
 		if (currentAttackStage >= 9)
 		{
 			if (!rng.RandomLT(100)) // 60.9375%
-			{ 
+			{
 				delta -= 1;
 			}
 		}
@@ -297,7 +357,7 @@ namespace HardAIMoveScoring
 
 
 		if (!rng.RandomLT(40)) // 84.375%
-		{ 
+		{
 			delta -= 2;
 		}
 
@@ -315,7 +375,7 @@ namespace HardAIMoveScoring
 		if (currentDefenseStage >= 9)
 		{
 			if (!rng.RandomLT(100)) // 60.9375% chance
-			{ 
+			{
 				delta -= 1;
 			}
 
@@ -333,7 +393,7 @@ namespace HardAIMoveScoring
 		if (currentHPPercent >= 70 && !rng.RandomLT(200))
 		{
 			delta -= 2;
-			
+
 			return delta;
 		}
 
@@ -391,7 +451,7 @@ namespace HardAIMoveScoring
 		if (AIMoveScoring::CalculateSpeed(selfMon) > AIMoveScoring::CalculateSpeed(targetMon))
 		{
 			delta -= 3;
-			
+
 			return delta;
 		}
 
@@ -422,7 +482,7 @@ namespace HardAIMoveScoring
 
 		return delta;
 	}
-
+	/*
 	int SelfSpABoost(RandomEngine& rng, const BattlePokemon& selfMon)
 	{
 		int delta{};
@@ -453,7 +513,7 @@ namespace HardAIMoveScoring
 		if (currentHPPercent < 40)
 		{
 			delta -= 2;
-			
+
 			return delta;
 		}
 
@@ -461,10 +521,10 @@ namespace HardAIMoveScoring
 		{
 			delta -= 2;
 		}
-		
+
 		return delta;
 	}
-
+	*/
 	int SelfSpDBoost(RandomEngine& rng, const BattlePokemon& selfMon, const BattlePokemon& targetMon)
 	{
 		int delta{};
@@ -533,7 +593,7 @@ namespace HardAIMoveScoring
 
 		return delta;
 	}
-
+	/*
 	int SelfAccuracyBoost(RandomEngine& rng, const BattlePokemon& selfMon)
 	{
 		int delta{};
@@ -557,7 +617,8 @@ namespace HardAIMoveScoring
 
 		return delta;
 	}
-
+	*/
+	// Later gens: baton pass, held items, abilities
 	int SelfEvasionBoost(RandomEngine& rng, AIController& self, const BattlePokemon& selfMon, const BattlePokemon& targetMon)
 	{
 		int delta{};
@@ -651,4 +712,280 @@ namespace HardAIMoveScoring
 
 		return delta;
 	}
+
+	int Growth(RandomEngine& rng, const BattlePokemon& selfMon)
+	{
+		unsigned int selfCurrentHPPercent = selfMon.GetCurrentHP() * 100 / selfMon.GetMaxHP();
+
+		if (selfCurrentHPPercent < 70 && !rng.RandomLT(50)) // 80.46875%
+		{
+			return -1;
+		}
+
+		return 0;
+	}
+
+	int AlwaysHit(RandomEngine& rng, const BattlePokemon& selfMon, const BattlePokemon& targetMon)
+	{
+		int delta{};
+
+		if (targetMon.GetEvasionStage() >= 10 || selfMon.GetAccuracyStage() < 2)
+		{
+			delta += 1;
+		}
+
+		if (targetMon.GetEvasionStage() >= 8 || selfMon.GetAccuracyStage() < 4)
+		{
+			if (!rng.RandomLT(100)) // 60.9375%
+			{
+				delta += 1;
+			}
+		}
+
+		return delta;
+	}
+
+	int TargetAttackDecrease(RandomEngine& rng, const BattlePokemon& selfMon, const BattlePokemon& targetMon)
+	{
+		int delta{};
+
+		int targetAttackStage = targetMon.GetAttackStage();
+
+		if (targetAttackStage != 6)
+		{
+			delta -= 1;
+		}
+
+		unsigned int selfCurrentHPPercent = selfMon.GetCurrentHP() * 100 / selfMon.GetMaxHP();
+
+		if (selfCurrentHPPercent < 90)
+		{
+			delta -= 1;
+		}
+
+		if (targetAttackStage < 3 && !rng.RandomLT(50))
+		{
+			delta -= 2;
+		}
+
+		unsigned int targetCurrentHPPercent = targetMon.GetCurrentHP() * 100 / targetMon.GetMaxHP();
+
+		if (targetCurrentHPPercent < 70)
+		{
+			delta -= 2;
+		}
+
+		const pokemonMove* targetLastUsedMove = targetMon.GetLastUsedMove();
+
+		if (targetLastUsedMove == nullptr || targetLastUsedMove->GetCategoryEnum() != Category::Special)
+		{
+			return delta;
+		}
+
+		if (!rng.RandomLT(128))
+		{
+			delta -= 2;
+		}
+
+		return delta;
+	}
+
+	int TargetDefenseDecrease(RandomEngine& rng, const BattlePokemon& selfMon, const BattlePokemon& targetMon)
+	{
+		int delta{};
+
+		unsigned int selfCurrentHPPercent = selfMon.GetCurrentHP() * 100 / selfMon.GetMaxHP();
+		unsigned int targetCurrentHPPercent = targetMon.GetCurrentHP() * 100 / targetMon.GetMaxHP();
+		int targetDefenseStage = targetMon.GetDefenseStage();
+
+		if (selfCurrentHPPercent < 70 || targetDefenseStage < 3)
+		{
+			if (!rng.RandomLT(50))
+			{
+				delta -= 2;
+			}
+		}
+
+		if (targetCurrentHPPercent < 70)
+		{
+			delta -= 2;
+		}
+
+		return delta;
+	}
+
+	int TargetSpeedDecrease(RandomEngine& rng, const BattlePokemon& selfMon, const BattlePokemon& targetMon)
+	{
+		int delta{};
+
+		unsigned int targetSpeed = AIMoveScoring::CalculateSpeed(targetMon);
+		unsigned int selfSpeed = AIMoveScoring::CalculateSpeed(selfMon);
+
+		if (targetSpeed >= selfSpeed)
+		{
+			if (!rng.RandomLT(70)) // 72.65625%
+			{
+				delta += 2;
+			}
+		}
+		else if (targetSpeed < selfSpeed)
+		{
+			delta -= 3;
+		}
+
+		return delta;
+	}
+	/*
+	int TargetSpecialAttackDecrease(RandomEngine& rng, const BattlePokemon& selfMon, const BattlePokemon& targetMon)
+	{
+		int delta{};
+
+		int targetSpecialAttackStage = targetMon.GetSpecialAttackStage();
+
+		if (targetSpecialAttackStage != 6)
+		{
+			delta -= 1;
+		}
+
+		unsigned int selfCurrentHPPercent = selfMon.GetCurrentHP() * 100 / selfMon.GetMaxHP();
+
+		if (selfCurrentHPPercent < 90)
+		{
+			delta -= 1;
+		}
+
+		if (targetSpecialAttackStage < 3 && !rng.RandomLT(50))
+		{
+			delta -= 2;
+		}
+
+		unsigned int targetCurrentHPPercent = targetMon.GetCurrentHP() * 100 / targetMon.GetMaxHP();
+
+		if (targetCurrentHPPercent < 70)
+		{
+			delta -= 2;
+		}
+
+		const pokemonMove* targetLastUsedMove = targetMon.GetLastUsedMove();
+
+		if (targetLastUsedMove == nullptr || targetLastUsedMove->GetCategoryEnum() != Category::Physical)
+		{
+			return delta;
+		}
+
+		if (!rng.RandomLT(128))
+		{
+			delta -= 2;
+		}
+
+		return delta;
+	}
+	
+	int TargetSpecialDefenseDecrease(RandomEngine& rng, const BattlePokemon& selfMon, const BattlePokemon& targetMon)
+	{
+		int delta{};
+
+		unsigned int selfCurrentHPPercent = selfMon.GetCurrentHP() * 100 / selfMon.GetMaxHP();
+		unsigned int targetCurrentHPPercent = targetMon.GetCurrentHP() * 100 / targetMon.GetMaxHP();
+		int targetSpecialDefenseStage = targetMon.GetSpecialDefenseStage();
+
+		if (selfCurrentHPPercent < 70 || targetSpecialDefenseStage < 3)
+		{
+			if (!rng.RandomLT(50))
+			{
+				delta -= 2;
+			}
+		}
+
+		if (targetCurrentHPPercent < 70)
+		{
+			delta -= 2;
+		}
+
+		return delta;
+	}
+	*/
+	int TargetAccuracyDecrease(RandomEngine& rng, const BattlePokemon& selfMon, const BattlePokemon& targetMon)
+	{
+		int delta{};
+
+		unsigned int selfCurrentHPPercent = selfMon.GetCurrentHP() * 100 / selfMon.GetMaxHP();
+		unsigned int targetCurrentHPPercent = targetMon.GetCurrentHP() * 100 / targetMon.GetMaxHP();
+
+		if (selfCurrentHPPercent < 70 || targetCurrentHPPercent < 70)
+		{
+			if (!rng.RandomLT(100)) // 60.9375%
+			{
+				delta -= 1;
+			}
+		}
+		
+		int selfAccuracyStage = selfMon.GetAccuracyStage();
+
+		if (selfAccuracyStage < 4)
+		{
+			if (!rng.RandomLT(80)) // 68.75%
+			{
+				delta -= 2;
+			}
+		}
+
+		if (targetMon.GetStatus() == Status::Badly_Poisoned)
+		{
+			if (!rng.RandomLT(70)) // 72.65625%
+			{
+				delta += 2;
+			}
+		}
+
+		if (targetMon.IsSeeded())
+		{
+			if (!rng.RandomLT(70)) // 72.65625%
+			{
+				delta += 2;
+			}
+		}
+
+		int targetAccuracyStage = targetMon.GetAccuracyStage();
+
+		if (selfCurrentHPPercent < 70 && targetAccuracyStage != 6)
+		{
+			if (selfCurrentHPPercent < 40 || targetCurrentHPPercent < 40)
+			{
+				delta -= 2;
+			}
+			else if (!rng.RandomLT(70)) // 72.65625%
+			{
+				delta -= 2;
+			}
+		}
+
+		return delta;
+	}
+	/*
+	int TargetEvasionDecrease(RandomEngine& rng, const BattlePokemon& selfMon, const BattlePokemon& targetMon)
+	{
+		int delta{};
+
+		unsigned int selfCurrentHPPercent = selfMon.GetCurrentHP() * 100 / selfMon.GetMaxHP();
+		int targetEvasionStage = targetMon.GetEvasionStage();
+
+		if (selfCurrentHPPercent < 70 || targetEvasionStage < 3)
+		{
+			if (!rng.RandomLT(50)) // 80.46875%
+			{
+				delta -= 2;
+			}
+		}
+
+		unsigned int targetCurrentHPPercent = targetMon.GetCurrentHP() * 100 / targetMon.GetMaxHP();
+
+		if (targetCurrentHPPercent < 70)
+		{
+			delta -= 2;
+		}
+
+		return delta;
+	}
+	*/
 }

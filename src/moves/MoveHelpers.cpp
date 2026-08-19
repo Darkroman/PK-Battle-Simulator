@@ -21,9 +21,8 @@ EffectivenessText ToEffectivenessText(BattleStateFlags::Effectiveness e)
 
 	switch (e)
 	{
-	case E::Normal: return EffectivenessText::Normal;
-	case E::Super:  return EffectivenessText::Super;
 	case E::Less:   return EffectivenessText::Less;
+	case E::Super:  return EffectivenessText::Super;
 	case E::No:	    return EffectivenessText::No;
 	default:	    return EffectivenessText::Normal;
 	}

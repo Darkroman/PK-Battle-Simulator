@@ -34,11 +34,30 @@ namespace HardAIMoveScoring
 
 	int SelfSpeedBoost(RandomEngine& rng, const BattlePokemon& selfMon, const BattlePokemon& targetMon);
 
-	int SelfSpABoost(RandomEngine& rng, const BattlePokemon& selfMon);
+	//int SelfSpABoost(RandomEngine& rng, const BattlePokemon& selfMon);
 
 	int SelfSpDBoost(RandomEngine& rng, const BattlePokemon& selfMon, const BattlePokemon& targetMon);
 
-	int SelfAccuracyBoost(RandomEngine& rng, const BattlePokemon& selfMon);
+	//int SelfAccuracyBoost(RandomEngine& rng, const BattlePokemon& selfMon);
 
 	int SelfEvasionBoost(RandomEngine& rng, AIController& self, const BattlePokemon& selfMon, const BattlePokemon& targetMon);
+
+	int Growth(RandomEngine& rng, const BattlePokemon& selfMon);
+
+	int AlwaysHit(RandomEngine& rng, const BattlePokemon& selfMon, const BattlePokemon& targetMon);
+
+	int TargetAttackDecrease(RandomEngine& rng, const BattlePokemon& selfMon, const BattlePokemon& targetMon);
+
+	int TargetDefenseDecrease(RandomEngine& rng, const BattlePokemon& selfMon, const BattlePokemon& targetMon);
+
+	int TargetSpeedDecrease(RandomEngine& rng, const BattlePokemon& selfMon, const BattlePokemon& targetMon);
+
+	//int TargetSpecialAttackDecrease(RandomEngine& rng, const BattlePokemon& selfMon, const BattlePokemon& targetMon);
+
+	//int TargetSpecialDefenseDecrease(RandomEngine& rng, const BattlePokemon& selfMon, const BattlePokemon& targetMon);
+
+	// future gens will require ingrain, aqua ring and curse
+	int TargetAccuracyDecrease(RandomEngine& rng, const BattlePokemon& selfMon, const BattlePokemon& targetMon);
+
+	//int TargetEvasionDecrease(RandomEngine& rng, const BattlePokemon& selfMon, const BattlePokemon& targetMon);
 }

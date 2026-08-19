@@ -9,7 +9,7 @@
 #include "ScoringResultsStruct.h"
 #include "BasicScoring.h"
 #include "MediumMoveScoring.h"
-//#include "HardAIScoring.h"
+#include "HardAIScoring.h"
 
 #include "AIMoveClassifier.h"
 #include "../../../battle/StageRatios.h"
@@ -54,7 +54,7 @@ namespace AIMoveScoring
 		{
 			MediumMoveScoring::EvaluateBestDamageMove(resultsView, targetMon);
 		}
-		/*
+		
 		if (self.GetAIController().GetDifficulty() == Difficulty::Hard)
 		{
 			for (auto& result : resultsView)
@@ -62,7 +62,7 @@ namespace AIMoveScoring
 				HardAIMoveScoring::RunExpertScoringRoutine(result, resultsView, self, targetPlayer, *result.move, selfMon, targetMon, rng);
 			}
 		}
-		*/
+		
 		//pokemonMove* winningMove = EvaluateScoredMoves(results, rng);
 		//return winningMove;
 
