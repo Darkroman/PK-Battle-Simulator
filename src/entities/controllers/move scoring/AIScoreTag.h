@@ -30,15 +30,18 @@ enum class AIScoreTag
 	SelfAttackBoost,
 	SelfDefenseBoost,
 	SelfSpeedBoost,
-	SelfSpABoost, // unused for now
+	//SelfSpABoost, // unused for now
 	SelfSpDBoost,
-	SelfAccuracyBoost, // unused for now
+	//SelfAccuracyBoost, // unused for now
 	SelfEvasionBoost,
 	Growth,
 	TargetAttackDecrease,
 	TargetDefenseDecrease,
 	TargetSpeedDecrease,
+	//TargetSpecialAttackDecrease, // unused for now
+	//TargetSpecialDefenseDecrease, // unused for now
 	TargetAccuracyDecrease,
+	//TargetEvasionDecrease, // unused for now
 	FocusEnergy,
 	Splash,
 	Mist,
