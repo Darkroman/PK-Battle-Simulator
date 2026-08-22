@@ -1,7 +1,7 @@
 #pragma once
 
-struct BattleContext;
 class Player;
+struct BattleContext;
 
 class WinChecker
 {

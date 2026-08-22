@@ -1,14 +1,15 @@
 #pragma once
 
-#include <span>
-
 #include "../common/EnumUtils.h"
-#include "PokemonID.h"
-#include "MoveID.h"
-#include "Pokemon.h"
+
 #include "Move.h"
-#include "PokedexConstexpr.h"
-#include "MovedexConstexpr.h"
+#include "MoveDex.h"
+#include "MoveID.h"
+#include "Pokedex.h"
+#include "Pokemon.h"
+#include "PokemonID.h"
+
+#include <span>
 
 namespace Database
 {

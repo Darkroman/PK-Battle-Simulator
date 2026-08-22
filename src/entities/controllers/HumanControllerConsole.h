@@ -1,15 +1,15 @@
 #pragma once
 
-#include <memory>
-
 #include "IPlayerController.h"
 
-struct pokemonMove;
-struct PlayerDecisionOutcome;
-class Player;
-class BattlePokemon;
-class RandomEngine;
+#include <memory>
+
 enum class BattleAction;
+class BattlePokemon;
+class Player;
+class RandomEngine;
+struct PlayerDecisionOutcome;
+struct PokemonMoveSlot;
 
 class HumanControllerConsole : public IPlayerController
 {
@@ -27,7 +27,7 @@ public:
 	PlayerDecisionOutcome TakeDecision() override;
 
 private:
-	pokemonMove* FightAction(const Player&, const Player&, BattlePokemon&, const BattlePokemon&);
+	PokemonMoveSlot* FightAction(const Player&, const Player&, BattlePokemon&, const BattlePokemon&);
 	BattlePokemon* SwitchAction(Player&, const BattlePokemon&, bool);
 	BattleAction ForfeitAction(const Player&);
 };

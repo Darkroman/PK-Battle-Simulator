@@ -1,15 +1,17 @@
-#include <vector>
-#include <memory>
-
 #include "BattleContext.h"
+
 #include "../data/StringToTypes.h"
 
+#include <memory>
+#include <vector>
+
 BattleContext::BattleContext(std::vector<std::unique_ptr<Player>>& vec_players)
-  : vec_aiPlayers([]() { std::vector<Player*> v; v.reserve(2); return v; }()),
+    : vec_aiPlayers([]() { std::vector<Player*> v; v.reserve(2); return v; }()),
     vec_outOfPokemon([]() { std::vector<Player*> v; v.reserve(2); return v; }()),
     playerOne(vec_players[0].get()),
-	playerTwo(vec_players[1].get())
-{}
+    playerTwo(vec_players[1].get())
+{
+}
 
 void BattleStateFlags::ResetBattleFlags()
 {
@@ -17,7 +19,6 @@ void BattleStateFlags::ResetBattleFlags()
     hitSubstitute = false;
     isCriticalHit = false;
     moveWasUsed = false;
-    currentEffectiveness = Effectiveness::Normal;
 }
 
 void BattleContext::ResetTurnState()
@@ -33,11 +34,11 @@ void BattleContext::ResetTurnState()
     flags.ResetBattleFlags();
 }
 
-void BattleContext::ResetBattleState()
+void BattleContext::ResetContextState()
 {
     flags.ResetBattleFlags();
 
-    //vec_aiPlayers.clear(); <-- This is already done in PresetupBattle() in GameEngine
+    //vec_aiPlayers.clear(); <-- This is already done in PresetupBattle() in BattleManager
     vec_outOfPokemon.clear();
 
     playerOneCurrentPokemon = nullptr;

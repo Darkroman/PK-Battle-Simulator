@@ -1,11 +1,11 @@
 #pragma once
 
-struct BattleContext;
 class BattleCalculations;
-class StatusEffectProcessor;
-class WinChecker;
-class SwitchExecutor;
 class MoveExecutor;
+class StatusEffectProcessor;
+class SwitchExecutor;
+class WinChecker;
+struct BattleContext;
 
 enum class TurnSwitchState
 {

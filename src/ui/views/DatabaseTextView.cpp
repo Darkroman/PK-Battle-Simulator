@@ -1,14 +1,15 @@
+#include "DatabaseTextView.h"
+
+#include "../../data/Database.h"
+#include "../../data/Move.h"
+#include "../../data/Pokemon.h"
+#include "../../data/StringToTypes.h"
+
 #include <iostream>
 #include <iomanip>
+#include <ios>
 #include <span>
 #include <string_view>
-#include <ios>
-
-#include "DatabaseTextView.h"
-#include "../../data/Database.h"
-#include "../../data/Pokemon.h"
-#include "../../data/Move.h"
-#include "../../data/StringToTypes.h"
 
 namespace DatabaseTextView
 {

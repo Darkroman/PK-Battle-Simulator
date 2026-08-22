@@ -1,16 +1,16 @@
 #pragma once
 
-#include <memory>
-#include <span>
-#include <array>
-#include <string>
-#include <string_view>
-#include <cstdint>
-
 #include "BattlePokemon.h"
 
-class IPlayerController;
+#include <array>
+#include <cstdint>
+#include <memory>
+#include <span>
+#include <string>
+#include <string_view>
+
 class AIController;
+class IPlayerController;
 
 enum class ControllerType : uint16_t { Human, AI };
 

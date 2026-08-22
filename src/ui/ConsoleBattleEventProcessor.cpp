@@ -1,15 +1,16 @@
 #include "ConsoleBattleEventProcessor.h"
 
+#include "BattleEvents.h"
+#include "BattleEventQueue.h"
+#include "BattleText.h"
+
+#include "interfaces/IOutputTarget.h"
+
 #include <format>
 #include <string>
 #include <string_view>
 #include <utility>
 #include <variant>
-
-#include "BattleText.h"
-#include "BattleEvents.h"
-#include "BattleEventQueue.h"
-#include "interfaces/IOutputTarget.h"
 
 ConsoleBattleEventProcessor::ConsoleBattleEventProcessor(BattleEventQueue& eventQueue, IOutputTarget& outputTarget)
 	: m_eventQueue(eventQueue)

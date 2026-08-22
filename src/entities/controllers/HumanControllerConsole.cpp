@@ -1,19 +1,23 @@
-#include <iostream>
-#include <istream>
-#include <string>
-#include <utility>
-#include <memory>
-
 #include "HumanControllerConsole.h"
 
-#include "IPlayerController.h"
-#include "../PlayerDecisionOutcome.h"
-#include "../pokemonMove.h"
-#include "../BattlePokemon.h"
-#include "../Player.h"
 #include "../../battle/BattleAction.h"
+
 #include "../../common/InputValidation.h"
+
 #include "../../ui/views/PokemonTextView.h"
+
+#include "../BattlePokemon.h"
+#include "../PlayerDecisionOutcome.h"
+#include "../Player.h"
+#include "../PokemonMoveSlot.h"
+
+#include "IPlayerController.h"
+
+#include <iostream>
+#include <istream>
+#include <memory>
+#include <string>
+#include <utility>
 
 void read_input_worker(std::string& input)
 {
@@ -129,7 +133,7 @@ PlayerDecisionOutcome HumanControllerConsole::TakeDecision()
     return std::exchange(m_decisionOutcome, {});
 }
 
-pokemonMove* HumanControllerConsole::FightAction(const Player& player, const Player& targetPlayer, BattlePokemon& currentPokemon, const BattlePokemon& targetMon)
+PokemonMoveSlot* HumanControllerConsole::FightAction(const Player& player, const Player& targetPlayer, BattlePokemon& currentPokemon, const BattlePokemon& targetMon)
 {
     if (currentPokemon.WillPerformStruggle())
     {
@@ -138,7 +142,7 @@ pokemonMove* HumanControllerConsole::FightAction(const Player& player, const Pla
         return &GetStruggle();
     }
 
-    pokemonMove* selectedMove{ nullptr };
+    PokemonMoveSlot* selectedMove{ nullptr };
 
     while (true)
     {

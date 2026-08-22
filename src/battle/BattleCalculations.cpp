@@ -1,22 +1,25 @@
-#include <array>
-#include <algorithm>
-#include <utility>
-
 #include "BattleCalculations.h"
-
-#include "RandomEngine.h"
-#include "BattleContext.h"
-#include "Typechart.h"
-#include "StageRatios.h"
 
 #include "../common/EnumUtils.h"
 
 #include "../data/Pokemon.h"
 #include "../data/StringToTypes.h"
-#include "../moves/MoveEffectEnums.h"
-#include "../entities/pokemonMove.h"
-#include "../entities/Player.h"
+
 #include "../entities/BattlePokemon.h"
+#include "../entities/NonVolatileStatuses.h"
+#include "../entities/Player.h"
+#include "../entities/PokemonMoveSlot.h"
+
+#include "../moves/MoveEffectEnums.h"
+
+#include "BattleContext.h"
+#include "RandomEngine.h"
+#include "StageRatios.h"
+#include "Typechart.h"
+
+#include <algorithm>
+#include <array>
+#include <utility>
 
 constexpr unsigned int FixedPointBase = 4096;
 
@@ -105,12 +108,9 @@ unsigned int BattleCalculations::MultiplyEffectiveness(unsigned int effect1, uns
 	return (product / FixedPointBase);
 }
 
-void BattleCalculations::CalculateTypeEffectiveness(BattleContext& ctx, const pokemonMove& currentMove, const BattlePokemon& target)
+void BattleCalculations::CalculateTypeEffectiveness(BattleContext& ctx, const PokemonMoveSlot& currentMove, const BattlePokemon& target)
 {
-	using Effectiveness = BattleStateFlags::Effectiveness;
-
 	ctx.effectiveness = FixedPointBase;
-	ctx.flags.currentEffectiveness = Effectiveness::Normal;
 
 	if (currentMove.GetMoveEffectEnum() == MoveEffect::Struggle)
 	{
@@ -125,28 +125,9 @@ void BattleCalculations::CalculateTypeEffectiveness(BattleContext& ctx, const po
 	unsigned int effect2 = (defensiveTypeTwo == 18) ? NormalMultiplier : typeChart[moveType][defensiveTypeTwo];
 
 	ctx.effectiveness = MultiplyEffectiveness(effect1, effect2);
-
-	int moveEffectiveness = ctx.effectiveness;
-	
-	if (moveEffectiveness == 0)
-	{
-		ctx.flags.currentEffectiveness = Effectiveness::No;
-	}
-	else if (moveEffectiveness < FixedPointBase)
-	{
-		ctx.flags.currentEffectiveness = Effectiveness::Less;
-	}
-	else if (moveEffectiveness == FixedPointBase)
-	{
-		ctx.flags.currentEffectiveness = Effectiveness::Normal;
-	}
-	else
-	{
-		ctx.flags.currentEffectiveness = Effectiveness::Super;
-	}
 }
 
-bool BattleCalculations::CalculateHitChance(const pokemonMove& currentMove, const BattlePokemon& source, const BattlePokemon& target)
+bool BattleCalculations::CalculateHitChance(const PokemonMoveSlot& currentMove, const BattlePokemon& source, const BattlePokemon& target)
 {
 	int sourceAccuracy = source.GetAccuracyStage();
 	int targetEvasion = target.GetEvasionStage();
@@ -185,7 +166,7 @@ bool BattleCalculations::CalculateHitChance(const pokemonMove& currentMove, cons
 	return rollOutcome < accuracyMod;
 }
 
-unsigned int BattleCalculations::CalculateDamage(BattleContext& ctx, const Player& targetPlayer, const pokemonMove& currentMove, const BattlePokemon& source, BattlePokemon& target)
+unsigned int BattleCalculations::CalculateDamage(BattleContext& ctx, const Player& targetPlayer, const PokemonMoveSlot& currentMove, const BattlePokemon& source, BattlePokemon& target)
 {
 	bool isCritical{ CalculateCriticalHit(ctx, source) };
 
@@ -308,7 +289,7 @@ unsigned int BattleCalculations::CalculateDamage(BattleContext& ctx, const Playe
 	return finalDamage;
 }
 
-void BattleCalculations::ApplyDamage(const pokemonMove& currentMove, BattlePokemon& target, unsigned int damage)
+void BattleCalculations::ApplyDamage(const PokemonMoveSlot& currentMove, BattlePokemon& target, unsigned int damage)
 {
 	const unsigned int HP_BAR_WIDTH = m_context.HP_BAR_WIDTH;
 

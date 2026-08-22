@@ -1,17 +1,20 @@
-#include <utility>
-
 #include "TurnProcessor.h"
 
-#include "BattleContext.h"
-#include "BattleCalculations.h"
-#include "StatusEffectProcessor.h"
-#include "WinChecker.h"
-#include "SwitchExecutor.h"
-#include "MoveExecutor.h"
-#include "../entities/PlayerDecisionOutcome.h"
-#include "../entities/pokemonMove.h"
+#include "../entities/BattlePokemon.h"
 #include "../entities/Player.h"
+#include "../entities/PlayerDecisionOutcome.h"
+#include "../entities/PokemonMoveSlot.h"
+
 #include "../entities/controllers/IPlayerController.h"
+
+#include "BattleCalculations.h"
+#include "BattleContext.h"
+#include "MoveExecutor.h"
+#include "StatusEffectProcessor.h"
+#include "SwitchExecutor.h"
+#include "WinChecker.h"
+
+#include <utility>
 
 constexpr int SwitchPriority{ 6 };
 
@@ -26,8 +29,8 @@ TurnProcessor::TurnProcessor(BattleContext& context, BattleCalculations& calcula
 
 void TurnProcessor::DetermineTurnOrder()
 {
-	const pokemonMove* moveOne = m_context.playerOneCurrentMove;
-	const pokemonMove* moveTwo = m_context.playerTwoCurrentMove;
+	const PokemonMoveSlot* moveOne = m_context.playerOneCurrentMove;
+	const PokemonMoveSlot* moveTwo = m_context.playerTwoCurrentMove;
 
 	int moveOnePriority = (m_context.playerOne->IsSwitching()) ? SwitchPriority : moveOne->GetPriority();
 	int moveTwoPriority = (m_context.playerTwo->IsSwitching()) ? SwitchPriority : moveTwo->GetPriority();

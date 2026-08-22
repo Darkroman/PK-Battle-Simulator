@@ -1,7 +1,8 @@
 #include "WinChecker.h"
 
-#include "BattleContext.h"
 #include "../entities/Player.h"
+
+#include "BattleContext.h"
 
 WinChecker::WinChecker(BattleContext& context)
     : m_context(context)

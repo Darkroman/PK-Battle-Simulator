@@ -1,9 +1,9 @@
-#include <string_view>
-
 #include "StatusEffectQueued.h"
 
 #include "BattleEvents.h"
 #include "BattleEventQueue.h"
+
+#include <string_view>
 
 StatusEffectQueued::StatusEffectQueued(BattleEventQueue& queue)
 	: m_queue(queue)

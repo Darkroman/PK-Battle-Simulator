@@ -1,8 +1,8 @@
 #pragma once
 
-#include <string_view>
-
 #include "../ui/interfaces/IStatusEffectUI.h"
+
+#include <string_view>
 
 class BattleEventQueue;
 

@@ -1,12 +1,12 @@
 #pragma once
 
-#include <string_view>
-
 #include "interfaces/IMoveResultsUI.h"
 
-class BattleEventQueue;
+#include <string_view>
+
 enum class EffectivenessText;
 enum class MoveID;
+class BattleEventQueue;
 
 class MoveResultsQueued : public IMoveResultsUI
 {

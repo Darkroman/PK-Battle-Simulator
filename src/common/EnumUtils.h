@@ -1,12 +1,12 @@
 #pragma once
 
-#include <type_traits>
-#include <random>
-#include <utility>
-#include <concepts>
-
-#include "../data/PokemonID.h"
 #include "../data/MoveID.h"
+#include "../data/PokemonID.h"
+
+#include <concepts>
+#include <random>
+#include <type_traits>
+#include <utility>
 
 template <typename E>
 concept DatabaseID =

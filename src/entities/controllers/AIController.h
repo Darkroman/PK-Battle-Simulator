@@ -1,25 +1,25 @@
 #pragma once
 
-#include <array>
-#include <span>
-#include <memory>
-
 #include "IPlayerController.h"
 
-struct pokemonMove;
-class Move;
-struct BattleContext;
+#include <array>
+#include <memory>
+#include <span>
+
 enum class BattleAction;
 class BattlePokemon;
+class Move;
 class Player;
 class RandomEngine;
+struct BattleContext;
 struct PlayerDecisionOutcome;
+struct PokemonMoveSlot;
 
 enum class Difficulty { Easy, Medium, Hard };
 
 struct ObservedPokemonMoves
 {
-	std::array<const pokemonMove*, 4> moves{};
+	std::array<const PokemonMoveSlot*, 4> moves{};
 	int count{};
 };
 
@@ -58,25 +58,25 @@ public:
 	void OnBattleStart(const Player&, BattleContext&);
 	void OnActivePokemonChanged(const BattleContext&);
 
-	std::span<const pokemonMove*> GetObservedMoves() const;
+	std::span<const PokemonMoveSlot*> GetObservedMoves() const;
 	void ResetObservedMoves();
 
 	void OnMoveResolved(const BattleContext&);
 	unsigned int AICalculatePokemonTypeEffectiveness(const BattlePokemon& source, const BattlePokemon& target) const;
-	unsigned int AICalculateMoveTypeEffectiveness(const pokemonMove& currentMove, const BattlePokemon& target) const;
-	unsigned int AICalculateDamage(const pokemonMove&, const Player&, const BattlePokemon&, const BattlePokemon&) const;
-	unsigned int AICalculateDamage(const pokemonMove&, const Player&, const BattlePokemon&, const BattlePokemon&, unsigned int) const;
-	bool CalculateStatusMoveEffectiveness(const pokemonMove& currentMove, const Player&, const Player& targetPlayer, const BattlePokemon& source, const BattlePokemon& target) const;
+	unsigned int AICalculateMoveTypeEffectiveness(const PokemonMoveSlot& currentMove, const BattlePokemon& target) const;
+	unsigned int AICalculateDamage(const PokemonMoveSlot&, const Player&, const BattlePokemon&, const BattlePokemon&) const;
+	unsigned int AICalculateDamage(const PokemonMoveSlot&, const Player&, const BattlePokemon&, const BattlePokemon&, unsigned int) const;
+	bool CalculateStatusMoveEffectiveness(const PokemonMoveSlot& currentMove, const Player&, const Player& targetPlayer, const BattlePokemon& source, const BattlePokemon& target) const;
 
 private:
-	pokemonMove* FightAction(const Player&, const Player&, BattlePokemon&, const BattlePokemon&, RandomEngine&);
+	PokemonMoveSlot* FightAction(const Player&, const Player&, BattlePokemon&, const BattlePokemon&, RandomEngine&);
 
 	BattlePokemon* SwitchAction(Player&, const Player&, const BattlePokemon&, const BattlePokemon&);
 	BattlePokemon* SwitchActionPostKO(Player&, const Player&, const BattlePokemon&, const BattlePokemon&);
 
 	BattleAction ForfeitAction(const Player&);
 
-	void UpdateObservedMoves(const pokemonMove&);
+	void UpdateObservedMoves(const PokemonMoveSlot&);
 	void UpdateOpponentActivePokemon(const BattlePokemon&);
 
 	PersistentMemory* FindPokemonMemory(const BattlePokemon& pokemon);

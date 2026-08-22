@@ -1,15 +1,17 @@
 #pragma once
 
-#include <string_view>
-
-#include "../ui/EffectivenessText.h"
-#include "../entities/BattlePokemon.h"
 #include "../battle/BattleContext.h"
 
+#include "../ui/EffectivenessText.h"
+
+#include <string_view>
+
+enum struct Status;
+class BattlePokemon;
 class IMoveResultsUI;
 struct MoveRoutineDeps;
 
-EffectivenessText ToEffectivenessText(BattleStateFlags::Effectiveness);
+EffectivenessText ToEffectivenessText(unsigned int effectiveness);
 
 bool IsBlockedBySemiInvulnerability(MoveRoutineDeps& deps);
 

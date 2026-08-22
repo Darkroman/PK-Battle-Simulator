@@ -1,17 +1,19 @@
-#include <string>
-#include <string_view>
-#include <memory>
-#include <utility>
-#include <span>
-#include <array>
-#include <algorithm>
-
 #include "Player.h"
 
-#include "BattlePokemon.h"
 #include "../data/StringToTypes.h"
-#include "controllers/IPlayerController.h"
+
+#include "BattlePokemon.h"
+
 #include "controllers/AIController.h"
+#include "controllers/IPlayerController.h"
+
+#include <array>
+#include <algorithm>
+#include <memory>
+#include <span>
+#include <string>
+#include <string_view>
+#include <utility>
 
 Player::Player(std::string_view name) :
     m_name(name) {}

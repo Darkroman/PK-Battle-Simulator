@@ -1,22 +1,22 @@
 #pragma once
 
-class Player;
 class BattlePokemon;
-struct pokemonMove;
+class Player;
+struct PokemonMoveSlot;
 struct ScoringResults;
 
 namespace BasicScoring
 {
 	int BaseDamageScoring(ScoringResults&, const Player& self, const Player& targetPlayer, const BattlePokemon& selfMon, const BattlePokemon& targetMon, unsigned int effectiveness);
-	int BaseStatusScoring(ScoringResults&, const Player& self, const Player& targetPlayer, const pokemonMove& move, const BattlePokemon& selfMon, const BattlePokemon& targetMon);
+	int BaseStatusScoring(ScoringResults&, const Player& self, const Player& targetPlayer, const PokemonMoveSlot& move, const BattlePokemon& selfMon, const BattlePokemon& targetMon);
 
 	int CheckOHKOLevel(const BattlePokemon& selfMon, const BattlePokemon& targetMon);
 	int CheckExplosionLastPokemon(const Player& self, const Player& targetPlayer);
 	int DreamEaterSleepCheck(const BattlePokemon& targetMon);
 
-	int SleepCheck(const pokemonMove& move, const BattlePokemon& targetMon);
-	int PoisonCheck(const pokemonMove& move, const BattlePokemon& targetMon);
-	int ParalyzeCheck(const pokemonMove& move, const BattlePokemon& targetMon);
+	int SleepCheck(const PokemonMoveSlot& move, const BattlePokemon& targetMon);
+	int PoisonCheck(const PokemonMoveSlot& move, const BattlePokemon& targetMon);
+	int ParalyzeCheck(const PokemonMoveSlot& move, const BattlePokemon& targetMon);
 	int ConfuseCheck(const BattlePokemon& targetMon);
 
 	int SelfAttackBoostCheck(const BattlePokemon& selfMon);

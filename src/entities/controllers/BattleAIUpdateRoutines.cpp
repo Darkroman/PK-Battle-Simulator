@@ -1,8 +1,10 @@
 #include "BattleAIUpdateRoutines.h"
 
-#include "AIController.h"
-#include "../Player.h"
 #include "../../battle/BattleContext.h"
+
+#include "../Player.h"
+
+#include "AIController.h"
 
 namespace BattleAIUpdateRoutines
 {

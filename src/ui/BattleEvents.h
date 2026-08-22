@@ -1,13 +1,13 @@
 #pragma once
 
+#include "EffectivenessText.h"
+
 #include <array>
 #include <string_view>
 #include <variant>
 
-#include "EffectivenessText.h"
-#include "../entities/BattlePokemon.h"
-
 enum class BattleEvents;
+enum struct Status;
 
 struct QueuedBattleEvent
 {

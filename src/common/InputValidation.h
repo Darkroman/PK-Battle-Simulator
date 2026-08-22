@@ -1,9 +1,9 @@
 #pragma once
 
-#include <string>
-#include <string_view>
 #include <algorithm>
 #include <cctype>
+#include <string>
+#include <string_view>
 
 inline bool IsDigits(std::string_view str)
 {

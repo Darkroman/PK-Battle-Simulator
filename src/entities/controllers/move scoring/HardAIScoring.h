@@ -1,16 +1,16 @@
 #pragma once
 
+#include "ScoringResultsStruct.h"
+
 #include <span>
 
-class Player;
-class BattlePokemon;
-struct pokemonMove;
-class RandomEngine;
-class AIController;
-enum class MoveID;
 enum class MoveEffect;
-
-#include "ScoringResultsStruct.h"
+enum class MoveID;
+class AIController;
+class BattlePokemon;
+class Player;
+class RandomEngine;
+struct PokemonMoveSlot;
 
 namespace HardAIMoveScoring
 {
@@ -18,7 +18,7 @@ namespace HardAIMoveScoring
 
 	bool SpeedUpMoveEffectFound(MoveEffect effect);
 
-	void RunExpertScoringRoutine(ScoringResults& result, std::span<ScoringResults>& results, const Player& self, const Player& targetPlayer, const pokemonMove& move, const BattlePokemon& selfMon, const BattlePokemon& targetMon, RandomEngine& rng);
+	void RunExpertScoringRoutine(ScoringResults& result, std::span<ScoringResults>& results, const Player& self, const Player& targetPlayer, const PokemonMoveSlot& move, const BattlePokemon& selfMon, const BattlePokemon& targetMon, RandomEngine& rng);
 
 	int SleepMove(std::span<ScoringResults>& results, RandomEngine& rng);
 

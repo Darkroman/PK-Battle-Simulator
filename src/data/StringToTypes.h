@@ -1,10 +1,10 @@
 #pragma once
 
-#include <string_view>
-#include <array>
-#include <utility>
-
 #include "../common/EnumUtils.h"
+
+#include <array>
+#include <string_view>
+#include <utility>
 
 enum class Category // Used in Moves
 {

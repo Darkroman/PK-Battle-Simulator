@@ -1,10 +1,12 @@
 #include "Pokemon.h"
-#include <string_view>
-#include <span>
 
-#include "../common//EnumUtils.h"
-#include "StringToTypes.h"
+#include "../common/EnumUtils.h"
+
 #include "PokemonID.h"
+#include "StringToTypes.h"
+
+#include <span>
+#include <string_view>
 
 PokemonID Pokemon::GetPokemonID() const
 {

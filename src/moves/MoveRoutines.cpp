@@ -1,26 +1,33 @@
-#include <array>
-#include <span>
-#include <algorithm>
-
 #include "MoveRoutines.h"
+
+#include "../common/EnumUtils.h"
+
+#include "../data/Database.h"
+#include "../data/Move.h"
+#include "../data/MoveID.h"
+#include "../data/StringToTypes.h"
+
+#include "../battle/BattleCalculations.h"
+#include "../battle/BattleContext.h"
+#include "../battle/RandomEngine.h"
+#include "../battle/StatusEffectProcessor.h"
+
+#include "../entities/BattlePokemon.h"
+#include "../entities/NonVolatileStatuses.h"
+#include "../entities/Player.h"
+#include "../entities/PokemonMoveSlot.h"
+
+#include "../entities/controllers/BattleAIUpdateRoutines.h"
+
+#include "../ui/interfaces/IMoveResultsUI.h"
 
 #include "MoveEffectEnums.h"
 #include "MoveHelpers.h"
 #include "MoveRoutineDeps.h"
-#include "../common/EnumUtils.h"
-#include "../data/Database.h"
-#include "../data/MoveID.h"
-#include "../data/Move.h"
-#include "../data/StringToTypes.h"
-#include "../battle/BattleCalculations.h"
-#include "../battle/StatusEffectProcessor.h"
-#include "../battle/BattleContext.h"
-#include "../battle/RandomEngine.h"
-#include "../entities/BattlePokemon.h"
-#include "../entities/Player.h"
-#include "../entities/pokemonMove.h"
-#include "../entities/controllers/BattleAIUpdateRoutines.h"
-#include "../ui/interfaces/IMoveResultsUI.h"
+
+#include <algorithm>
+#include <array>
+#include <span>
 
 namespace MoveRoutines
 {
@@ -160,9 +167,9 @@ namespace MoveRoutines
 
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
-		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
+		if (ctx.effectiveness == 0)
 		{
-			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.flags.currentEffectiveness));
+			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.effectiveness));
 			return;
 		}
 
@@ -176,7 +183,7 @@ namespace MoveRoutines
 
 		DamageRoutine(deps);
 
-		deps.statusProcessor.CheckSubstituteCondition(ctx.defendingPlayer, ctx.defendingPokemon);
+		deps.statusProcessor.CheckSubstituteCondition(*ctx.defendingPlayer, *ctx.defendingPokemon);
 		deps.statusProcessor.CheckFaintCondition(*ctx.attackingPlayer, *ctx.defendingPlayer, *ctx.attackingPokemon, *ctx.defendingPokemon);
 	}
 
@@ -201,9 +208,9 @@ namespace MoveRoutines
 
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
-		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
+		if (ctx.effectiveness == 0)
 		{
-			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.flags.currentEffectiveness));
+			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.effectiveness));
 			return;
 		}
 
@@ -217,7 +224,7 @@ namespace MoveRoutines
 
 		IncreasedCriticalHitRoutine(deps);
 
-		deps.statusProcessor.CheckSubstituteCondition(ctx.defendingPlayer, ctx.defendingPokemon);
+		deps.statusProcessor.CheckSubstituteCondition(*ctx.defendingPlayer, *ctx.defendingPokemon);
 		deps.statusProcessor.CheckFaintCondition(*ctx.attackingPlayer, *ctx.defendingPlayer, *ctx.attackingPokemon, *ctx.defendingPokemon);
 	}
 
@@ -242,9 +249,9 @@ namespace MoveRoutines
 
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
-		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
+		if (ctx.effectiveness == 0)
 		{
-			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.flags.currentEffectiveness));
+			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.effectiveness));
 			return;
 		}
 
@@ -295,9 +302,9 @@ namespace MoveRoutines
 
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
-		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
+		if (ctx.effectiveness == 0)
 		{
-			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.flags.currentEffectiveness));
+			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.effectiveness));
 			return;
 		}
 
@@ -311,7 +318,7 @@ namespace MoveRoutines
 
 		DamageRoutine(deps);
 
-		deps.statusProcessor.CheckSubstituteCondition(ctx.defendingPlayer, ctx.defendingPokemon);
+		deps.statusProcessor.CheckSubstituteCondition(*ctx.defendingPlayer, *ctx.defendingPokemon);
 		deps.statusProcessor.CheckFaintCondition(*ctx.attackingPlayer, *ctx.defendingPlayer, *ctx.attackingPokemon, *ctx.defendingPokemon);
 
 		InflictNVStatus(Status::Burned, ctx.currentMove->GetEffectChance(), deps);
@@ -338,9 +345,9 @@ namespace MoveRoutines
 
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
-		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
+		if (ctx.effectiveness == 0)
 		{
-			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.flags.currentEffectiveness));
+			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.effectiveness));
 			return;
 		}
 
@@ -354,7 +361,7 @@ namespace MoveRoutines
 
 		DamageRoutine(deps);
 
-		deps.statusProcessor.CheckSubstituteCondition(ctx.defendingPlayer, ctx.defendingPokemon);
+		deps.statusProcessor.CheckSubstituteCondition(*ctx.defendingPlayer, *ctx.defendingPokemon);
 		deps.statusProcessor.CheckFaintCondition(*ctx.attackingPlayer, *ctx.defendingPlayer, *ctx.attackingPokemon, *ctx.defendingPokemon);
 
 		InflictNVStatus(Status::Frozen, ctx.currentMove->GetEffectChance(), deps);
@@ -381,9 +388,9 @@ namespace MoveRoutines
 
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
-		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
+		if (ctx.effectiveness == 0)
 		{
-			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.flags.currentEffectiveness));
+			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.effectiveness));
 			return;
 		}
 
@@ -397,7 +404,7 @@ namespace MoveRoutines
 
 		DamageRoutine(deps);
 
-		deps.statusProcessor.CheckSubstituteCondition(ctx.defendingPlayer, ctx.defendingPokemon);
+		deps.statusProcessor.CheckSubstituteCondition(*ctx.defendingPlayer, *ctx.defendingPokemon);
 		deps.statusProcessor.CheckFaintCondition(*ctx.attackingPlayer, *ctx.defendingPlayer, *ctx.attackingPokemon, *ctx.defendingPokemon);
 
 		InflictNVStatus(Status::Paralyzed, ctx.currentMove->GetEffectChance(), deps);
@@ -424,9 +431,9 @@ namespace MoveRoutines
 
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
-		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
+		if (ctx.effectiveness == 0)
 		{
-			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.flags.currentEffectiveness));
+			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.effectiveness));
 			return;
 		}
 
@@ -440,7 +447,7 @@ namespace MoveRoutines
 
 		OHKODamageRoutine(deps);
 
-		deps.statusProcessor.CheckSubstituteCondition(ctx.defendingPlayer, ctx.defendingPokemon);
+		deps.statusProcessor.CheckSubstituteCondition(*ctx.defendingPlayer, *ctx.defendingPokemon);
 		deps.statusProcessor.CheckFaintCondition(*ctx.attackingPlayer, *ctx.defendingPlayer, *ctx.attackingPokemon, *ctx.defendingPokemon);
 	}
 
@@ -472,9 +479,9 @@ namespace MoveRoutines
 
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
-		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
+		if (ctx.effectiveness == 0)
 		{
-			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.flags.currentEffectiveness));
+			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.effectiveness));
 			return;
 		}
 
@@ -488,7 +495,7 @@ namespace MoveRoutines
 
 		IncreasedCriticalHitRoutine(deps);
 
-		deps.statusProcessor.CheckSubstituteCondition(ctx.defendingPlayer, ctx.defendingPokemon);
+		deps.statusProcessor.CheckSubstituteCondition(*ctx.defendingPlayer, *ctx.defendingPokemon);
 		deps.statusProcessor.CheckFaintCondition(*ctx.attackingPlayer, *ctx.defendingPlayer, *ctx.attackingPokemon, *ctx.defendingPokemon);
 	}
 
@@ -524,9 +531,9 @@ namespace MoveRoutines
 
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
-		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
+		if (ctx.effectiveness == 0)
 		{
-			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.flags.currentEffectiveness));
+			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.effectiveness));
 			return;
 		}
 
@@ -546,7 +553,7 @@ namespace MoveRoutines
 
 		DamageRoutine(deps);
 
-		deps.statusProcessor.CheckSubstituteCondition(ctx.defendingPlayer, ctx.defendingPokemon);
+		deps.statusProcessor.CheckSubstituteCondition(*ctx.defendingPlayer, *ctx.defendingPokemon);
 		deps.statusProcessor.CheckFaintCondition(*ctx.attackingPlayer, *ctx.defendingPlayer, *ctx.attackingPokemon, *ctx.defendingPokemon);
 	}
 
@@ -651,9 +658,9 @@ namespace MoveRoutines
 
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
-		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
+		if (ctx.effectiveness == 0)
 		{
-			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.flags.currentEffectiveness));
+			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.effectiveness));
 			return;
 		}
 
@@ -667,7 +674,7 @@ namespace MoveRoutines
 
 		DamageRoutine(deps);
 
-		deps.statusProcessor.CheckSubstituteCondition(ctx.defendingPlayer, ctx.defendingPokemon);
+		deps.statusProcessor.CheckSubstituteCondition(*ctx.defendingPlayer, *ctx.defendingPokemon);
 		deps.statusProcessor.CheckFaintCondition(*ctx.attackingPlayer, *ctx.defendingPlayer, *ctx.attackingPokemon, *ctx.defendingPokemon);
 	}
 
@@ -692,9 +699,9 @@ namespace MoveRoutines
 
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
-		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
+		if (ctx.effectiveness == 0)
 		{
-			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.flags.currentEffectiveness));
+			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.effectiveness));
 			return;
 		}
 
@@ -708,10 +715,10 @@ namespace MoveRoutines
 
 		DamageRoutine(deps);
 
-		deps.statusProcessor.CheckSubstituteCondition(ctx.defendingPlayer, ctx.defendingPokemon);
+		deps.statusProcessor.CheckSubstituteCondition(*ctx.defendingPlayer, *ctx.defendingPokemon);
 		deps.statusProcessor.CheckFaintCondition(*ctx.attackingPlayer, *ctx.defendingPlayer, *ctx.attackingPokemon, *ctx.defendingPokemon);
 
-		if (!ctx.defendingPokemon->IsFainted() && !ctx.defendingPokemon->IsBound() && ctx.flags.currentEffectiveness != BattleStateFlags::Effectiveness::No && !ctx.flags.hitSubstitute)
+		if (!ctx.defendingPokemon->IsFainted() && !ctx.defendingPokemon->IsBound() && ctx.effectiveness != 0 && !ctx.flags.hitSubstitute)
 		{
 			bool isGhost = ctx.defendingPokemon->GetTypeOneEnum() == PokemonType::Ghost || ctx.defendingPokemon->GetTypeTwoEnum() == PokemonType::Ghost;
 
@@ -747,9 +754,9 @@ namespace MoveRoutines
 
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
-		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
+		if (ctx.effectiveness == 0)
 		{
-			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.flags.currentEffectiveness));
+			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.effectiveness));
 			return;
 		}
 
@@ -775,7 +782,7 @@ namespace MoveRoutines
 		// Damage multiplier for when defending Pokemon has minimized is in CalculateDamage()
 		DamageRoutine(deps);
 
-		deps.statusProcessor.CheckSubstituteCondition(ctx.defendingPlayer, ctx.defendingPokemon);
+		deps.statusProcessor.CheckSubstituteCondition(*ctx.defendingPlayer, *ctx.defendingPokemon);
 		deps.statusProcessor.CheckFaintCondition(*ctx.attackingPlayer, *ctx.defendingPlayer, *ctx.attackingPokemon, *ctx.defendingPokemon);
 
 		FlinchRoutine(deps);
@@ -802,9 +809,9 @@ namespace MoveRoutines
 
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
-		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
+		if (ctx.effectiveness == 0)
 		{
-			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.flags.currentEffectiveness));
+			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.effectiveness));
 			return;
 		}
 
@@ -848,9 +855,9 @@ namespace MoveRoutines
 			deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 		}
 		
-		if (!moveFailed && ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
+		if (!moveFailed && ctx.effectiveness == 0)
 		{
-			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.flags.currentEffectiveness));
+			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.effectiveness));
 			moveFailed = true;
 		}
 
@@ -880,7 +887,7 @@ namespace MoveRoutines
 
 		DamageRoutine(deps);
 
-		deps.statusProcessor.CheckSubstituteCondition(ctx.defendingPlayer, ctx.defendingPokemon);
+		deps.statusProcessor.CheckSubstituteCondition(*ctx.defendingPlayer, *ctx.defendingPokemon);
 		deps.statusProcessor.CheckFaintCondition(*ctx.attackingPlayer, *ctx.defendingPlayer, *ctx.attackingPokemon, *ctx.defendingPokemon);
 	}
 
@@ -905,9 +912,9 @@ namespace MoveRoutines
 
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
-		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
+		if (ctx.effectiveness == 0)
 		{
-			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.flags.currentEffectiveness));
+			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.effectiveness));
 			return;
 		}
 
@@ -921,7 +928,7 @@ namespace MoveRoutines
 
 		DamageRoutine(deps);
 
-		deps.statusProcessor.CheckSubstituteCondition(ctx.defendingPlayer, ctx.defendingPokemon);
+		deps.statusProcessor.CheckSubstituteCondition(*ctx.defendingPlayer, *ctx.defendingPokemon);
 		deps.statusProcessor.CheckFaintCondition(*ctx.attackingPlayer, *ctx.defendingPlayer, *ctx.attackingPokemon, *ctx.defendingPokemon);
 
 		FlinchRoutine(deps);
@@ -984,9 +991,9 @@ namespace MoveRoutines
 
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
-		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
+		if (ctx.effectiveness == 0)
 		{
-			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.flags.currentEffectiveness));
+			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.effectiveness));
 			return;
 		}
 
@@ -1012,7 +1019,7 @@ namespace MoveRoutines
 		// Damage multiplier for when defending Pokemon has minimized is in CalculateDamage()
 		DamageRoutine(deps);
 
-		deps.statusProcessor.CheckSubstituteCondition(ctx.defendingPlayer, ctx.defendingPokemon);
+		deps.statusProcessor.CheckSubstituteCondition(*ctx.defendingPlayer, *ctx.defendingPokemon);
 		deps.statusProcessor.CheckFaintCondition(*ctx.attackingPlayer, *ctx.defendingPlayer, *ctx.attackingPokemon, *ctx.defendingPokemon);
 
 		InflictNVStatus(Status::Paralyzed, ctx.currentMove->GetEffectChance(), deps);
@@ -1039,9 +1046,9 @@ namespace MoveRoutines
 
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
-		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
+		if (ctx.effectiveness == 0)
 		{
-			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.flags.currentEffectiveness));
+			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.effectiveness));
 			return;
 		}
 
@@ -1055,7 +1062,7 @@ namespace MoveRoutines
 
 		DamageRoutine(deps);
 
-		deps.statusProcessor.CheckSubstituteCondition(ctx.defendingPlayer, ctx.defendingPokemon);
+		deps.statusProcessor.CheckSubstituteCondition(*ctx.defendingPlayer, *ctx.defendingPokemon);
 		deps.statusProcessor.CheckFaintCondition(*ctx.attackingPlayer, *ctx.defendingPlayer, *ctx.attackingPokemon, *ctx.defendingPokemon);
 
 		RecoilRoutine(deps, 4);
@@ -1100,9 +1107,9 @@ namespace MoveRoutines
 			deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 		}
 
-		if (!moveFailed && ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
+		if (!moveFailed && ctx.effectiveness == 0)
 		{
-			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.flags.currentEffectiveness));
+			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.effectiveness));
 			moveFailed = true;
 		}
 		
@@ -1121,7 +1128,7 @@ namespace MoveRoutines
 		{
 			DamageRoutine(deps);
 
-			deps.statusProcessor.CheckSubstituteCondition(ctx.defendingPlayer, ctx.defendingPokemon);
+			deps.statusProcessor.CheckSubstituteCondition(*ctx.defendingPlayer, *ctx.defendingPokemon);
 			deps.statusProcessor.CheckFaintCondition(*ctx.attackingPlayer, *ctx.defendingPlayer, *ctx.attackingPokemon, *ctx.defendingPokemon);
 		}
 
@@ -1159,9 +1166,9 @@ namespace MoveRoutines
 
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
-		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
+		if (ctx.effectiveness == 0)
 		{
-			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.flags.currentEffectiveness));
+			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.effectiveness));
 			return;
 		}
 
@@ -1175,7 +1182,7 @@ namespace MoveRoutines
 
 		DamageRoutine(deps);
 
-		deps.statusProcessor.CheckSubstituteCondition(ctx.defendingPlayer, ctx.defendingPokemon);
+		deps.statusProcessor.CheckSubstituteCondition(*ctx.defendingPlayer, *ctx.defendingPokemon);
 		deps.statusProcessor.CheckFaintCondition(*ctx.attackingPlayer, *ctx.defendingPlayer, *ctx.attackingPokemon, *ctx.defendingPokemon);
 
 		RecoilRoutine(deps, 3);
@@ -1238,9 +1245,9 @@ namespace MoveRoutines
 
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
-		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
+		if (ctx.effectiveness == 0)
 		{
-			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.flags.currentEffectiveness));
+			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.effectiveness));
 			return;
 		}
 
@@ -1254,7 +1261,7 @@ namespace MoveRoutines
 
 		DamageRoutine(deps);
 
-		deps.statusProcessor.CheckSubstituteCondition(ctx.defendingPlayer, ctx.defendingPokemon);
+		deps.statusProcessor.CheckSubstituteCondition(*ctx.defendingPlayer, *ctx.defendingPokemon);
 		deps.statusProcessor.CheckFaintCondition(*ctx.attackingPlayer, *ctx.defendingPlayer, *ctx.attackingPokemon, *ctx.defendingPokemon);
 
 		InflictNVStatus(Status::Poisoned, ctx.currentMove->GetEffectChance(), deps);
@@ -1281,9 +1288,9 @@ namespace MoveRoutines
 
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
-		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
+		if (ctx.effectiveness == 0)
 		{
-			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.flags.currentEffectiveness));
+			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.effectiveness));
 			return;
 		}
 
@@ -1443,9 +1450,9 @@ namespace MoveRoutines
 
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
-		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
+		if (ctx.effectiveness == 0)
 		{
-			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.flags.currentEffectiveness));
+			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.effectiveness));
 			return;
 		}
 
@@ -1461,7 +1468,7 @@ namespace MoveRoutines
 
 		FixedDamageRoutine(deps, baseDamage);
 
-		deps.statusProcessor.CheckSubstituteCondition(ctx.defendingPlayer, ctx.defendingPokemon);
+		deps.statusProcessor.CheckSubstituteCondition(*ctx.defendingPlayer, *ctx.defendingPokemon);
 		deps.statusProcessor.CheckFaintCondition(*ctx.attackingPlayer, *ctx.defendingPlayer, *ctx.attackingPokemon, *ctx.defendingPokemon);
 	}
 
@@ -1547,9 +1554,9 @@ namespace MoveRoutines
 
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
-		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
+		if (ctx.effectiveness == 0)
 		{
-			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.flags.currentEffectiveness));
+			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.effectiveness));
 			return;
 		}
 
@@ -1563,7 +1570,7 @@ namespace MoveRoutines
 
 		DamageRoutine(deps);
 
-		deps.statusProcessor.CheckSubstituteCondition(ctx.defendingPlayer, ctx.defendingPokemon);
+		deps.statusProcessor.CheckSubstituteCondition(*ctx.defendingPlayer, *ctx.defendingPokemon);
 		deps.statusProcessor.CheckFaintCondition(*ctx.attackingPlayer, *ctx.defendingPlayer, *ctx.attackingPokemon, *ctx.defendingPokemon);
 
 		StageDownDamageRoutine(deps, 1, "special defense", [](BattlePokemon& p) { return p.GetSpecialDefenseStage(); }, [](BattlePokemon& p, int val) { p.SetSpecialDefenseStage(val); });
@@ -1609,9 +1616,9 @@ namespace MoveRoutines
 
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
-		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
+		if (ctx.effectiveness == 0)
 		{
-			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.flags.currentEffectiveness));
+			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.effectiveness));
 			return;
 		}
 
@@ -1625,7 +1632,7 @@ namespace MoveRoutines
 
 		DamageRoutine(deps);
 
-		deps.statusProcessor.CheckSubstituteCondition(ctx.defendingPlayer, ctx.defendingPokemon);
+		deps.statusProcessor.CheckSubstituteCondition(*ctx.defendingPlayer, *ctx.defendingPokemon);
 		deps.statusProcessor.CheckFaintCondition(*ctx.attackingPlayer, *ctx.defendingPlayer, *ctx.attackingPokemon, *ctx.defendingPokemon);
 
 		if (!ctx.defendingPokemon->IsFainted() && !ctx.defendingPokemon->IsConfused() && !ctx.flags.hitSubstitute)
@@ -1666,9 +1673,9 @@ namespace MoveRoutines
 
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
-		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
+		if (ctx.effectiveness == 0)
 		{
-			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.flags.currentEffectiveness));
+			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.effectiveness));
 			return;
 		}
 
@@ -1682,7 +1689,7 @@ namespace MoveRoutines
 
 		DamageRoutine(deps);
 
-		deps.statusProcessor.CheckSubstituteCondition(ctx.defendingPlayer, ctx.defendingPokemon);
+		deps.statusProcessor.CheckSubstituteCondition(*ctx.defendingPlayer, *ctx.defendingPokemon);
 		deps.statusProcessor.CheckFaintCondition(*ctx.attackingPlayer, *ctx.defendingPlayer, *ctx.attackingPokemon, *ctx.defendingPokemon);
 
 		StageDownDamageRoutine(deps, 1, "speed", [](BattlePokemon& p) { return p.GetSpeedStage(); }, [](BattlePokemon& p, int val) { p.SetSpeedStage(val); });
@@ -1709,9 +1716,9 @@ namespace MoveRoutines
 
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
-		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
+		if (ctx.effectiveness == 0)
 		{
-			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.flags.currentEffectiveness));
+			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.effectiveness));
 			return;
 		}
 
@@ -1725,7 +1732,7 @@ namespace MoveRoutines
 
 		DamageRoutine(deps);
 
-		deps.statusProcessor.CheckSubstituteCondition(ctx.defendingPlayer, ctx.defendingPokemon);
+		deps.statusProcessor.CheckSubstituteCondition(*ctx.defendingPlayer, *ctx.defendingPokemon);
 		deps.statusProcessor.CheckFaintCondition(*ctx.attackingPlayer, *ctx.defendingPlayer, *ctx.attackingPokemon, *ctx.defendingPokemon);
 
 		StageDownDamageRoutine(deps, 1, "attack", [](BattlePokemon& p) { return p.GetAttackStage(); }, [](BattlePokemon& p, int val) { p.SetAttackStage(val); });
@@ -1752,9 +1759,9 @@ namespace MoveRoutines
 
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
-		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
+		if (ctx.effectiveness == 0)
 		{
-			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.flags.currentEffectiveness));
+			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.effectiveness));
 			return;
 		}
 
@@ -1768,7 +1775,7 @@ namespace MoveRoutines
 
 		DamageRoutine(deps);
 
-		deps.statusProcessor.CheckSubstituteCondition(ctx.defendingPlayer, ctx.defendingPokemon);
+		deps.statusProcessor.CheckSubstituteCondition(*ctx.defendingPlayer, *ctx.defendingPokemon);
 		deps.statusProcessor.CheckFaintCondition(*ctx.attackingPlayer, *ctx.defendingPlayer, *ctx.attackingPokemon, *ctx.defendingPokemon);
 
 		ctx.attackingPokemon->SetRecharging(true);
@@ -1795,9 +1802,9 @@ namespace MoveRoutines
 
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
-		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
+		if (ctx.effectiveness == 0)
 		{
-			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.flags.currentEffectiveness));
+			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.effectiveness));
 			return;
 		}
 
@@ -1812,7 +1819,7 @@ namespace MoveRoutines
 		// Low Kick power calculated in CalculateDamage()
 		DamageRoutine(deps);
 
-		deps.statusProcessor.CheckSubstituteCondition(ctx.defendingPlayer, ctx.defendingPokemon);
+		deps.statusProcessor.CheckSubstituteCondition(*ctx.defendingPlayer, *ctx.defendingPokemon);
 		deps.statusProcessor.CheckFaintCondition(*ctx.attackingPlayer, *ctx.defendingPlayer, *ctx.attackingPokemon, *ctx.defendingPokemon);
 	}
 
@@ -1842,9 +1849,9 @@ namespace MoveRoutines
 
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
-		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
+		if (ctx.effectiveness == 0)
 		{
-			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.flags.currentEffectiveness));
+			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.effectiveness));
 			return;
 		}
 
@@ -1858,7 +1865,7 @@ namespace MoveRoutines
 
 		FixedDamageRoutine(deps, counterDamage);
 
-		deps.statusProcessor.CheckSubstituteCondition(ctx.defendingPlayer, ctx.defendingPokemon);
+		deps.statusProcessor.CheckSubstituteCondition(*ctx.defendingPlayer, *ctx.defendingPokemon);
 		deps.statusProcessor.CheckFaintCondition(*ctx.attackingPlayer, *ctx.defendingPlayer, *ctx.attackingPokemon, *ctx.defendingPokemon);
 	}
 
@@ -1883,9 +1890,9 @@ namespace MoveRoutines
 
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
-		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
+		if (ctx.effectiveness == 0)
 		{
-			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.flags.currentEffectiveness));
+			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.effectiveness));
 			return;
 		}
 
@@ -1901,7 +1908,7 @@ namespace MoveRoutines
 
 		FixedDamageRoutine(deps, baseDamage);
 
-		deps.statusProcessor.CheckSubstituteCondition(ctx.defendingPlayer, ctx.defendingPokemon);
+		deps.statusProcessor.CheckSubstituteCondition(*ctx.defendingPlayer, *ctx.defendingPokemon);
 		deps.statusProcessor.CheckFaintCondition(*ctx.attackingPlayer, *ctx.defendingPlayer, *ctx.attackingPokemon, *ctx.defendingPokemon);
 	}
 
@@ -1926,9 +1933,9 @@ namespace MoveRoutines
 
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
-		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
+		if (ctx.effectiveness == 0)
 		{
-			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.flags.currentEffectiveness));
+			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.effectiveness));
 			return;
 		}
 
@@ -1948,7 +1955,7 @@ namespace MoveRoutines
 
 		ctx.attackingPokemon->HealCurrentHP(finalLeech);
 
-		deps.statusProcessor.CheckSubstituteCondition(ctx.defendingPlayer, ctx.defendingPokemon);
+		deps.statusProcessor.CheckSubstituteCondition(*ctx.defendingPlayer, *ctx.defendingPokemon);
 
 		if (finalLeech > 0)
 		{
@@ -2044,9 +2051,9 @@ namespace MoveRoutines
 
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
-		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
+		if (ctx.effectiveness == 0)
 		{
-			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.flags.currentEffectiveness));
+			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.effectiveness));
 			return;
 		}
 
@@ -2060,7 +2067,7 @@ namespace MoveRoutines
 
 		DamageRoutine(deps);
 
-		deps.statusProcessor.CheckSubstituteCondition(ctx.defendingPlayer, ctx.defendingPokemon);
+		deps.statusProcessor.CheckSubstituteCondition(*ctx.defendingPlayer, *ctx.defendingPokemon);
 		deps.statusProcessor.CheckFaintCondition(*ctx.attackingPlayer, *ctx.defendingPlayer, *ctx.attackingPokemon, *ctx.defendingPokemon);
 	}
 
@@ -2274,9 +2281,9 @@ namespace MoveRoutines
 
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
-		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
+		if (ctx.effectiveness == 0)
 		{
-			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.flags.currentEffectiveness));
+			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.effectiveness));
 			return;
 		}
 
@@ -2292,7 +2299,7 @@ namespace MoveRoutines
 
 		FixedDamageRoutine(deps, baseDamage);
 
-		deps.statusProcessor.CheckSubstituteCondition(ctx.defendingPlayer, ctx.defendingPokemon);
+		deps.statusProcessor.CheckSubstituteCondition(*ctx.defendingPlayer, *ctx.defendingPokemon);
 		deps.statusProcessor.CheckFaintCondition(*ctx.attackingPlayer, *ctx.defendingPlayer, *ctx.attackingPokemon, *ctx.defendingPokemon);
 	}
 
@@ -2322,7 +2329,7 @@ namespace MoveRoutines
 			(ctx.defendingPokemon->GetTypeOneEnum() == PokemonType::Ground ||
 				ctx.defendingPokemon->GetTypeTwoEnum() == PokemonType::Ground);
 
-		bool isImmune = (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No || isElectricType || electricVsGround);
+		bool isImmune = (ctx.effectiveness == 0 || isElectricType || electricVsGround);
 
 		// Special case: Glare affects Ghosts despite being Normal-type
 		if (ctx.currentMove->GetMoveID() == MoveID::Glare)
@@ -2384,9 +2391,9 @@ namespace MoveRoutines
 
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
-		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
+		if (ctx.effectiveness == 0)
 		{
-			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.flags.currentEffectiveness));
+			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.effectiveness));
 			return;
 		}
 
@@ -2400,7 +2407,7 @@ namespace MoveRoutines
 
 		DamageRoutine(deps);
 
-		deps.statusProcessor.CheckSubstituteCondition(ctx.defendingPlayer, ctx.defendingPokemon);
+		deps.statusProcessor.CheckSubstituteCondition(*ctx.defendingPlayer, *ctx.defendingPokemon);
 		deps.statusProcessor.CheckFaintCondition(*ctx.attackingPlayer, *ctx.defendingPlayer, *ctx.attackingPokemon, *ctx.defendingPokemon);
 
 		InflictNVStatus(Status::Paralyzed, ctx.currentMove->GetEffectChance(), deps);
@@ -2427,9 +2434,9 @@ namespace MoveRoutines
 
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
-		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
+		if (ctx.effectiveness == 0)
 		{
-			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.flags.currentEffectiveness));
+			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.effectiveness));
 			return;
 		}
 
@@ -2444,7 +2451,7 @@ namespace MoveRoutines
 		// Damage multiplier for when defending Pokemon is SemiInvulnerableDig is in CalculateDamage()
 		DamageRoutine(deps);
 
-		deps.statusProcessor.CheckSubstituteCondition(ctx.defendingPlayer, ctx.defendingPokemon);
+		deps.statusProcessor.CheckSubstituteCondition(*ctx.defendingPlayer, *ctx.defendingPokemon);
 		deps.statusProcessor.CheckFaintCondition(*ctx.attackingPlayer, *ctx.defendingPlayer, *ctx.attackingPokemon, *ctx.defendingPokemon);
 	}
 
@@ -2480,9 +2487,9 @@ namespace MoveRoutines
 
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
-		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
+		if (ctx.effectiveness == 0)
 		{
-			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.flags.currentEffectiveness));
+			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.effectiveness));
 			return;
 		}
 
@@ -2496,7 +2503,7 @@ namespace MoveRoutines
 
 		DamageRoutine(deps);
 
-		deps.statusProcessor.CheckSubstituteCondition(ctx.defendingPlayer, ctx.defendingPokemon);
+		deps.statusProcessor.CheckSubstituteCondition(*ctx.defendingPlayer, *ctx.defendingPokemon);
 		deps.statusProcessor.CheckFaintCondition(*ctx.attackingPlayer, *ctx.defendingPlayer, *ctx.attackingPokemon, *ctx.defendingPokemon);
 	}
 
@@ -2605,9 +2612,9 @@ namespace MoveRoutines
 
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
-		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
+		if (ctx.effectiveness == 0)
 		{
-			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.flags.currentEffectiveness));
+			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.effectiveness));
 			return;
 		}
 
@@ -2623,7 +2630,7 @@ namespace MoveRoutines
 
 		DamageRoutine(deps);
 
-		deps.statusProcessor.CheckSubstituteCondition(ctx.defendingPlayer, ctx.defendingPokemon);
+		deps.statusProcessor.CheckSubstituteCondition(*ctx.defendingPlayer, *ctx.defendingPokemon);
 		deps.statusProcessor.CheckFaintCondition(*ctx.attackingPlayer, *ctx.defendingPlayer, *ctx.attackingPokemon, *ctx.defendingPokemon);
 	}
 
@@ -2665,9 +2672,9 @@ namespace MoveRoutines
 
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
-		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
+		if (ctx.effectiveness == 0)
 		{
-			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.flags.currentEffectiveness));
+			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.effectiveness));
 			return;
 		}
 
@@ -2683,7 +2690,7 @@ namespace MoveRoutines
 
 		FixedDamageRoutine(deps, baseDamage);
 
-		deps.statusProcessor.CheckSubstituteCondition(ctx.defendingPlayer, ctx.defendingPokemon);
+		deps.statusProcessor.CheckSubstituteCondition(*ctx.defendingPlayer, *ctx.defendingPokemon);
 		deps.statusProcessor.CheckFaintCondition(*ctx.attackingPlayer, *ctx.defendingPlayer, *ctx.attackingPokemon, *ctx.defendingPokemon);
 	}
 
@@ -2706,7 +2713,7 @@ namespace MoveRoutines
 			return;
 		}
 
-		pokemonMove* targetLastUsedMove = ctx.defendingPokemon->GetLastUsedMove();
+		PokemonMoveSlot* targetLastUsedMove = ctx.defendingPokemon->GetLastUsedMove();
 
 		if (targetLastUsedMove == nullptr)
 		{
@@ -2995,9 +3002,9 @@ namespace MoveRoutines
 
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
-		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
+		if (ctx.effectiveness == 0)
 		{
-			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.flags.currentEffectiveness));
+			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.effectiveness));
 			return;
 		}
 
@@ -3011,7 +3018,7 @@ namespace MoveRoutines
 
 		FixedDamageRoutine(deps, bideDamage);
 
-		deps.statusProcessor.CheckSubstituteCondition(ctx.defendingPlayer, ctx.defendingPokemon);
+		deps.statusProcessor.CheckSubstituteCondition(*ctx.defendingPlayer, *ctx.defendingPokemon);
 		deps.statusProcessor.CheckFaintCondition(*ctx.attackingPlayer, *ctx.defendingPlayer, *ctx.attackingPokemon, *ctx.defendingPokemon);
 	}
 
@@ -3047,9 +3054,9 @@ namespace MoveRoutines
 			ctx.attackingPokemon->SetCalledMove(selectedMove);
 		}
 
-		pokemonMove* metronome = ctx.currentMove;
+		PokemonMoveSlot* metronome = ctx.currentMove;
 
-		pokemonMove& calledMove = *ctx.attackingPokemon->GetCalledMove();
+		PokemonMoveSlot& calledMove = *ctx.attackingPokemon->GetCalledMove();
 
 		ctx.currentMove = &calledMove;
 
@@ -3081,7 +3088,7 @@ namespace MoveRoutines
 				return;
 			}
 
-			pokemonMove* targetLastUsedMove = ctx.defendingPokemon->GetLastUsedMove();
+			PokemonMoveSlot* targetLastUsedMove = ctx.defendingPokemon->GetLastUsedMove();
 
 			if (targetLastUsedMove == nullptr)
 			{
@@ -3102,9 +3109,9 @@ namespace MoveRoutines
 			ctx.attackingPokemon->SetCalledMove(selectedMove);
 		}
 
-		pokemonMove* mirrorMove = ctx.currentMove;
+		PokemonMoveSlot* mirrorMove = ctx.currentMove;
 
-		pokemonMove& calledMove = *ctx.attackingPokemon->GetCalledMove();
+		PokemonMoveSlot& calledMove = *ctx.attackingPokemon->GetCalledMove();
 
 		ctx.currentMove = &calledMove;
 
@@ -3142,9 +3149,9 @@ namespace MoveRoutines
 
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
-		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
+		if (ctx.effectiveness == 0)
 		{
-			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.flags.currentEffectiveness));
+			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.effectiveness));
 
 			deps.statusProcessor.CheckFaintCondition(*ctx.defendingPlayer, *ctx.attackingPlayer, *ctx.defendingPokemon, *ctx.attackingPokemon);
 
@@ -3166,7 +3173,7 @@ namespace MoveRoutines
 
 		deps.statusProcessor.CheckFaintCondition(*ctx.defendingPlayer, *ctx.attackingPlayer, *ctx.defendingPokemon, *ctx.attackingPokemon);
 
-		deps.statusProcessor.CheckSubstituteCondition(ctx.defendingPlayer, ctx.defendingPokemon);
+		deps.statusProcessor.CheckSubstituteCondition(*ctx.defendingPlayer, *ctx.defendingPokemon);
 		deps.statusProcessor.CheckFaintCondition(*ctx.attackingPlayer, *ctx.defendingPlayer, *ctx.attackingPokemon, *ctx.defendingPokemon);
 	}
 
@@ -3191,9 +3198,9 @@ namespace MoveRoutines
 
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
-		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
+		if (ctx.effectiveness == 0)
 		{
-			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.flags.currentEffectiveness));
+			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.effectiveness));
 			return;
 		}
 
@@ -3201,7 +3208,7 @@ namespace MoveRoutines
 
 		DamageRoutine(deps);
 
-		deps.statusProcessor.CheckSubstituteCondition(ctx.defendingPlayer, ctx.defendingPokemon);
+		deps.statusProcessor.CheckSubstituteCondition(*ctx.defendingPlayer, *ctx.defendingPokemon);
 		deps.statusProcessor.CheckFaintCondition(*ctx.attackingPlayer, *ctx.defendingPlayer, *ctx.attackingPokemon, *ctx.defendingPokemon);
 	}
 
@@ -3240,9 +3247,9 @@ namespace MoveRoutines
 
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
-		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
+		if (ctx.effectiveness == 0)
 		{
-			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.flags.currentEffectiveness));
+			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.effectiveness));
 			return;
 		}
 
@@ -3256,7 +3263,7 @@ namespace MoveRoutines
 
 		DamageRoutine(deps);
 
-		deps.statusProcessor.CheckSubstituteCondition(ctx.defendingPlayer, ctx.defendingPokemon);
+		deps.statusProcessor.CheckSubstituteCondition(*ctx.defendingPlayer, *ctx.defendingPokemon);
 		deps.statusProcessor.CheckFaintCondition(*ctx.attackingPlayer, *ctx.defendingPlayer, *ctx.attackingPokemon, *ctx.defendingPokemon);
 	}
 
@@ -3292,7 +3299,7 @@ namespace MoveRoutines
 
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
-		if (ctx.defendingPokemon->GetStatus() != Status::Sleeping || ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
+		if (ctx.defendingPokemon->GetStatus() != Status::Sleeping || ctx.effectiveness == 0)
 		{
 			deps.resultsUI.DisplayDoesntAffectMsg(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView());
 			return;
@@ -3314,7 +3321,7 @@ namespace MoveRoutines
 
 		ctx.attackingPokemon->HealCurrentHP(finalLeech);
 
-		deps.statusProcessor.CheckSubstituteCondition(ctx.defendingPlayer, ctx.defendingPokemon);
+		deps.statusProcessor.CheckSubstituteCondition(*ctx.defendingPlayer, *ctx.defendingPokemon);
 
 		if (finalLeech > 0)
 		{
@@ -3403,9 +3410,9 @@ namespace MoveRoutines
 
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
-		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
+		if (ctx.effectiveness == 0)
 		{
-			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.flags.currentEffectiveness));
+			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.effectiveness));
 			return;
 		}
 
@@ -3419,7 +3426,7 @@ namespace MoveRoutines
 
 		IncreasedCriticalHitRoutine(deps);
 
-		deps.statusProcessor.CheckSubstituteCondition(ctx.defendingPlayer, ctx.defendingPokemon);
+		deps.statusProcessor.CheckSubstituteCondition(*ctx.defendingPlayer, *ctx.defendingPokemon);
 		deps.statusProcessor.CheckFaintCondition(*ctx.attackingPlayer, *ctx.defendingPlayer, *ctx.attackingPokemon, *ctx.defendingPokemon);
 
 		FlinchRoutine(deps);
@@ -3477,9 +3484,9 @@ namespace MoveRoutines
 
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
-		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
+		if (ctx.effectiveness == 0)
 		{
-			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.flags.currentEffectiveness));
+			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.effectiveness));
 			return;
 		}
 
@@ -3499,7 +3506,7 @@ namespace MoveRoutines
 
 		FixedDamageRoutine(deps, psywaveDamage);
 
-		deps.statusProcessor.CheckSubstituteCondition(ctx.defendingPlayer, ctx.defendingPokemon);
+		deps.statusProcessor.CheckSubstituteCondition(*ctx.defendingPlayer, *ctx.defendingPokemon);
 		deps.statusProcessor.CheckFaintCondition(*ctx.attackingPlayer, *ctx.defendingPlayer, *ctx.attackingPokemon, *ctx.defendingPokemon);
 	}
 
@@ -3595,9 +3602,9 @@ namespace MoveRoutines
 
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
-		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
+		if (ctx.effectiveness == 0)
 		{
-			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.flags.currentEffectiveness));
+			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.effectiveness));
 			return;
 		}
 
@@ -3638,7 +3645,7 @@ namespace MoveRoutines
 			}
 		}
 
-		deps.statusProcessor.CheckSubstituteCondition(ctx.defendingPlayer, ctx.defendingPokemon);
+		deps.statusProcessor.CheckSubstituteCondition(*ctx.defendingPlayer, *ctx.defendingPokemon);
 		deps.statusProcessor.CheckFaintCondition(*ctx.attackingPlayer, *ctx.defendingPlayer, *ctx.attackingPokemon, *ctx.defendingPokemon);
 	}
 
@@ -3663,9 +3670,9 @@ namespace MoveRoutines
 
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
-		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
+		if (ctx.effectiveness == 0)
 		{
-			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.flags.currentEffectiveness));
+			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.effectiveness));
 			return;
 		}
 
@@ -3687,7 +3694,7 @@ namespace MoveRoutines
 
 		ExecuteOnHitReactions(deps);
 
-		deps.statusProcessor.CheckSubstituteCondition(ctx.defendingPlayer, ctx.defendingPokemon);
+		deps.statusProcessor.CheckSubstituteCondition(*ctx.defendingPlayer, *ctx.defendingPokemon);
 		deps.statusProcessor.CheckFaintCondition(*ctx.attackingPlayer, *ctx.defendingPlayer, *ctx.attackingPokemon, *ctx.defendingPokemon);
 	}
 
@@ -3750,9 +3757,9 @@ namespace MoveRoutines
 
 		deps.calculations.CalculateTypeEffectiveness(ctx, *ctx.currentMove, *ctx.defendingPokemon);
 
-		if (ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
+		if (ctx.effectiveness == 0)
 		{
-			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.flags.currentEffectiveness));
+			deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.effectiveness));
 			return;
 		}
 
@@ -3760,7 +3767,7 @@ namespace MoveRoutines
 
 		DamageRoutine(deps);
 
-		deps.statusProcessor.CheckSubstituteCondition(ctx.defendingPlayer, ctx.defendingPokemon);
+		deps.statusProcessor.CheckSubstituteCondition(*ctx.defendingPlayer, *ctx.defendingPokemon);
 		deps.statusProcessor.CheckFaintCondition(*ctx.attackingPlayer, *ctx.defendingPlayer, *ctx.attackingPokemon, *ctx.defendingPokemon);
 
 		unsigned int recoilDamage = (ctx.attackingPokemon->GetMaxHP() + 2) / 4;

@@ -1,14 +1,12 @@
 #pragma once
 
-#include "AIScoreTag.h"
-
-struct pokemonMove;
+enum class AIScoreTag;
+struct PokemonMoveSlot;
 
 struct ScoringResults
 {
+	PokemonMoveSlot* move{};
+	AIScoreTag tag{};
 	unsigned int damage{};
 	int score{ 0 };
-	pokemonMove* move{};
-	AIScoreTag tag{};
-	//bool isKO{ false };
 };

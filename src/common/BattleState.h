@@ -11,6 +11,7 @@ struct BattleRunResult
 enum class BattleState
 {
 	None,
+	PresetupBattle,
 	StartBattle,
 	DisplayFightingPokemon,
 	BeginChooseAction,

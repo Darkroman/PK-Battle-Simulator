@@ -1,8 +1,8 @@
 #pragma once
 
-#include <queue>
-
 #include "BattleEvents.h"
+
+#include <queue>
 
 class BattleEventQueue
 {

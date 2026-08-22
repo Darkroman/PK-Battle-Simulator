@@ -1,8 +1,8 @@
 #pragma once
 
-#include <string_view>
-
 #include "../EffectivenessText.h"
+
+#include <string_view>
 
 enum class MoveID;
 

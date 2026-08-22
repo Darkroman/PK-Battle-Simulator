@@ -1,18 +1,24 @@
-#include <span>
-
 #include "HardAIScoring.h"
 
-#include "AIScoreTag.h"
-#include "AIMoveScoring.h"
-#include "ScoringResultsStruct.h"
-#include "../../Player.h"
-#include "../../pokemonMove.h"
-#include "../../BattlePokemon.h"
+#include "../../../battle/RandomEngine.h"
+
 #include "../../../data/MoveID.h"
 #include "../../../data/StringToTypes.h"
-#include "../../../battle/RandomEngine.h"
+
 #include "../../../moves/MoveEffectEnums.h"
+
+#include "../../BattlePokemon.h"
+#include "../../NonVolatileStatuses.h"
+#include "../../Player.h"
+#include "../../PokemonMoveSlot.h"
+
 #include "../AIController.h"
+
+#include "AIMoveScoring.h"
+#include "AIScoreTag.h"
+#include "ScoringResultsStruct.h"
+
+#include <span>
 
 // Largely based on Da Squyd's reverse-engineered Gen 5 Expert AI scripts in his flag2.ais file
 // https://docs.google.com/document/d/1AziiMPsY1TcABKIwl92677A4nYGtByvjFOR7p6PAXY0
@@ -61,7 +67,7 @@ namespace HardAIMoveScoring
 		}
 	}
 
-	void RunExpertScoringRoutine(ScoringResults& result, std::span<ScoringResults>& results, const Player& self, const Player& targetPlayer, const pokemonMove& move, const BattlePokemon& selfMon, const BattlePokemon& targetMon, RandomEngine& rng)
+	void RunExpertScoringRoutine(ScoringResults& result, std::span<ScoringResults>& results, const Player& self, const Player& targetPlayer, const PokemonMoveSlot& move, const BattlePokemon& selfMon, const BattlePokemon& targetMon, RandomEngine& rng)
 	{
 		int delta{};
 
@@ -287,7 +293,7 @@ namespace HardAIMoveScoring
 
 	int MirrorMove(RandomEngine& rng, const BattlePokemon& selfMon, const BattlePokemon& targetMon)
 	{
-		pokemonMove* targetLastUsedMove{ targetMon.GetLastUsedMove() };
+		PokemonMoveSlot* targetLastUsedMove{ targetMon.GetLastUsedMove() };
 		MoveID targetLastUsedMoveID{};
 		if (targetLastUsedMove)
 		{
@@ -404,7 +410,7 @@ namespace HardAIMoveScoring
 			return delta;
 		}
 
-		const pokemonMove* targetLastMove = targetMon.GetLastUsedMove();
+		const PokemonMoveSlot* targetLastMove = targetMon.GetLastUsedMove();
 
 		if (targetLastMove != nullptr)
 		{
@@ -556,7 +562,7 @@ namespace HardAIMoveScoring
 			return delta;
 		}
 
-		pokemonMove* targetLastMove = targetMon.GetLastUsedMove();
+		PokemonMoveSlot* targetLastMove = targetMon.GetLastUsedMove();
 
 		if (targetLastMove)
 		{
@@ -623,7 +629,7 @@ namespace HardAIMoveScoring
 	{
 		int delta{};
 
-		const pokemonMove* targetLastMove = targetMon.GetLastUsedMove();
+		const PokemonMoveSlot* targetLastMove = targetMon.GetLastUsedMove();
 
 		// Discourage and end if target's last move was an AlwaysHit move.
 		if (targetLastMove != nullptr &&
@@ -775,7 +781,7 @@ namespace HardAIMoveScoring
 			delta -= 2;
 		}
 
-		const pokemonMove* targetLastUsedMove = targetMon.GetLastUsedMove();
+		const PokemonMoveSlot* targetLastUsedMove = targetMon.GetLastUsedMove();
 
 		if (targetLastUsedMove == nullptr || targetLastUsedMove->GetCategoryEnum() != Category::Special)
 		{
@@ -866,7 +872,7 @@ namespace HardAIMoveScoring
 			delta -= 2;
 		}
 
-		const pokemonMove* targetLastUsedMove = targetMon.GetLastUsedMove();
+		const PokemonMoveSlot* targetLastUsedMove = targetMon.GetLastUsedMove();
 
 		if (targetLastUsedMove == nullptr || targetLastUsedMove->GetCategoryEnum() != Category::Physical)
 		{

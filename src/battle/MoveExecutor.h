@@ -1,18 +1,18 @@
 #pragma once
 
-struct BattleContext;
+#include "../moves/MoveRoutineDeps.h"
+
 class BattleCalculations;
-class StatusEffectProcessor;
 class IMoveResultsUI;
 class IStatusEffectUI;
 class RandomEngine;
-
-#include "../moves/MoveRoutineDeps.h"
+class StatusEffectProcessor;
+struct BattleContext;
 
 class MoveExecutor
 {
 public:
-    MoveExecutor(BattleContext& context, BattleCalculations& calculations, StatusEffectProcessor& statusProcessor, IMoveResultsUI& resultsUI, IStatusEffectUI& statusEffectUI, RandomEngine& rng);
+    MoveExecutor(BattleContext& context, RandomEngine& rng, BattleCalculations& calculations, StatusEffectProcessor& statusProcessor, IMoveResultsUI& resultsUI, IStatusEffectUI& statusEffectUI);
 
     void ExecuteMove();
 

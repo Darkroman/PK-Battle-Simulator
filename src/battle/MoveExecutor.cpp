@@ -1,21 +1,27 @@
 #include "MoveExecutor.h"
 
-#include "BattleContext.h"
-#include "../entities/pokemonMove.h"
-#include "../entities/BattlePokemon.h"
 #include "../data/StringToTypes.h"
+
+#include "../entities/BattlePokemon.h"
+#include "../entities/NonVolatileStatuses.h"
+#include "../entities/PokemonMoveSlot.h"
+
+#include "../moves/MoveRoutineDeps.h"
 #include "../moves/MoveRoutines.h"
+
 #include "../ui/interfaces/IStatusEffectUI.h"
+
+#include "BattleContext.h"
 
 MoveExecutor::MoveExecutor(
     BattleContext& context,
+    RandomEngine& rng,
     BattleCalculations& calculations,
     StatusEffectProcessor& statusProcessor,
     IMoveResultsUI& resultsUI,
-    IStatusEffectUI& statusEffectUI,
-    RandomEngine& rng
+    IStatusEffectUI& statusEffectUI
 )
-    : m_deps(context, calculations, statusProcessor, resultsUI, statusEffectUI, rng)
+    : m_deps(context, rng, calculations, statusProcessor, resultsUI, statusEffectUI)
 {}
 
 void MoveExecutor::ExecuteMove()

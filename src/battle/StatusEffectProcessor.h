@@ -1,10 +1,10 @@
 #pragma once
 
-struct BattleContext;
-class RandomEngine;
+class BattlePokemon;
 class IStatusEffectUI;
 class Player;
-class BattlePokemon;
+class RandomEngine;
+struct BattleContext;
 
 class StatusEffectProcessor
 {
@@ -24,7 +24,7 @@ public:
 
 	void ResetBideState();
 
-	void CheckSubstituteCondition(Player*, BattlePokemon*);
+	void CheckSubstituteCondition(Player&, BattlePokemon&);
 
 	void CheckFaintCondition(Player& sourcePlayer, Player& targetPlayer, BattlePokemon& sourcePokemon, BattlePokemon& targetPokemon);
 

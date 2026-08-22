@@ -1,15 +1,16 @@
 #pragma once
 
-#include <unordered_map>
-
-#include "AIScoreTag.h"
 #include "../../../moves/MoveEffectEnums.h"
 
-struct pokemonMove;
+#include "AIScoreTag.h"
+
+#include <unordered_map>
+
+struct PokemonMoveSlot;
 
 class AIMoveClassifier {
 public:
-	static AIScoreTag Classify(const pokemonMove& move);
+	static AIScoreTag Classify(const PokemonMoveSlot& move);
 
 private:
 	static inline const std::unordered_map<MoveEffect, AIScoreTag> s_effectToTag
