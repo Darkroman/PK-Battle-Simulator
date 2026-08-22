@@ -1,11 +1,11 @@
-#include <algorithm>
-
 #include "BattleAnnouncerText.h"
 
 #include "../battle/BattleContext.h"
+
 #include "../entities/BattlePokemon.h"
 #include "../entities/Player.h"
 
+#include <algorithm>
 #include <iostream>
 
 void BattleAnnouncerText::ThrowOutFirstPokemon(const BattleContext& context) const

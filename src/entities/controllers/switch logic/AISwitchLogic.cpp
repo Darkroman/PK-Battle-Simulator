@@ -1,18 +1,23 @@
 #include "AISwitchLogic.h"
 
+#include "../../../battle/RandomEngine.h"
+
+#include "../../../data/StringToTypes.h"
+
+#include "../../BattlePokemon.h"
+#include "../../NonVolatileStatuses.h"
+#include "../../Player.h"
+#include "../../PokemonMoveSlot.h"
+
+#include "../AIController.h"
+
+#include "../move scoring/AIMoveScoring.h"
+
 #include <array>
 #include <cassert>
 #include <span>
 #include <algorithm>
 #include <tuple>
-
-#include "../AIController.h"
-#include "../move scoring/AIMoveScoring.h"
-#include "../../pokemonMove.h"
-#include "../../BattlePokemon.h"
-#include "../../Player.h"
-#include "../../../battle/RandomEngine.h"
-#include "../../../data/StringToTypes.h"
 
 namespace AISwitchLogic
 {
@@ -47,7 +52,7 @@ namespace AISwitchLogic
 		}
 
 		unsigned int highestDamage{ 0 };
-		const pokemonMove* highestDamagingMove{};
+		const PokemonMoveSlot* highestDamagingMove{};
 
 		bool canKO{};
 		bool priorityCanKO{};
@@ -109,7 +114,7 @@ namespace AISwitchLogic
 			return false;
 		}
 
-		const pokemonMove* targetMonLastUsedMove = targetMon.GetLastUsedMove();
+		const PokemonMoveSlot* targetMonLastUsedMove = targetMon.GetLastUsedMove();
 		bool lastUsedMoveAvailable = targetMonLastUsedMove != nullptr &&
 			targetMonLastUsedMove->IsActive() &&
 			targetMonLastUsedMove->GetCategoryEnum() != Category::Status;
@@ -214,7 +219,7 @@ namespace AISwitchLogic
 		AIController& ai = self.GetAIController();
 		
 		const auto& observedMoves = ai.GetObservedMoves();
-		std::array<const pokemonMove*, 4> observedDamagingMoves{};
+		std::array<const PokemonMoveSlot*, 4> observedDamagingMoves{};
 		size_t observedCount{};
 
 		for (const auto& observedMove : observedMoves)
@@ -228,10 +233,10 @@ namespace AISwitchLogic
 			++observedCount;
 		}
 		
-		std::span<const pokemonMove*> validObservedMoves{ observedDamagingMoves.data(), observedCount };
+		std::span<const PokemonMoveSlot*> validObservedMoves{ observedDamagingMoves.data(), observedCount };
 
 		unsigned int highestDamageToSelf{ 0 };
-		const pokemonMove* mostLikelyMove{};
+		const PokemonMoveSlot* mostLikelyMove{};
 		if (!validObservedMoves.empty())
 		{
 			mostLikelyMove = validObservedMoves.front();
@@ -400,7 +405,7 @@ namespace AISwitchLogic
 		
 		const auto& observedMoves = ai.GetObservedMoves();
 
-		std::array<const pokemonMove*, 4> observedDamagingMoves{};
+		std::array<const PokemonMoveSlot*, 4> observedDamagingMoves{};
 		size_t observedCount{};
 
 		for (const auto& observedMove : observedMoves)
@@ -414,7 +419,7 @@ namespace AISwitchLogic
 			++observedCount;
 		}
 
-		std::span<const pokemonMove*> validObservedMoves{ observedDamagingMoves.data(), observedCount };
+		std::span<const PokemonMoveSlot*> validObservedMoves{ observedDamagingMoves.data(), observedCount };
 
 		unsigned int targetMonSpeed = AIMoveScoring::CalculateSpeed(targetMon);
 
@@ -524,52 +529,52 @@ namespace AISwitchLogic
 		return it->pokemon;
 	}
 
-	bool IsMoveSuperEffective(const AIController& self, const pokemonMove& move, const BattlePokemon& pokemon)
+	bool IsMoveSuperEffective(const AIController& self, const PokemonMoveSlot& move, const BattlePokemon& pokemon)
 	{
-		auto MoveEffectiveness = [&](const pokemonMove& move, const BattlePokemon& targetMon) {
+		auto MoveEffectiveness = [&](const PokemonMoveSlot& move, const BattlePokemon& targetMon) {
 			return self.AICalculateMoveTypeEffectiveness(move, targetMon);
 			};
 
 		return MoveEffectiveness(move, pokemon) > 4096 && move.GetPower() > 0 && move.m_currentPP > 0;
 	}
 
-	bool IsMoveAtMostEffective(const AIController& self, const pokemonMove& move, const BattlePokemon& pokemon)
+	bool IsMoveAtMostEffective(const AIController& self, const PokemonMoveSlot& move, const BattlePokemon& pokemon)
 	{
-		auto MoveEffectiveness = [&](const pokemonMove& move, const BattlePokemon& targetMon) {
+		auto MoveEffectiveness = [&](const PokemonMoveSlot& move, const BattlePokemon& targetMon) {
 			return self.AICalculateMoveTypeEffectiveness(move, targetMon);
 			};
 
 		return MoveEffectiveness(move, pokemon) <= 4096 && move.GetPower() > 0 && move.m_currentPP > 0;
 	}
 
-	bool IsMoveAtLeastEffective(const AIController& self, const pokemonMove& move, const BattlePokemon& pokemon)
+	bool IsMoveAtLeastEffective(const AIController& self, const PokemonMoveSlot& move, const BattlePokemon& pokemon)
 	{
-		auto MoveEffectiveness = [&](const pokemonMove& move, const BattlePokemon& targetMon) {
+		auto MoveEffectiveness = [&](const PokemonMoveSlot& move, const BattlePokemon& targetMon) {
 			return self.AICalculateMoveTypeEffectiveness(move, targetMon);
 			};
 
 		return MoveEffectiveness(move, pokemon) >= 4096 && move.GetPower() > 0 && move.m_currentPP > 0;
 	}
 
-	bool IsMoveNotEffective(const AIController& self, const pokemonMove& move, const BattlePokemon& pokemon)
+	bool IsMoveNotEffective(const AIController& self, const PokemonMoveSlot& move, const BattlePokemon& pokemon)
 	{
-		auto MoveEffectiveness = [&](const pokemonMove& move, const BattlePokemon& targetMon) {
+		auto MoveEffectiveness = [&](const PokemonMoveSlot& move, const BattlePokemon& targetMon) {
 			return self.AICalculateMoveTypeEffectiveness(move, targetMon);
 			};
 
 		return MoveEffectiveness(move, pokemon) == 0 && move.GetPower() > 0 && move.m_currentPP > 0;
 	}
 
-	bool IsMoveNotVeryEffective(const AIController& self, const pokemonMove& move, const BattlePokemon& pokemon)
+	bool IsMoveNotVeryEffective(const AIController& self, const PokemonMoveSlot& move, const BattlePokemon& pokemon)
 	{
-		auto MoveEffectiveness = [&](const pokemonMove& move, const BattlePokemon& targetMon) {
+		auto MoveEffectiveness = [&](const PokemonMoveSlot& move, const BattlePokemon& targetMon) {
 			return self.AICalculateMoveTypeEffectiveness(move, targetMon);
 			};
 
 		return MoveEffectiveness(move, pokemon) <= 2048 && move.GetPower() > 0 && move.m_currentPP > 0;
 	}
 
-	bool IsStatusMoveEffective(const AIController& self, const Player& selfPlayer, const Player& targetPlayer, const pokemonMove& move, const BattlePokemon& selfMon, const BattlePokemon& targetMon)
+	bool IsStatusMoveEffective(const AIController& self, const Player& selfPlayer, const Player& targetPlayer, const PokemonMoveSlot& move, const BattlePokemon& selfMon, const BattlePokemon& targetMon)
 	{
 		return self.CalculateStatusMoveEffectiveness(move, selfPlayer, targetPlayer, selfMon, targetMon) && move.m_currentPP > 0;
 	}

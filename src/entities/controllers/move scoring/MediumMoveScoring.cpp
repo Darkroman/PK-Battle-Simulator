@@ -1,12 +1,13 @@
-#include <algorithm>
-#include <array>
-#include <span>
-
 #include "MediumMoveScoring.h"
+
+#include "../../BattlePokemon.h"
 
 #include "AIScoreTag.h"
 #include "ScoringResultsStruct.h"
-#include "../../BattlePokemon.h"
+
+#include <algorithm>
+#include <array>
+#include <span>
 
 namespace MediumMoveScoring
 {

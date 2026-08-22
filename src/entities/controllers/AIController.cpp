@@ -1,30 +1,36 @@
+#include "AIController.h"
+
+#include "../../battle/BattleAction.h"
+#include "../../battle/BattleContext.h"
+#include "../../battle/StageRatios.h"
+#include "../../battle/Typechart.h"
+
+#include "../../common/EnumUtils.h"
+
+#include "../../data/MoveID.h"
+#include "../../data/Pokemon.h"
+#include "../../data/StringToTypes.h"
+
+#include "../../moves/MoveEffectEnums.h"
+
+#include "../BattlePokemon.h"
+#include "../NonVolatileStatuses.h"
+#include "../Player.h"
+#include "../PlayerDecisionOutcome.h"
+#include "../PokemonMoveSlot.h"
+
+#include "IPlayerController.h"
+
+#include "move scoring/AIMoveScoring.h"
+
+#include "switch logic/AISwitchLogic.h"
+
 #include <algorithm>
 #include <array>
 #include <cassert>
 #include <memory>
 #include <span>
 #include <utility>
-
-#include "AIController.h"
-
-#include "IPlayerController.h"
-
-#include "../../common/EnumUtils.h"
-
-#include "move scoring/AIMoveScoring.h"
-#include "switch logic/AISwitchLogic.h"
-#include "../PlayerDecisionOutcome.h"
-#include "../pokemonMove.h"
-#include "../BattlePokemon.h"
-#include "../Player.h"
-#include "../../battle/BattleAction.h"
-#include "../../battle/BattleContext.h"
-#include "../../battle/Typechart.h"
-#include "../../battle/StageRatios.h"
-#include "../../moves/MoveEffectEnums.h"
-#include "../../data/StringToTypes.h"
-#include "../../data/Pokemon.h"
-#include "../../data/MoveID.h"
 
 constexpr unsigned int FixedPointBase = 4096;
 
@@ -93,7 +99,7 @@ Difficulty AIController::GetDifficulty() const
 	return m_difficulty;
 }
 
-pokemonMove* AIController::FightAction(const Player& player, const Player& targetPlayer, BattlePokemon& selfMon, const BattlePokemon& targetMon, RandomEngine& rng)
+PokemonMoveSlot* AIController::FightAction(const Player& player, const Player& targetPlayer, BattlePokemon& selfMon, const BattlePokemon& targetMon, RandomEngine& rng)
 {
 	if (selfMon.WillPerformStruggle())
 	{
@@ -101,7 +107,7 @@ pokemonMove* AIController::FightAction(const Player& player, const Player& targe
 		return &GetStruggle();
 	}
 
-	pokemonMove* selectedMove = AIMoveScoring::GetWinningMove(player, targetPlayer, selfMon, targetMon, rng);
+	PokemonMoveSlot* selectedMove = AIMoveScoring::GetWinningMove(player, targetPlayer, selfMon, targetMon, rng);
 	b_hasDecision = true;
     return selectedMove;
 }
@@ -152,13 +158,13 @@ void AIController::OnActivePokemonChanged(const BattleContext& context)
 	}
 }
 
-std::span<const pokemonMove*> AIController::GetObservedMoves() const
+std::span<const PokemonMoveSlot*> AIController::GetObservedMoves() const
 {
 	auto activePokemon = memory.activeOpponentMemory;
 
 	if (activePokemon == nullptr || activePokemon->pokemon->IsFainted())
 	{
-		return std::span<const pokemonMove*>{};
+		return std::span<const PokemonMoveSlot*>{};
 	}
 
 	return {
@@ -167,7 +173,7 @@ std::span<const pokemonMove*> AIController::GetObservedMoves() const
 	};
 }
 
-void AIController::UpdateObservedMoves(const pokemonMove& currentMove)
+void AIController::UpdateObservedMoves(const PokemonMoveSlot& currentMove)
 {
 	auto* activePokemon = memory.activeOpponentMemory;
 	
@@ -250,7 +256,7 @@ void AIController::OnMoveResolved(const BattleContext& context)
 
 	bool amIDefender = (memory.selfPlayer == context.defendingPlayer);
 
-	const pokemonMove& moveUsed = *context.currentMove;
+	const PokemonMoveSlot& moveUsed = *context.currentMove;
 
 	if (amIDefender)
 	{
@@ -283,7 +289,7 @@ unsigned int AIController::AICalculatePokemonTypeEffectiveness(const BattlePokem
 	return std::max(score1, score2);
 }
 
-unsigned int AIController::AICalculateMoveTypeEffectiveness(const pokemonMove& currentMove, const BattlePokemon& target) const
+unsigned int AIController::AICalculateMoveTypeEffectiveness(const PokemonMoveSlot& currentMove, const BattlePokemon& target) const
 {
 	if (currentMove.GetCategoryEnum() == Category::Status)
 	{
@@ -311,14 +317,14 @@ unsigned int AIController::AICalculateMoveTypeEffectiveness(const pokemonMove& c
 	return (product / FixedPointBase);
 }
 
-unsigned int AIController::AICalculateDamage(const pokemonMove& currentMove, const Player& targetPlayer, const BattlePokemon& source, const BattlePokemon& target) const
+unsigned int AIController::AICalculateDamage(const PokemonMoveSlot& currentMove, const Player& targetPlayer, const BattlePokemon& source, const BattlePokemon& target) const
 {
 	unsigned int effectiveness{ AICalculateMoveTypeEffectiveness(currentMove, target) };
 
 	return AICalculateDamage(currentMove, targetPlayer, source, target, effectiveness);
 }
 
-unsigned int AIController::AICalculateDamage(const pokemonMove& currentMove, const Player& targetPlayer, const BattlePokemon& source, const BattlePokemon& target, unsigned int effectiveness) const
+unsigned int AIController::AICalculateDamage(const PokemonMoveSlot& currentMove, const Player& targetPlayer, const BattlePokemon& source, const BattlePokemon& target, unsigned int effectiveness) const
 {
 	if (currentMove.GetCategoryEnum() == Category::Status)
 	{
@@ -355,7 +361,7 @@ unsigned int AIController::AICalculateDamage(const pokemonMove& currentMove, con
 
 	case MoveID::Counter:
 	{
-		const pokemonMove* lastMove = target.GetLastUsedMove();
+		const PokemonMoveSlot* lastMove = target.GetLastUsedMove();
 
 		if (lastMove && lastMove->GetCategoryEnum() == Category::Physical)
 		{
@@ -523,7 +529,7 @@ unsigned int AIController::AICalculateDamage(const pokemonMove& currentMove, con
 	}
 }
 
-bool AIController::CalculateStatusMoveEffectiveness(const pokemonMove& currentMove, const Player& self, const Player& targetPlayer, const BattlePokemon& selfMon, const BattlePokemon& targetMon) const
+bool AIController::CalculateStatusMoveEffectiveness(const PokemonMoveSlot& currentMove, const Player& self, const Player& targetPlayer, const BattlePokemon& selfMon, const BattlePokemon& targetMon) const
 {
 	constexpr int MaxStage = 12;
 	constexpr int MinStage = 0;
@@ -750,7 +756,7 @@ bool AIController::CalculateStatusMoveEffectiveness(const pokemonMove& currentMo
 
 	if (currentMove.GetMoveEffectEnum() == MoveEffect::Mimic) // move bypasses substitute
 	{
-		const pokemonMove* targetLastUsedMove = targetMon.GetLastUsedMove();
+		const PokemonMoveSlot* targetLastUsedMove = targetMon.GetLastUsedMove();
 
 		if (targetLastUsedMove == nullptr)
 		{

@@ -1,9 +1,9 @@
 #pragma once
 
-struct BattleContext;
+class BattlePokemon;
 class IMoveResultsUI;
 class Player;
-class BattlePokemon;
+struct BattleContext;
 
 class SwitchExecutor
 {

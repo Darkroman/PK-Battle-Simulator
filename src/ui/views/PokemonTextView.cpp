@@ -1,23 +1,27 @@
-#include <iostream>
-#include <iomanip>
-#include <ios>
-#include <format>
-#include <string_view>
-
 #include "PokemonTextView.h"
+
+#include "../../battle/Typechart.h"
 
 #include "../../common/EnumUtils.h"
 
-#include "../../entities/pokemonMove.h"
-#include "../../entities/BattlePokemon.h"
-#include "../../entities/Player.h"
-#include "../../data/MoveID.h"
 #include "../../data/Database.h"
-#include "../../data/Pokemon.h"
 #include "../../data/Move.h"
+#include "../../data/MoveID.h"
+#include "../../data/Pokemon.h"
 #include "../../data/StringToTypes.h"
+
+#include "../../entities/BattlePokemon.h"
+#include "../../entities/NonVolatileStatuses.h"
+#include "../../entities/Player.h"
+#include "../../entities/PokemonMoveSlot.h"
+
 #include "../../moves/MoveEffectEnums.h"
-#include "../../battle/Typechart.h"
+
+#include <format>
+#include <ios>
+#include <iomanip>
+#include <iostream>
+#include <string_view>
 
 namespace PokemonTextView
 {
@@ -289,7 +293,7 @@ namespace PokemonTextView
 
     }
 
-    std::string_view CalculateStatusMoveEffectiveness(const Player& self, const Player& targetPlayer, const BattlePokemon& selfMon, const BattlePokemon& targetMon, const pokemonMove& currentMove)
+    std::string_view CalculateStatusMoveEffectiveness(const Player& self, const Player& targetPlayer, const BattlePokemon& selfMon, const BattlePokemon& targetMon, const PokemonMoveSlot& currentMove)
     {
         constexpr int MaxStage = 12;
         constexpr int MinStage = 0;
@@ -516,7 +520,7 @@ namespace PokemonTextView
 
         if (currentMove.GetMoveEffectEnum() == MoveEffect::Mimic) // move bypasses substitute
         {
-            const pokemonMove* targetLastUsedMove = targetMon.GetLastUsedMove();
+            const PokemonMoveSlot* targetLastUsedMove = targetMon.GetLastUsedMove();
 
             if (targetLastUsedMove == nullptr)
             {
@@ -587,7 +591,7 @@ namespace PokemonTextView
         return "Effective";
     }
 
-    std::string_view CalculateDamageMoveEffectiveness(const BattlePokemon& target, const pokemonMove& currentMove)
+    std::string_view CalculateDamageMoveEffectiveness(const BattlePokemon& target, const PokemonMoveSlot& currentMove)
     {
         if (currentMove.GetMoveEffectEnum() == MoveEffect::Struggle)
         {

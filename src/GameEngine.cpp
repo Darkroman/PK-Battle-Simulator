@@ -1,3 +1,29 @@
+#include "GameEngine.h"
+
+#include "battle/BattleManager.h"
+#include "battle/RandomEngine.h"
+
+#include "common/AppState.h"
+#include "common/BattleState.h"
+
+#include "entities/Player.h"
+
+#include "entities/controllers/AIController.h"
+#include "entities/controllers/HumanControllerConsole.h"
+
+#include "ui/BattleAnnouncerHeadless.h"
+#include "ui/BattleAnnouncerText.h"
+#include "ui/ConsoleBattleEventProcessor.h"
+#include "ui/ConsoleOutput.h"
+#include "ui/MoveResultsHeadless.h"
+#include "ui/MoveResultsQueued.h"
+#include "ui/StatusEffectHeadless.h"
+#include "ui/StatusEffectQueued.h"
+
+#include "ui/interfaces/IBattleAnnouncerUI.h"
+#include "ui/interfaces/IMoveResultsUI.h"
+#include "ui/interfaces/IStatusEffectUI.h"
+
 #include <algorithm>
 #include <atomic>
 #include <chrono>
@@ -8,66 +34,17 @@
 #include <thread>
 #include <vector>
 
-#include "GameEngine.h"
-
-#include "entities/Player.h"
-#include "entities/controllers/AIController.h"
-#include "entities/controllers/HumanControllerConsole.h"
-
-#include "ui/interfaces/IOutputTarget.h"
-#include "ui/ConsoleOutput.h"
-
-#include "ui/interfaces/IBattleAnnouncerUI.h"
-#include "ui/BattleAnnouncerText.h"
-#include "ui/BattleAnnouncerHeadless.h"
-
-#include "ui/interfaces/IMoveResultsUI.h"
-#include "ui/MoveResultsQueued.h"
-#include "ui/MoveResultsHeadless.h"
-
-#include "ui/interfaces/IStatusEffectUI.h"
-#include "ui/StatusEffectQueued.h"
-#include "ui/StatusEffectHeadless.h"
-
-#include "ui/ConsoleBattleEventProcessor.h"
-
-#include "common/AppState.h"
-#include "common/BattleState.h"
-
-#include "battle/BattleContext.h"
-#include "battle/RandomEngine.h"
-#include "battle/BattleManager.h"
-
 GameEngine::GameEngine()
     : players([&] {
-        std::vector<std::unique_ptr<Player>> v;
-        v.push_back(std::make_unique<Player>("Player One"));
-        v.push_back(std::make_unique<Player>("Player Two"));
-        v.at(0)->SetController(std::make_unique<HumanControllerConsole>(), ControllerType::Human);
-        v.at(1)->SetController(std::make_unique<AIController>(Difficulty::Easy), ControllerType::AI);
-        return v;
+    std::vector<std::unique_ptr<Player>> v;
+    v.push_back(std::make_unique<Player>("Player One"));
+    v.push_back(std::make_unique<Player>("Player Two"));
+    v.at(0)->SetController(std::make_unique<HumanControllerConsole>(), ControllerType::Human);
+    v.at(1)->SetController(std::make_unique<AIController>(Difficulty::Easy), ControllerType::AI);
+    return v;
         }()),
-    context(players),
     rng()
-{
-    Bootstrap();
-}
-
-void GameEngine::Bootstrap()
-{
-    context.playerOne = players[0].get();
-    context.playerTwo = players[1].get();
-}
-
-void GameEngine::PresetupBattle()
-{
-    context.playerOne = players[0].get();
-    context.playerTwo = players[1].get();
-
-    context.vec_aiPlayers.clear();
-    if (context.playerOne->IsAI()) context.vec_aiPlayers.emplace_back(context.playerOne);
-    if (context.playerTwo->IsAI()) context.vec_aiPlayers.emplace_back(context.playerTwo);
-}
+{}
 
 void GameEngine::Run()
 {
@@ -94,16 +71,12 @@ void GameEngine::Run()
                 
                 m_eventProcessor.emplace(m_eventQueue, *outputTarget);
 
-                PresetupBattle();
-
                 if (!battleManager)
                 {
-                    battleManager.emplace(context, rng, *battleAnnouncer, *moveResults, *statusEffect);
+                    battleManager.emplace(players, rng, *battleAnnouncer, *moveResults, *statusEffect);
                 }
 
                 currentState = AppState::Battle;
-
-                break;
 
             case AppState::Battle:
             {
@@ -124,8 +97,7 @@ void GameEngine::Run()
             }
 
             case AppState::Victory:
-                battleAnnouncer->AnnounceWinner(context);
-                battleManager->ResetValues();
+                battleManager->EndBattle();
                 battleManager.reset();
                 currentState = AppState::MainMenu;
 
@@ -197,7 +169,6 @@ void GameEngine::RunSimulations(unsigned int simIterations)
     //std::vector<ThreadDebugInfo> debugResults;
     //std::mutex debugMutex;
     
-    std::unique_ptr<IOutputTarget> outputTarget = std::make_unique<ConsoleOutput>();
     std::unique_ptr<IBattleAnnouncerUI> battleAnnouncer = std::make_unique<BattleAnnouncerHeadless>();
     std::unique_ptr<IMoveResultsUI> moveResults = std::make_unique<MoveResultsHeadless>();
     std::unique_ptr<IStatusEffectUI> statusEffect = std::make_unique<StatusEffectHeadless>();
@@ -216,17 +187,19 @@ void GameEngine::RunSimulations(unsigned int simIterations)
                 localPlayers.push_back(std::make_unique<Player>(*playerPtr));
             }
 
-            BattleContext localContext(localPlayers);
+            //BattleContext localContext(localPlayers);
 
             RandomEngine localRng(t);
-
+            /*
             localContext.playerOne = localPlayers[0].get();
             localContext.playerTwo = localPlayers[1].get();
 
             if (localContext.playerOne->IsAI()) localContext.vec_aiPlayers.emplace_back(localContext.playerOne);
             if (localContext.playerTwo->IsAI()) localContext.vec_aiPlayers.emplace_back(localContext.playerTwo);
+            */
+            BattleManager localManager(localPlayers, localRng, *battleAnnouncer, *moveResults, *statusEffect);
 
-            BattleManager localManager(localContext, localRng, *battleAnnouncer, *moveResults, *statusEffect);
+            localManager.PresetupBattle();
 
             uint64_t localP1Wins = 0;
             uint64_t localP2Wins = 0;
@@ -289,11 +262,11 @@ void GameEngine::RunSimulations(unsigned int simIterations)
                         debugResults.push_back(info);
                     }
                 }
-                //debugManager.ResetValues();
+                //debugManager.ResetBattleState();
                 //++localNumOfIterations;
                 */
-                localThreadTurns += localContext.battleTurn;
-                localManager.ResetValues();
+                localThreadTurns += localManager.GetTotalTurns();
+                localManager.ResetBattleState();
             }
 
             pOneVictories += localP1Wins;

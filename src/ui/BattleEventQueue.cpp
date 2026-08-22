@@ -1,8 +1,8 @@
-#include <utility>
-
 #include "BattleEventQueue.h"
 
 #include "BattleEvents.h"
+
+#include <utility>
 
 void BattleEventQueue::PushEvent(QueuedBattleEvent event)
 {

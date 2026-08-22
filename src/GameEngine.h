@@ -1,21 +1,24 @@
 #pragma once
 
-#include <optional>
-#include <vector>
-#include <memory>
+#include "battle/BattleManager.h"
+#include "battle/RandomEngine.h"
+
+#include "common/AppState.h"
 
 #include "entities/Player.h"
-#include "battle/BattleContext.h"
-#include "battle/RandomEngine.h"
+
 #include "ui/BattleEventQueue.h"
 #include "ui/ConsoleBattleEventProcessor.h"
-#include "common/AppState.h"
 #include "ui/Menu.h"
-#include "battle/BattleManager.h"
+
 #include "ui/interfaces/IOutputTarget.h"
 #include "ui/interfaces/IBattleAnnouncerUI.h"
 #include "ui/interfaces/IMoveResultsUI.h"
 #include "ui/interfaces/IStatusEffectUI.h"
+
+#include <memory>
+#include <optional>
+#include <vector>
 
 class GameEngine
 {
@@ -25,11 +28,7 @@ public:
     void RunSimulations(unsigned int simIterations);
 
 private:
-    void Bootstrap();
-    void PresetupBattle();
-
     std::vector<std::unique_ptr<Player>> players;
-    BattleContext context;
     RandomEngine rng;
 
     std::unique_ptr<IOutputTarget> outputTarget;
@@ -44,7 +43,4 @@ private:
     MenuResult m_pendingMenuResult{};
     std::optional<Menu> menu;
     std::optional<BattleManager> battleManager;
-
-    int playerOneVictories{};
-    int playerTwoVictories{};
 };

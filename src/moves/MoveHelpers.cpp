@@ -1,30 +1,48 @@
-#include <algorithm>
-#include <string_view>
-
 #include "MoveHelpers.h"
 
-#include "../ui/EffectivenessText.h"
-#include "MoveRoutineDeps.h"
-#include "MoveEffectEnums.h"
-#include "../entities/BattlePokemon.h"
-#include "../entities/Player.h"
-#include "../data/StringToTypes.h"
-#include "../battle/RandomEngine.h"
-#include "../battle/BattleContext.h"
-#include "../ui/interfaces/IMoveResultsUI.h"
 #include "../battle/BattleCalculations.h"
+#include "../battle/BattleContext.h"
+#include "../battle/RandomEngine.h"
 #include "../battle/StatusEffectProcessor.h"
 
-EffectivenessText ToEffectivenessText(BattleStateFlags::Effectiveness e)
-{
-	using E = BattleStateFlags::Effectiveness;
+#include "../data/StringToTypes.h"
 
-	switch (e)
+#include "../entities/BattlePokemon.h"
+#include "../entities/NonVolatileStatuses.h"
+#include "../entities/Player.h"
+
+#include "../ui/EffectivenessText.h"
+#include "../ui/interfaces/IMoveResultsUI.h"
+
+#include "MoveEffectEnums.h"
+#include "MoveRoutineDeps.h"
+
+#include <algorithm>
+#include <cassert>
+#include <string_view>
+#include <utility>
+
+EffectivenessText ToEffectivenessText(unsigned int effectiveness)
+{
+	switch (effectiveness)
 	{
-	case E::Less:   return EffectivenessText::Less;
-	case E::Super:  return EffectivenessText::Super;
-	case E::No:	    return EffectivenessText::No;
-	default:	    return EffectivenessText::Normal;
+	case 0:
+	return EffectivenessText::No;
+
+	case 1024:
+	case 2048:
+	return EffectivenessText::Less;					
+	
+	case 4096:
+	return EffectivenessText::Normal;
+
+	case 8192:
+	case 16384:
+	return EffectivenessText::Super;
+
+	default:
+		assert(false && "Unexpected type effectiveness value");
+		std::unreachable();
 	}
 }
 
@@ -57,7 +75,7 @@ void InflictNVStatus(Status status, int effectChance, MoveRoutineDeps& deps)
 {
 	auto& ctx = deps.context;
 
-	if (ctx.flags.hitSubstitute || ctx.defendingPokemon->GetCurrentHP() <= 0 || ctx.defendingPokemon->GetStatus() != Status::Normal || ctx.flags.currentEffectiveness == BattleStateFlags::Effectiveness::No)
+	if (ctx.flags.hitSubstitute || ctx.defendingPokemon->GetCurrentHP() <= 0 || ctx.defendingPokemon->GetStatus() != Status::Normal || ctx.effectiveness == 0)
 	{
 		return;
 	}
@@ -152,7 +170,7 @@ void DamageRoutine(MoveRoutineDeps& deps)
 	calc.ApplyDamage(*ctx.currentMove, *ctx.defendingPokemon, damage);
 	resultsUI.DisplayDirectDamageInflictedMsg(damage);
 	resultsUI.DisplayCritTextDialog(ctx.flags.isCriticalHit);
-	resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.flags.currentEffectiveness));
+	resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.effectiveness));
 	resultsUI.DisplaySubstituteDamageTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ctx.defendingPokemon->GetSubstituteHP(), ctx.defendingPokemon->HasSubstitute(), ctx.flags.hitSubstitute);
 
 	ExecuteOnHitReactions(deps);
@@ -186,12 +204,12 @@ void MultiStrikeRoutine(MoveRoutineDeps& deps, int turnCount)
 
 		totalDamage += damage;
 		deps.resultsUI.DisplayCritTextDialog(ctx.flags.isCriticalHit);
-		deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.flags.currentEffectiveness));
+		deps.resultsUI.DisplayEffectivenessTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ToEffectivenessText(ctx.effectiveness));
 		deps.resultsUI.DisplaySubstituteDamageTextDialog(ctx.defendingPlayer->GetPlayerNameView(), ctx.defendingPokemon->GetNameView(), ctx.defendingPokemon->GetSubstituteHP(), ctx.defendingPokemon->HasSubstitute(), ctx.flags.hitSubstitute);
 
 		ExecuteOnHitReactions(deps);
 
-		deps.statusProcessor.CheckSubstituteCondition(ctx.defendingPlayer, ctx.defendingPokemon);
+		deps.statusProcessor.CheckSubstituteCondition(*ctx.defendingPlayer, *ctx.defendingPokemon);
 
 		++timesHit;
 

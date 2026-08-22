@@ -1,15 +1,15 @@
 #pragma once
 
-#include <vector>
-#include <memory>
+#include "../common/AppState.h"
+#include "../common/PartyEditResults.h"
+
 #include <array>
-#include <string>
-#include <string_view>
 #include <cstdint>
 #include <filesystem>
-
-#include "../common/PartyEditResults.h"
-#include "../common/AppState.h"
+#include <memory>
+#include <string>
+#include <string_view>
+#include <vector>
 
 class BattlePokemon;
 class Player;

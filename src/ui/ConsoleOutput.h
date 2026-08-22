@@ -1,8 +1,8 @@
 #pragma once
 
-#include <string>
-
 #include "interfaces/IOutputTarget.h"
+
+#include <string>
 
 class ConsoleOutput final : public IOutputTarget
 {

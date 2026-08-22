@@ -48,6 +48,7 @@ enum class AIScoreTag
 	LightScreen,
 	Reflect,
 	Haze,
+
 	Mimic,
 	Metronome,
 	MirrorMove,

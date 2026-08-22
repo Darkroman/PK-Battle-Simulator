@@ -1,36 +1,52 @@
-#include <utility>
-
 #include "BattleManager.h"
 
-#include "BattleContext.h"
-#include "RandomEngine.h"
-#include "BattleAction.h"
-#include "TurnProcessor.h"
 #include "../common/BattleState.h"
-#include "../ui/interfaces/IBattleAnnouncerUI.h"
-#include "../ui/interfaces/IMoveResultsUI.h"
-#include "../ui/interfaces/IStatusEffectUI.h"
+
 #include "../data/StringToTypes.h"
-#include "../entities/PlayerDecisionOutcome.h"
+
 #include "../entities/BattlePokemon.h"
 #include "../entities/Player.h"
+#include "../entities/PlayerDecisionOutcome.h"
 #include "../entities/controllers/IPlayerController.h"
 #include "../entities/controllers/BattleAIUpdateRoutines.h"
 
-BattleManager::BattleManager(BattleContext& context, RandomEngine& rng, IBattleAnnouncerUI& battleAnnouncerUI, IMoveResultsUI& moveResultsUI, IStatusEffectUI& statusEffectUI)
-	: m_context(context)
+#include "../ui/interfaces/IBattleAnnouncerUI.h"
+#include "../ui/interfaces/IMoveResultsUI.h"
+#include "../ui/interfaces/IStatusEffectUI.h"
+
+#include "BattleAction.h"
+#include "BattleContext.h"
+#include "RandomEngine.h"
+#include "TurnProcessor.h"
+
+#include <memory>
+#include <utility>
+#include <vector>
+
+BattleManager::BattleManager(std::vector<std::unique_ptr<Player>>& players, RandomEngine& rng, IBattleAnnouncerUI& battleAnnouncerUI, IMoveResultsUI& moveResultsUI, IStatusEffectUI& statusEffectUI)
+	: m_players(players)
 	, m_rng(rng)
 	, m_battleAnnouncerUI(battleAnnouncerUI)
 	, m_moveResultsUI(moveResultsUI)
 	, m_statusEffectUI(statusEffectUI)
-	, m_calculations(context, rng)
-	, m_switchExecutor(context, moveResultsUI)
-	, m_winChecker(context)
-	, m_statusEffectProcessor(context, rng, statusEffectUI)
-	, m_moveExecutor(context, m_calculations, m_statusEffectProcessor, moveResultsUI, statusEffectUI, rng)
-	, m_turnProcessor(context, m_calculations, m_statusEffectProcessor, m_winChecker, m_switchExecutor, m_moveExecutor)
-	, m_postTurnProcessor(context, m_calculations, statusEffectUI, m_statusEffectProcessor, m_winChecker, m_switchExecutor)
+	, m_context(m_players)
+	, m_calculations(m_context, m_rng)
+	, m_statusEffectProcessor(m_context, m_rng, m_statusEffectUI)
+	, m_winChecker(m_context)
+	, m_switchExecutor(m_context, m_moveResultsUI)
+	, m_moveExecutor(m_context, m_rng, m_calculations, m_statusEffectProcessor, m_moveResultsUI, m_statusEffectUI)
+	, m_turnProcessor(m_context, m_calculations, m_statusEffectProcessor, m_winChecker, m_switchExecutor, m_moveExecutor)
+	, m_postTurnProcessor(m_context, m_calculations, m_statusEffectUI, m_statusEffectProcessor, m_winChecker, m_switchExecutor)
+{}
+
+void BattleManager::PresetupBattle()
 {
+	m_context.playerOne = m_players[0].get();
+	m_context.playerTwo = m_players[1].get();
+
+	m_context.vec_aiPlayers.clear();
+	if (m_context.playerOne->IsAI()) m_context.vec_aiPlayers.emplace_back(m_context.playerOne);
+	if (m_context.playerTwo->IsAI()) m_context.vec_aiPlayers.emplace_back(m_context.playerTwo);
 }
 
 BattleRunResult BattleManager::RunBattle()
@@ -39,6 +55,13 @@ BattleRunResult BattleManager::RunBattle()
 
 	switch (curBattleState)
 	{
+		case BattleState::PresetupBattle:
+		{
+			PresetupBattle();
+			curBattleState = BattleState::StartBattle;
+			[[fallthrough]];
+		}
+
 		case BattleState::StartBattle:
 		{
 			// Returns BattleState::DisplayFightingPokemon
@@ -151,11 +174,6 @@ BattleRunResult BattleManager::RunBattle()
 			curBattleState = Cleanup();
 		}
 		break;
-
-		case BattleState::Victory:
-		{
-
-		}
 	}
 
 	return { curBattleState, playEvents };
@@ -572,6 +590,13 @@ BattleState BattleManager::Cleanup()
 	return BattleState::DisplayFightingPokemon;
 }
 
+void BattleManager::EndBattle()
+{
+	m_battleAnnouncerUI.AnnounceWinner(m_context);
+
+	ResetBattleState();
+}
+
 bool BattleManager::RunBattleSimulation()
 {
 	m_context.battleTurn = 0;
@@ -664,9 +689,9 @@ bool BattleManager::RunBattleSimulation()
 	return true;
 }
 
-void BattleManager::ResetValues()
+void BattleManager::ResetBattleState()
 {
-	m_context.ResetBattleState();
+	m_context.ResetContextState();
 
 	m_context.playerOne->ResetValues();
 	m_context.playerTwo->ResetValues();
@@ -690,4 +715,9 @@ void BattleManager::ResetValues()
 	}
 
 	BattleAIUpdateRoutines::ResetAIObservedMoves(m_context);
+}
+
+unsigned int BattleManager::GetTotalTurns() const
+{
+	return m_context.battleTurn;
 }

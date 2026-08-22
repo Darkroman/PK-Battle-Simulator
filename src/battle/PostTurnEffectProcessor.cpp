@@ -1,17 +1,22 @@
-#include <algorithm>
-
 #include "PostTurnEffectProcessor.h"
 
-#include "BattleContext.h"
-#include "BattleCalculations.h"
-#include "StatusEffectProcessor.h"
-#include "WinChecker.h"
-#include "SwitchExecutor.h"
-#include "../ui/interfaces/IStatusEffectUI.h"
 #include "../data/Move.h"
+
 #include "../entities/BattlePokemon.h"
+#include "../entities/NonVolatileStatuses.h"
 #include "../entities/Player.h"
+
 #include "../entities/controllers/IPlayerController.h"
+
+#include "../ui/interfaces/IStatusEffectUI.h"
+
+#include "BattleCalculations.h"
+#include "BattleContext.h"
+#include "StatusEffectProcessor.h"
+#include "SwitchExecutor.h"
+#include "WinChecker.h"
+
+#include <algorithm>
 
 constexpr unsigned int SeedDivisor{ 8 };
 constexpr unsigned int BurnDivisor{ 16 };

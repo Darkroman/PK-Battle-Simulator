@@ -1,20 +1,19 @@
 #pragma once
 
-#include <array>
-#include <string>
-#include <string_view>
-#include <span>
-
-enum class PokemonType;
-enum class MoveID;
-class Pokemon;
-class Move;
-
-#include "pokemonMove.h"
-
 #include "../common/PartyEditResults.h"
 
-enum struct Status { Normal = 0, Burned, Frozen, Paralyzed, Poisoned, Badly_Poisoned, Sleeping };
+#include "NonVolatileStatuses.h"
+#include "PokemonMoveSlot.h"
+
+#include <array>
+#include <span>
+#include <string>
+#include <string_view>
+
+enum class MoveID;
+enum class PokemonType;
+class Move;
+class Pokemon;
 
 class BattlePokemon
 {
@@ -25,7 +24,7 @@ public:
 
         void BackupOriginalPokemonData(BattlePokemon*);
 
-        std::array<pokemonMove, 4> m_array_moves{};
+        std::array<PokemonMoveSlot, 4> m_array_moves{};
 
         const Pokemon* mp_pokemon{ nullptr };
 
@@ -60,8 +59,8 @@ public:
     void ReleasePokemon();
 
     SetMoveOutcome SetMove(size_t, std::string_view);
-    std::span<pokemonMove> GetMoveArray();
-    std::span<const pokemonMove> GetMoveArray() const;
+    std::span<PokemonMoveSlot> GetMoveArray();
+    std::span<const PokemonMoveSlot> GetMoveArray() const;
 
     void SetNickname(std::string_view);
     bool HasNickname() const;
@@ -113,8 +112,8 @@ public:
 
     unsigned int GetLevel() const;
 
-    pokemonMove& GetMove(size_t);
-    const pokemonMove& GetMove(size_t) const;
+    PokemonMoveSlot& GetMove(size_t);
+    const PokemonMoveSlot& GetMove(size_t) const;
     void DeleteMove(size_t);
     void SwapMoves(size_t, size_t);
     void ReorderMoves(size_t, size_t);
@@ -133,8 +132,8 @@ public:
     std::string_view GetMoveName(size_t) const;
     MoveID GetMoveID(size_t) const;
 
-    pokemonMove* GetLastUsedMove() const;
-    void SetLastUsedMove(pokemonMove*);
+    PokemonMoveSlot* GetLastUsedMove() const;
+    void SetLastUsedMove(PokemonMoveSlot*);
 
     unsigned int GetTotalEVs() const;
 
@@ -281,7 +280,7 @@ public:
     void DamageSubstitute(unsigned int);
 
     void SetCalledMove(const Move& move);
-    pokemonMove* GetCalledMove();
+    PokemonMoveSlot* GetCalledMove();
     void ResetCalledMove();
 
 private:
@@ -292,12 +291,12 @@ public:
     void ResetValues();
 
 private:
-    std::array<pokemonMove, 4> m_array_moves{};
+    std::array<PokemonMoveSlot, 4> m_array_moves{};
 
     std::string m_name{};
     std::string m_nickname{};
 
-    pokemonMove* lastUsedMove{ nullptr };
+    PokemonMoveSlot* lastUsedMove{ nullptr };
 
     const Pokemon* mp_pokemon{ nullptr };
 
@@ -411,7 +410,7 @@ private:
 
     DetransformData m_detransformData;
 
-    pokemonMove m_mimicLastUsedMove;
+    PokemonMoveSlot m_mimicLastUsedMove;
 
-    pokemonMove calledMove;
+    PokemonMoveSlot calledMove;
 };

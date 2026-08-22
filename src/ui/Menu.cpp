@@ -1,27 +1,30 @@
-#include <iostream>
-#include <istream>
-#include <vector>
-#include <memory>
-#include <string>
-#include <string_view>
-#include <cstdint>
-#include <charconv>
-#include <filesystem>
-#include <algorithm>
-
 #include "Menu.h"
 
 #include "../common/AppState.h"
+#include "../common/InputValidation.h"
 #include "../common/PartyEditResults.h"
+
 #include "../entities/BattlePokemon.h"
 #include "../entities/Player.h"
 #include "../entities/controllers/AIController.h"
 #include "../entities/controllers/HumanControllerConsole.h"
-#include "../save/SaveParty.h"
+
 #include "../save/LoadParty.h"
-#include "../ui/views/PokemonTextView.h"
+#include "../save/SaveParty.h"
+
 #include "../ui/views/DatabaseTextView.h"
-#include "../common/InputValidation.h"
+#include "../ui/views/PokemonTextView.h"
+
+#include <algorithm>
+#include <charconv>
+#include <cstdint>
+#include <filesystem>
+#include <iostream>
+#include <istream>
+#include <memory>
+#include <string>
+#include <string_view>
+#include <vector>
 
 Menu::Menu(std::vector<std::unique_ptr<Player>>& playerStorage)
 	: playerStorage(playerStorage)

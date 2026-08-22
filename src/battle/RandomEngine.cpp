@@ -1,8 +1,8 @@
-#include <chrono>
-#include <random>
-//#include <iostream>
-
 #include "RandomEngine.h"
+
+#include <chrono>
+//#include <iostream>
+#include <random>
 
 RandomEngine::RandomEngine()
 	:

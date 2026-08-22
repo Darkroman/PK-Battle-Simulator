@@ -1,29 +1,37 @@
 #pragma once
 
-struct BattleContext;
-class RandomEngine;
+#include "../common/BattleState.h"
+
+#include "BattleAction.h"
+#include "BattleCalculations.h"
+#include "BattleContext.h"
+#include "MoveExecutor.h"
+#include "PostTurnEffectProcessor.h"
+#include "StatusEffectProcessor.h"
+#include "SwitchExecutor.h"
+#include "TurnProcessor.h"
+#include "WinChecker.h"
+
+#include <memory>
+#include <vector>
+
+class Player;
 class IBattleAnnouncerUI;
 class IMoveResultsUI;
 class IStatusEffectUI;
-
-#include "BattleCalculations.h"
-#include "SwitchExecutor.h"
-#include "WinChecker.h"
-#include "StatusEffectProcessor.h"
-#include "MoveExecutor.h"
-#include "TurnProcessor.h"
-#include "PostTurnEffectProcessor.h"
-#include "BattleAction.h"
-#include "../common/BattleState.h"
+class RandomEngine;
 
 class BattleManager
 {
 public:
-	BattleManager(BattleContext& context, RandomEngine& rng, IBattleAnnouncerUI& battleAnnouncerUI, IMoveResultsUI& moveResultsUI, IStatusEffectUI& statusEffectUI);
+	BattleManager(std::vector<std::unique_ptr<Player>>& players, RandomEngine& rng, IBattleAnnouncerUI& battleAnnouncerUI, IMoveResultsUI& moveResultsUI, IStatusEffectUI& statusEffectUI);
 
+	void PresetupBattle();
 	BattleRunResult RunBattle();
+	void EndBattle();
 	bool RunBattleSimulation();
-	void ResetValues();
+	void ResetBattleState();
+	unsigned int GetTotalTurns() const;
 
 private:
 	void AssignFirstPokemon();
@@ -45,21 +53,22 @@ private:
 	void ResolveSwitchDecisions(bool playerOneNeedsSwitch, bool playerTwoNeedsSwitch);
 
 private:
-	BattleContext& m_context;
+	std::vector<std::unique_ptr<Player>>& m_players;
 	RandomEngine& m_rng;
 	IBattleAnnouncerUI& m_battleAnnouncerUI;
 	IMoveResultsUI& m_moveResultsUI;
 	IStatusEffectUI& m_statusEffectUI;
 
+	BattleContext m_context;
 	BattleCalculations m_calculations;
-	SwitchExecutor m_switchExecutor;
-	WinChecker m_winChecker;
 	StatusEffectProcessor m_statusEffectProcessor;
+	WinChecker m_winChecker;
+	SwitchExecutor m_switchExecutor;
 	MoveExecutor m_moveExecutor;
 	TurnProcessor m_turnProcessor;
 	PostTurnEffectProcessor m_postTurnProcessor;
 
 	BattleAction e_battleAction{};
-	BattleState curBattleState = BattleState::StartBattle;
+	BattleState curBattleState = BattleState::PresetupBattle;
 	CurrentRoundActor curActor{};
 };

@@ -11,7 +11,7 @@ set(SOURCES
     # entities
     entities/BattlePokemon.cpp
     entities/Player.cpp
-    entities/pokemonMove.cpp
+    entities/PokemonMoveSlot.cpp
 
     # controllers
     entities/controllers/AIController.cpp

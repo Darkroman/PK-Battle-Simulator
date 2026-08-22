@@ -1,10 +1,11 @@
-#include <string_view>
-
 #include "Move.h"
 
 #include "../common/EnumUtils.h"
+
 #include "MoveID.h"
 #include "StringToTypes.h"
+
+#include <string_view>
 
 MoveID Move::GetMoveID() const
 {

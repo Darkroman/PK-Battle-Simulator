@@ -1,13 +1,13 @@
 #pragma once
 
-struct BattleContext;
 class BattleCalculations;
-class IStatusEffectUI;
-class StatusEffectProcessor;
-class WinChecker;
-class SwitchExecutor;
-class Player;
 class BattlePokemon;
+class IStatusEffectUI;
+class Player;
+class StatusEffectProcessor;
+class SwitchExecutor;
+class WinChecker;
+struct BattleContext;
 
 class PostTurnEffectProcessor
 {

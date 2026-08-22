@@ -4,7 +4,7 @@
 
 class BattlePokemon;
 class Player;
-struct pokemonMove;
+struct PokemonMoveSlot;
 
 namespace PokemonTextView
 {
@@ -21,6 +21,6 @@ namespace PokemonTextView
     void DisplayPlayerPokemon(const Player&);
     std::string_view DisplayPokemonStatus(const BattlePokemon&);
 
-    std::string_view CalculateStatusMoveEffectiveness(const Player&, const Player&, const BattlePokemon&, const BattlePokemon&, const pokemonMove&);
-    std::string_view CalculateDamageMoveEffectiveness(const BattlePokemon&, const pokemonMove&);
+    std::string_view CalculateStatusMoveEffectiveness(const Player&, const Player&, const BattlePokemon&, const BattlePokemon&, const PokemonMoveSlot&);
+    std::string_view CalculateDamageMoveEffectiveness(const BattlePokemon&, const PokemonMoveSlot&);
 }

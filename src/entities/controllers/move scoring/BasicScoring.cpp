@@ -1,15 +1,19 @@
-#include <algorithm>
-
 #include "BasicScoring.h"
+
+#include "../../../data/MoveID.h"
+#include "../../../data/StringToTypes.h"
+
+#include "../../../moves/MoveEffectEnums.h"
+
+#include "../../BattlePokemon.h"
+#include "../../NonVolatileStatuses.h"
+#include "../../Player.h"
+#include "../../PokemonMoveSlot.h"
 
 #include "AIScoreTag.h"
 #include "ScoringResultsStruct.h"
-#include "../../Player.h"
-#include "../../pokemonMove.h"
-#include "../../BattlePokemon.h"
-#include "../../../data/MoveID.h"
-#include "../../../data/StringToTypes.h"
-#include "../../../moves/MoveEffectEnums.h"
+
+#include <algorithm>
 
 namespace BasicScoring
 {
@@ -43,7 +47,7 @@ namespace BasicScoring
 		return delta;
 	}
 
-	int BaseStatusScoring(ScoringResults& results, const Player& self, const Player& targetPlayer, const pokemonMove& move, const BattlePokemon& selfMon, const BattlePokemon& targetMon)
+	int BaseStatusScoring(ScoringResults& results, const Player& self, const Player& targetPlayer, const PokemonMoveSlot& move, const BattlePokemon& selfMon, const BattlePokemon& targetMon)
 	{
 		int delta{};
 
@@ -211,7 +215,7 @@ namespace BasicScoring
 		return delta;
 	}
 
-	int SleepCheck(const pokemonMove& move, const BattlePokemon& targetMon)
+	int SleepCheck(const PokemonMoveSlot& move, const BattlePokemon& targetMon)
 	{
 		int delta{};
 
@@ -226,7 +230,7 @@ namespace BasicScoring
 		return delta;
 	}
 
-	int PoisonCheck(const pokemonMove& move, const BattlePokemon& targetMon)
+	int PoisonCheck(const PokemonMoveSlot& move, const BattlePokemon& targetMon)
 	{
 		int delta{};
 
@@ -246,7 +250,7 @@ namespace BasicScoring
 		return delta;
 	}
 
-	int ParalyzeCheck(const pokemonMove& move, const BattlePokemon& targetMon)
+	int ParalyzeCheck(const PokemonMoveSlot& move, const BattlePokemon& targetMon)
 	{
 		int delta{};
 

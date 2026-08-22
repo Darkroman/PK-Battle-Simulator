@@ -1,11 +1,11 @@
 #pragma once
 
-#include <string_view>
-
 #include "interfaces/IMoveResultsUI.h"
 
-enum class MoveID;
+#include <string_view>
+
 enum class EffectivenessText;
+enum class MoveID;
 
 class MoveResultsHeadless : public IMoveResultsUI
 {

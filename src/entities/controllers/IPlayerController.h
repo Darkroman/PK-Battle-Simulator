@@ -1,13 +1,15 @@
 #pragma once
 
+#include "../../data/MoveID.h"
+
+#include "../../entities/PokemonMoveSlot.h"
+
+#include "../PlayerDecisionOutcome.h"
+
 #include <memory>
 
-#include "../../data/MoveID.h"
-#include "../PlayerDecisionOutcome.h"
-#include "../../entities/pokemonMove.h"
-
-class Player;
 class BattlePokemon;
+class Player;
 class RandomEngine;
 
 class IPlayerController
@@ -23,9 +25,9 @@ public:
 	virtual PlayerDecisionOutcome TakeDecision() = 0;
 
 protected:
-	static pokemonMove& GetStruggle()
+	static PokemonMoveSlot& GetStruggle()
 	{
-		static pokemonMove struggleInstance{ MoveID::Struggle };
+		static PokemonMoveSlot struggleInstance{ MoveID::Struggle };
 		return struggleInstance;
 	}
 

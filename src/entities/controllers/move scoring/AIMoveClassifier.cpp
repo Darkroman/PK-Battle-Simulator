@@ -1,10 +1,12 @@
 #include "AIMoveClassifier.h"
 
-#include "AIScoreTag.h"
-#include "../../pokemonMove.h"
 #include "../../../moves/MoveEffectEnums.h"
 
-AIScoreTag AIMoveClassifier::Classify(const pokemonMove& move)
+#include "../../PokemonMoveSlot.h"
+
+#include "AIScoreTag.h"
+
+AIScoreTag AIMoveClassifier::Classify(const PokemonMoveSlot& move)
 {
 	if (move.GetPriority() > 0 && move.GetMoveEffectEnum() == MoveEffect::NormalHit)
 	{

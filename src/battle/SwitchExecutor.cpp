@@ -1,10 +1,13 @@
 #include "SwitchExecutor.h"
 
-#include "BattleContext.h"
 #include "../entities/BattlePokemon.h"
 #include "../entities/Player.h"
+
 #include "../entities/controllers/BattleAIUpdateRoutines.h"
+
 #include "../ui/interfaces/IMoveResultsUI.h"
+
+#include "BattleContext.h"
 
 SwitchExecutor::SwitchExecutor(BattleContext& context, IMoveResultsUI& moveResultsUI) :
 	m_context(context), m_moveResultsUI(moveResultsUI) {}

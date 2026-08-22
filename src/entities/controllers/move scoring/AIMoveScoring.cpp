@@ -6,23 +6,26 @@
 
 #include "AIMoveScoring.h"
 
-#include "ScoringResultsStruct.h"
-#include "BasicScoring.h"
-#include "MediumMoveScoring.h"
-#include "HardAIScoring.h"
+#include "../../../battle/RandomEngine.h"
+#include "../../../battle/StageRatios.h"
+#include "../../../data/StringToTypes.h"
+
+#include "../../BattlePokemon.h"
+#include "../../NonVolatileStatuses.h"
+#include "../../Player.h"
+#include "../../PokemonMoveSlot.h"
+
+#include "../AIController.h"
 
 #include "AIMoveClassifier.h"
-#include "../../../battle/StageRatios.h"
-#include "../../../battle/RandomEngine.h"
-#include "../../../data/StringToTypes.h"
-#include "../../pokemonMove.h"
-#include "../../BattlePokemon.h"
-#include "../../Player.h"
-#include "../AIController.h"
+#include "BasicScoring.h"
+#include "HardAIScoring.h"
+#include "MediumMoveScoring.h"
+#include "ScoringResultsStruct.h"
 
 namespace AIMoveScoring
 {
-	pokemonMove* GetWinningMove(const Player& self, const Player& targetPlayer, BattlePokemon& selfMon, const BattlePokemon& targetMon, RandomEngine& rng)
+	PokemonMoveSlot* GetWinningMove(const Player& self, const Player& targetPlayer, BattlePokemon& selfMon, const BattlePokemon& targetMon, RandomEngine& rng)
 	{
 		std::array<ScoringResults, 4> results{};
 
@@ -54,7 +57,7 @@ namespace AIMoveScoring
 		{
 			MediumMoveScoring::EvaluateBestDamageMove(resultsView, targetMon);
 		}
-		
+
 		if (self.GetAIController().GetDifficulty() == Difficulty::Hard)
 		{
 			for (auto& result : resultsView)
@@ -62,14 +65,14 @@ namespace AIMoveScoring
 				HardAIMoveScoring::RunExpertScoringRoutine(result, resultsView, self, targetPlayer, *result.move, selfMon, targetMon, rng);
 			}
 		}
-		
-		//pokemonMove* winningMove = EvaluateScoredMoves(results, rng);
+
+		//PokemonMoveSlot* winningMove = EvaluateScoredMoves(results, rng);
 		//return winningMove;
 
 		return EvaluateScoredMoves(resultsView, rng);
 	}
 
-	pokemonMove* EvaluateScoredMoves(std::span<ScoringResults>& results, RandomEngine& rng)
+	PokemonMoveSlot* EvaluateScoredMoves(std::span<ScoringResults>& results, RandomEngine& rng)
 	{
 		int highestScore = INT_MIN;
 		for (const auto& result : results)
@@ -94,7 +97,7 @@ namespace AIMoveScoring
 		return topScores[rng.RandomRange(0ull, count - 1ull)]->move;
 	}
 
-	void RunScoringRoutine(ScoringResults& results, const Player& self, const Player& targetPlayer, const pokemonMove& move, const BattlePokemon& selfMon, const BattlePokemon& targetMon)
+	void RunScoringRoutine(ScoringResults& results, const Player& self, const Player& targetPlayer, const PokemonMoveSlot& move, const BattlePokemon& selfMon, const BattlePokemon& targetMon)
 	{
 		if (move.GetCategoryEnum() == Category::Status)
 		{

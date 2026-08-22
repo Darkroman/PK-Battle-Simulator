@@ -2,11 +2,11 @@
 
 #include <array>
 
+class BattlePokemon;
+class Player;
 class RandomEngine;
 struct BattleContext;
-class Player;
-class BattlePokemon;
-struct pokemonMove;
+struct PokemonMoveSlot;
 
 class BattleCalculations
 {
@@ -25,13 +25,13 @@ public:
 
 	unsigned int MultiplyEffectiveness(unsigned int, unsigned int);
 
-	void CalculateTypeEffectiveness(BattleContext&, const pokemonMove&, const BattlePokemon&);
+	void CalculateTypeEffectiveness(BattleContext&, const PokemonMoveSlot&, const BattlePokemon&);
 
-	bool CalculateHitChance(const pokemonMove&, const BattlePokemon&, const BattlePokemon&);
+	bool CalculateHitChance(const PokemonMoveSlot&, const BattlePokemon&, const BattlePokemon&);
 
-	unsigned int CalculateDamage(BattleContext&, const Player&, const pokemonMove&, const BattlePokemon&, BattlePokemon&);
+	unsigned int CalculateDamage(BattleContext&, const Player&, const PokemonMoveSlot&, const BattlePokemon&, BattlePokemon&);
 
-	void ApplyDamage(const pokemonMove&, BattlePokemon&, unsigned int);
+	void ApplyDamage(const PokemonMoveSlot&, BattlePokemon&, unsigned int);
 
 	unsigned int CalculateLowKickPower(const BattlePokemon&);
 

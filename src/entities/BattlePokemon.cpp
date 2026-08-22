@@ -1,21 +1,24 @@
-#include <ranges>
+#include "BattlePokemon.h"
+
+#include "../common/InputValidation.h"
+#include "../common/PartyEditResults.h"
+
+#include "../data/Database.h"
+#include "../data/Move.h"
+#include "../data/MoveID.h"
+#include "../data/Pokemon.h"
+#include "../data/StringToTypes.h"
+
+#include "NonVolatileStatuses.h"
+#include "PokemonMoveSlot.h"
+
+#include <algorithm>
 #include <charconv>
+#include <ranges>
+#include <span>
 #include <string>
 #include <string_view>
 #include <utility>
-#include <algorithm>
-#include <span>
-
-#include "BattlePokemon.h"
-#include "pokemonMove.h"
-
-#include "../data/Pokemon.h"
-#include "../data/MoveID.h"
-#include "../data/Move.h"
-#include "../data/StringToTypes.h"
-#include "../data/Database.h"
-#include "../common/PartyEditResults.h"
-#include "../common/InputValidation.h"
 
 constexpr int EV_TOTAL_ALLOWED = 510;
 constexpr int MAX_STAT_EV = 252;
@@ -230,12 +233,12 @@ SetMoveOutcome BattlePokemon::SetMove(size_t moveslot, std::string_view movename
     return outcome;
 }
 
-std::span<pokemonMove> BattlePokemon::GetMoveArray()
+std::span<PokemonMoveSlot> BattlePokemon::GetMoveArray()
 {
     return m_array_moves;
 }
 
-std::span<const pokemonMove> BattlePokemon::GetMoveArray() const
+std::span<const PokemonMoveSlot> BattlePokemon::GetMoveArray() const
 {
     return m_array_moves;
 }
@@ -575,13 +578,13 @@ unsigned int BattlePokemon::GetLevel() const
     return m_level;
 }
 
-pokemonMove& BattlePokemon::GetMove(size_t moveslot)
+PokemonMoveSlot& BattlePokemon::GetMove(size_t moveslot)
 {
     --moveslot;
     return m_array_moves[moveslot];
 }
 
-const pokemonMove& BattlePokemon::GetMove(size_t moveslot) const
+const PokemonMoveSlot& BattlePokemon::GetMove(size_t moveslot) const
 {
     --moveslot;
     return m_array_moves[moveslot];
@@ -671,12 +674,12 @@ MoveID BattlePokemon::GetMoveID(size_t moveslot) const
     return m_array_moves[moveslot].GetMoveID();
 }
 
-pokemonMove* BattlePokemon::GetLastUsedMove() const
+PokemonMoveSlot* BattlePokemon::GetLastUsedMove() const
 {
     return lastUsedMove;
 }
 
-void BattlePokemon::SetLastUsedMove(pokemonMove* move)
+void BattlePokemon::SetLastUsedMove(PokemonMoveSlot* move)
 {
     lastUsedMove = move;
 }
@@ -1266,7 +1269,7 @@ void BattlePokemon::SetTransformation(BattlePokemon* pokemon)
 
     for (size_t i = 0; i < m_array_moves.size(); ++i)
     {
-        const pokemonMove& targetMove = pokemon->GetMove(i + 1);
+        const PokemonMoveSlot& targetMove = pokemon->GetMove(i + 1);
 
         m_array_moves[i].SetMovePointer(targetMove.GetMovePointer());
 
@@ -1456,7 +1459,7 @@ void BattlePokemon::SetCalledMove(const Move& move)
     calledMove.m_maxPP = 5;
 }
 
-pokemonMove* BattlePokemon::GetCalledMove()
+PokemonMoveSlot* BattlePokemon::GetCalledMove()
 {
     return &calledMove;
 }

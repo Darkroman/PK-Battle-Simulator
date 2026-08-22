@@ -1,17 +1,22 @@
-#include <algorithm>
-#include <vector>
-
 #include "StatusEffectProcessor.h"
+
+#include "../data/Move.h"
+
+#include "../entities/BattlePokemon.h"
+#include "../entities/NonVolatileStatuses.h"
+#include "../entities/Player.h"
+#include "../entities/PokemonMoveSlot.h"
+
+#include "../moves/MoveEffectEnums.h"
+
+#include "../ui/interfaces/IStatusEffectUI.h"
 
 #include "BattleContext.h"
 #include "RandomEngine.h"
 #include "StageRatios.h"
-#include "../data/Move.h"
-#include "../moves/MoveEffectEnums.h"
-#include "../ui/interfaces/IStatusEffectUI.h"
-#include "../entities/pokemonMove.h"
-#include "../entities/BattlePokemon.h"
-#include "../entities/Player.h"
+
+#include <algorithm>
+#include <vector>
 
 constexpr int ConfusionTurnChance{ 33 };
 constexpr int ThawTurnChance{ 20 };
@@ -174,13 +179,13 @@ bool StatusEffectProcessor::CheckDisabled()
 
 	if (isCalledMoveContinuation)
 	{
-		const pokemonMove* calledMove = m_context.attackingPokemon->GetCalledMove();
+		const PokemonMoveSlot* calledMove = m_context.attackingPokemon->GetCalledMove();
 
 		disabled = calledMove->HasMove() && calledMove->GetMoveID() == disabledMove->GetMoveID();
 	}
 	else if (isLocked)
 	{
-		const pokemonMove* lastUsed = m_context.attackingPokemon->GetLastUsedMove();
+		const PokemonMoveSlot* lastUsed = m_context.attackingPokemon->GetLastUsedMove();
 
 		disabled = lastUsed != nullptr && lastUsed->GetMoveID() == disabledMove->GetMoveID();
 	}
@@ -298,12 +303,12 @@ void StatusEffectProcessor::ResetBideState()
 	m_context.attackingPokemon->ResetBideDamage();
 }
 
-void StatusEffectProcessor::CheckSubstituteCondition(Player* targetPlayer, BattlePokemon* targetPokemon)
+void StatusEffectProcessor::CheckSubstituteCondition(Player& targetPlayer, BattlePokemon& targetPokemon)
 {
-	if (targetPokemon->GetSubstituteHP() <= 0 && targetPokemon->HasSubstitute())
+	if (targetPokemon.GetSubstituteHP() <= 0 && targetPokemon.HasSubstitute())
 	{
-		targetPokemon->SetSubstitute(false);
-		m_statusEffectUI.DisplaySubstituteFadedMsg(targetPlayer->GetPlayerNameView(), targetPokemon->GetNameView());
+		targetPokemon.SetSubstitute(false);
+		m_statusEffectUI.DisplaySubstituteFadedMsg(targetPlayer.GetPlayerNameView(), targetPokemon.GetNameView());
 	}
 }
 

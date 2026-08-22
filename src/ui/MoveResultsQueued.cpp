@@ -1,12 +1,14 @@
-#include <string_view>
-
 #include "MoveResultsQueued.h"
 
-#include "BattleEvents.h"
-#include "EffectivenessText.h"
-#include "BattleEventQueue.h"
-#include "../data/MoveID.h"
 #include "../common/EnumUtils.h"
+
+#include "../data/MoveID.h"
+
+#include "BattleEvents.h"
+#include "BattleEventQueue.h"
+#include "EffectivenessText.h"
+
+#include <string_view>
 
 // Basic Move Results
 MoveResultsQueued::MoveResultsQueued(BattleEventQueue& queue)

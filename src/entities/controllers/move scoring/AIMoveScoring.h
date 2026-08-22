@@ -2,16 +2,16 @@
 
 #include <span>
 
-struct ScoringResults;
-class Player;
 class BattlePokemon;
-struct pokemonMove;
+class Player;
 class RandomEngine;
+struct PokemonMoveSlot;
+struct ScoringResults;
 
 namespace AIMoveScoring
 {
-	pokemonMove* GetWinningMove(const Player& self, const Player& targetPlayer, BattlePokemon& selfMon, const BattlePokemon& targetMon, RandomEngine& rng);
-	pokemonMove* EvaluateScoredMoves(std::span<ScoringResults>& results, RandomEngine& rng);
-	void RunScoringRoutine(ScoringResults& results, const Player& self, const Player& targetPlayer, const pokemonMove& move, const BattlePokemon& selfMon, const BattlePokemon& targetMon);
+	PokemonMoveSlot* GetWinningMove(const Player& self, const Player& targetPlayer, BattlePokemon& selfMon, const BattlePokemon& targetMon, RandomEngine& rng);
+	PokemonMoveSlot* EvaluateScoredMoves(std::span<ScoringResults>& results, RandomEngine& rng);
+	void RunScoringRoutine(ScoringResults& results, const Player& self, const Player& targetPlayer, const PokemonMoveSlot& move, const BattlePokemon& selfMon, const BattlePokemon& targetMon);
 	unsigned int CalculateSpeed(const BattlePokemon&);
 }

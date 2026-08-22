@@ -1,14 +1,14 @@
-#include <iostream>
-#include <istream>
-#include <sstream>
-#include <filesystem>
-#include <string>
-#include <string_view>
-#include <algorithm>
-
 #include "LoadParty.h"
 
 #include "../entities/Player.h"
+
+#include <algorithm>
+#include <filesystem>
+#include <iostream>
+#include <istream>
+#include <sstream>
+#include <string>
+#include <string_view>
 
 LoadParty::LoadParty(Player* player, std::filesystem::path path) : player(player)
 {
